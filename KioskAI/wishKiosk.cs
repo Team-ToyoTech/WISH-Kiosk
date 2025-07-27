@@ -389,6 +389,7 @@ namespace wishKiosk
 			if (scannerInfo == null)
 			{
 				MessageBox.Show("ES-50 스캐너를 찾을 수 없습니다.");
+				return null;
             }
 
 			var device = scannerInfo.Connect();
