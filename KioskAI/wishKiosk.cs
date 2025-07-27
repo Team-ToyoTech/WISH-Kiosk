@@ -4,6 +4,7 @@ using System.IO;
 using QRCoder;
 using WIA;
 using ZXing;
+using WishKiosk;
 
 namespace wishKiosk
 {
@@ -387,8 +388,8 @@ namespace wishKiosk
 
 			if (scannerInfo == null)
 			{
-				throw new Exception("ES-50 스캐너를 찾을 수 없습니다.");
-			}
+				MessageBox.Show("ES-50 스캐너를 찾을 수 없습니다.");
+            }
 
 			var device = scannerInfo.Connect();
 			var item = device.Items[1];
