@@ -82,6 +82,7 @@
             Margin = new Padding(2);
             Name = "wishKiosk";
             Text = "WISH Kiosk";
+            Load += wishKiosk_Load;
             ResumeLayout(false);
         }
 

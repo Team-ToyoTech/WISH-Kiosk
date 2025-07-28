@@ -1,13 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Drawing.Printing;
-using System.Windows.Forms;
+﻿using System.Drawing.Printing;
+using System.IO;
 
 namespace wishKiosk
 {
@@ -15,7 +7,7 @@ namespace wishKiosk
 	{
 		public PrintDocument printDoc = new PrintDocument();
 		public int digitCount = 3;
-		public string menuPath = string.Empty;
+		public string menuPath;
 
 		public settings()
 		{
@@ -36,12 +28,18 @@ namespace wishKiosk
 
 		private void menuButton_Click(object sender, EventArgs e)
 		{
-			menuSettings menuSettings = new menuSettings();
-			menuSettings.digitCount = digitCount;
-			menuSettings.menuPath = menuPath;
-			if (menuSettings.ShowDialog() == DialogResult.OK)
+            if (!File.Exists(menuPath))
+            {
+                MessageBox.Show($"{menuPath} 파일이 존재하지 않습니다.");
+                return;
+            }
+            menuSettings MenuSettings = new menuSettings();
+			MenuSettings.digitCount = digitCount;
+			MenuSettings.menuPath = menuPath;
+			var dialogRes = MenuSettings.ShowDialog();
+			if (dialogRes == DialogResult.OK)
 			{
-				digitCount = menuSettings.digitCount;
+				digitCount = MenuSettings.digitCount;
 			}
 		}
 	}
