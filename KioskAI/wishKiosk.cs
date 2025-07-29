@@ -340,7 +340,9 @@ namespace wishKiosk
 				foreach (int line in allLines)
 				{
 					if (visited.Contains((line, level)) && xQrSizes.TryGetValue((line, level), out var size))
+					{
 						knownWidths.Add(size.Width);
+					}
 				}
 
 				float avgWidth = knownWidths.Count > 0 ? knownWidths.Average() : 40;
@@ -371,8 +373,10 @@ namespace wishKiosk
 
             foreach (int line in allLines)
             {
-                if (!yQrSizes.ContainsKey(line))
-                    yQrSizes[line] = new SizeF(40, avgHeight); // 너비는 X에서 예측
+				if (!yQrSizes.ContainsKey(line))
+				{
+					yQrSizes[line] = new SizeF(40, avgHeight); // 너비는 X에서 예측
+				}
             }
         }
 
