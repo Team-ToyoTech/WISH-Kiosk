@@ -332,153 +332,109 @@ namespace wishKiosk
             }
         }
 
-		public static void FillMissingXQrSizes(
-			ref Dictionary<(int line, int digitLevel), SizeF> xQrSizes, 
-			HashSet<(int line, int digitLevel)> visited, 
-			int[] allLines, 
-			int[] digitLevels)
-		{
-			foreach (int level in digitLevels)
-			{
-				List<float> knownWidths = new();
-				foreach (int line in allLines)
-				{
-					if (visited.Contains((line, level)) && xQrSizes.TryGetValue((line, level), out var size))
-					{
-						knownWidths.Add(size.Width);
-					}
-				}
-
-				float avgWidth = knownWidths.Count > 0 ? knownWidths.Average() : 40;
-
-				foreach (int line in allLines)
-				{
-					var key = (line, level);
-					if (!xQrSizes.ContainsKey(key))
-					{
-						xQrSizes[key] = new SizeF(avgWidth, 40); // 높이는 Y에서 예측
-					}
-				}
-			}
-		}
-
-        public static void FillMissingYQrSizes(ref Dictionary<int, SizeF> yQrSizes, HashSet<int> visitedLines, int[] allLines)
+        /// <summary>
+        /// X좌표와 Y좌표를 모두 최소제곱법으로 보정하는 함수
+        /// </summary>
+        /// <param name="xTable">line -> digitLevel -> X좌표</param>
+        /// <param name="yTable">line -> Y좌표</param>
+        /// <param name="allLines">존재해야 하는 모든 줄 번호</param>
+        /// <param name="digitLevels">자리수 인덱스 목록 (0=백, 1=십, 2=일)</param>
+        public void FillMissingXYWithLeastSquares(
+            ref Dictionary<int, Dictionary<int, float>> xTable,
+            ref Dictionary<int, float> yTable,
+            int[] allLines,
+            int[] digitLevels
+        )
         {
-            List<float> knownHeights = new();
-            foreach (int line in allLines)
-            {
-				if (visitedLines.Contains(line) && yQrSizes.TryGetValue(line, out var size))
-				{
-					knownHeights.Add(size.Height);
-				}
-            }
+            
 
-            float avgHeight = knownHeights.Count > 0 ? knownHeights.Average() : 40;
-
-            foreach (int line in allLines)
+            // ===== Y좌표 보정 =====
+            var yPts = yTable.Where(kv => allLines.Contains(kv.Key)).ToList();
+            if (yPts.Count >= 2)
             {
-				if (!yQrSizes.ContainsKey(line))
-				{
-					yQrSizes[line] = new SizeF(40, avgHeight); // 너비는 X에서 예측
-				}
-            }
-        }
+                float sumX = yPts.Sum(p => p.Key);
+                float sumY = yPts.Sum(p => p.Value);
+                float sumXX = yPts.Sum(p => p.Key * p.Key);
+                float sumXY = yPts.Sum(p => p.Key * p.Value);
+                int n = yPts.Count;
 
-        public static void NormalizeXPositions(
-			ref Dictionary<int, Dictionary<int, float>> xTable, 
-			List<int> digitLevels, 
-			float expectedSpacing = 60f)
-        {
-            foreach (var line in xTable.Keys.ToList())
-            {
-                var entries = xTable[line];
-                if (entries.Count == 1 || entries.Count == 2)
+                float slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+                float intercept = (sumY - slope * sumX) / n;
+
+                foreach (var line in allLines)
                 {
-                    var sorted = entries.OrderBy(kv => kv.Key).ToList();
-
-                    var baseLevel = sorted[0].Key;
-                    var baseX = sorted[0].Value;
-
-                    foreach (int level in digitLevels)
+                    if (!yTable.ContainsKey(line))
                     {
-                        if (!entries.ContainsKey(level))
-                        {
-                            int offset = digitLevels.IndexOf(level) - digitLevels.IndexOf(baseLevel);
-                            float newX = baseX + offset * expectedSpacing;
+                        yTable[line] = slope * line + intercept;
+                    }
+                }
+            }
 
-                            entries[level] = newX;
+            // ===== X좌표 보정 =====
+            foreach (var digitLevel in digitLevels)
+            {
+                var pts = new List<(int line, float x)>();
+
+                foreach (var line in allLines)
+                {
+                    if (xTable.ContainsKey(line) && xTable[line].ContainsKey(digitLevel))
+                    {
+                        pts.Add((line, xTable[line][digitLevel]));
+                    }
+                }
+
+                if (pts.Count >= 2)
+                {
+                    // 최소제곱법 계산
+                    float sumX = pts.Sum(p => p.line);
+                    float sumY = pts.Sum(p => p.x);
+                    float sumXX = pts.Sum(p => p.line * p.line);
+                    float sumXY = pts.Sum(p => p.line * p.x);
+                    int n = pts.Count;
+
+                    float slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+                    float intercept = (sumY - slope * sumX) / n;
+
+                    // 누락된 X 좌표 채우기
+                    foreach (var line in allLines)
+                    {
+                        if (!xTable.ContainsKey(line))
+                            xTable[line] = new Dictionary<int, float>();
+
+                        if (!xTable[line].ContainsKey(digitLevel))
+                        {
+                            float predictedX = slope * line + intercept;
+                            xTable[line][digitLevel] = predictedX;
                         }
                     }
-
-                    xTable[line] = entries.OrderBy(kv => kv.Key).ToDictionary(kv => kv.Key, kv => kv.Value);
                 }
             }
-        }
 
-        public static void NormalizeXQrSizes(ref Dictionary<(int, int), SizeF> xQrSizes, float fallbackWidth = 40)
-        {
-			if (xQrSizes.Count == 0)
-			{
-				return;
-			}
-
-            float avg = xQrSizes.Values.Average(s => s.Width);
-            float min = xQrSizes.Values.Min(s => s.Width);
-            float max = xQrSizes.Values.Max(s => s.Width);
-
-            foreach (var key in xQrSizes.Keys.ToList())
+            // ===== Y좌표 보정 =====
+            yPts = yTable.Where(kv => allLines.Contains(kv.Key)).ToList();
+            if (yPts.Count >= 2)
             {
-                var s = xQrSizes[key];
-                if (s.Width < min * 0.8f || s.Width > max * 1.2f)
+                float sumX = yPts.Sum(p => p.Key);
+                float sumY = yPts.Sum(p => p.Value);
+                float sumXX = yPts.Sum(p => p.Key * p.Key);
+                float sumXY = yPts.Sum(p => p.Key * p.Value);
+                int n = yPts.Count;
+
+                float slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+                float intercept = (sumY - slope * sumX) / n;
+
+                foreach (var line in allLines)
                 {
-                    xQrSizes[key] = new SizeF(avg, s.Height); // width 평균으로 보정
-                }
-            }
-        }
-
-        public static void AlignXSpacingUniformly(
-			ref Dictionary<int, Dictionary<int, float>> xTable,
-			List<int> digitLevels,
-			float? spacingOverride = null)
-        {
-            digitLevels.Sort();
-
-            foreach (var line in xTable.Keys.ToList())
-            {
-                var levels = xTable[line];
-
-                // 제일 왼쪽 숫자 위치 찾기
-                float left = levels.Values.Min();
-
-                // 간격 계산
-                float spacing;
-                if (spacingOverride.HasValue)
-                {
-                    spacing = spacingOverride.Value;
-                }
-                else
-                {
-                    if (levels.Count >= 2)
+                    if (!yTable.ContainsKey(line))
                     {
-                        var ordered = levels.OrderBy(kv => kv.Value).ToList();
-                        spacing = (ordered.Last().Value - ordered.First().Value) / (digitLevels.Count - 1);
-                    }
-                    else
-                    {
-                        spacing = 60f; // 기본 간격
+                        yTable[line] = slope * line + intercept;
                     }
                 }
-
-                // 균등 간격 재배치
-                for (int i = 0; i < digitLevels.Count; i++)
-                {
-                    int level = digitLevels[i];
-                    levels[level] = left + i * spacing;
-                }
-
-                xTable[line] = levels;
             }
         }
+
+
+
 
         private void scanButton_Click(object sender, EventArgs e)
 		{
@@ -522,7 +478,7 @@ namespace wishKiosk
 
 			Dictionary<(int menuNum, int level), SizeF> xQrSizes = new();
 			Dictionary<int, SizeF> yQrSizes = new();
-
+			List<SizeF> allsize = new List<SizeF>();
 			foreach (var (text, point, size) in qrData)
 			{
 				if (text.Contains("-"))
@@ -537,6 +493,7 @@ namespace wishKiosk
                         }
 						xTable[line][digitLevel] = point.X;
 						xQrSizes[(line, digitLevel)] = size;
+						allsize.Add(size);
 					}
 				}
 				else if (text.StartsWith("m"))
@@ -562,14 +519,19 @@ namespace wishKiosk
 
             FillMissingXPoints(ref xTable, xvisited, allLines, digitLevels.ToArray());
 
-            FillMissingXQrSizes(ref xQrSizes, xvisited, allLines, digitLevels.ToArray());
-            FillMissingYQrSizes(ref yQrSizes, yVisited, allLines);
+            FillMissingXYWithLeastSquares(
+				ref xTable,
+			    ref yTable,
+			    allLines,
+			    digitLevels.ToArray()
+			);           // 크기 비율 정리
 
 
-            AlignXSpacingUniformly(ref xTable, digitLevels); // 균등 간격 강제
-            NormalizeXPositions(ref xTable, digitLevels);    // 소수점 보정 / 좌측 정렬
-            NormalizeXQrSizes(ref xQrSizes);                 // 크기 비율 정리
-
+            List<int> leveling = new List<int>();
+			for(int i = 1; i <= digitCount; i++)
+			{
+				leveling.Add((int)Math.Pow(10, digitCount - i));
+            }
             foreach (var menuEntry in yTable)
 			{
 				int menuNum = menuEntry.Key;
@@ -582,14 +544,14 @@ namespace wishKiosk
 
 				if (xTable.ContainsKey(menuNum))
 				{
-					foreach (int level in new[] { 100, 10, 1 })
+					foreach (int level in leveling)
 					{
 						if (xTable[menuNum].ContainsKey(level))
 						{
 							float x = xTable[menuNum][level];
 
-							float qrWidth = xQrSizes.TryGetValue((menuNum, level), out var sizeX) ? sizeX.Width : 40;
-							float qrHeight = yQrSizes.TryGetValue(menuNum, out var sizeY) ? sizeY.Height : 40;
+							float qrWidth = xQrSizes.TryGetValue((menuNum, level), out var sizeX) ? sizeX.Width : (allsize.Sum(x => x.Width)/allsize.Count);
+							float qrHeight = yQrSizes.TryGetValue(menuNum, out var sizeY) ? sizeY.Height : (allsize.Sum(x => x.Height) / allsize.Count);
 
 							Rectangle roi = new Rectangle(
 								(int)(x - qrWidth),
@@ -621,15 +583,15 @@ namespace wishKiosk
 				string orderCount = "";
 				if (xTable.ContainsKey(menuNum))
 				{
-					foreach (int level in new[] { 100, 10, 1 })
+					foreach (int level in leveling)
 					{
 						if (xTable[menuNum].ContainsKey(level))
 						{
 							float x = xTable[menuNum][level];
-							float qrWidth = xQrSizes.TryGetValue((menuNum, level), out var xSize) ? xSize.Width : 40;
-							float qrHeight = yQrSizes.TryGetValue(menuNum, out var ySize) ? ySize.Height : 40;
+                            float qrWidth = xQrSizes.TryGetValue((menuNum, level), out var sizeX) ? sizeX.Width : (allsize.Sum(x => x.Width) / allsize.Count);
+                            float qrHeight = yQrSizes.TryGetValue(menuNum, out var sizeY) ? sizeY.Height : (allsize.Sum(x => x.Height) / allsize.Count);
 
-							Rectangle roi = new Rectangle(
+                            Rectangle roi = new Rectangle(
 								(int)(x - qrWidth),
 								(int)(y - qrHeight),
 								(int)qrWidth * 2,
@@ -687,8 +649,8 @@ namespace wishKiosk
 
 			return new Rectangle(x, y, width, height);
 		}
-
-		static string OCRDigit(Bitmap bitmap, Rectangle roi)
+        static int t = 0;
+        static string OCRDigit(Bitmap bitmap, Rectangle roi)
 		{
 			using (var memoryStream = new MemoryStream())
 			{
@@ -704,7 +666,8 @@ namespace wishKiosk
 					Bitmap preprocessed = PreprocessImage(cropped);
 
 					preprocessed.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Png);
-					memoryStream.Position = 0;
+					preprocessed.Save($"ocr_debug_{t++}.png", System.Drawing.Imaging.ImageFormat.Png);
+                    memoryStream.Position = 0;
 
 					var imageBytes = memoryStream.ToArray();
 					MNIST.ModelInput sampleData = new MNIST.ModelInput()
