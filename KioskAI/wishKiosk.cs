@@ -172,7 +172,268 @@ namespace wishKiosk
 			}
 		}
 
-		private void scanButton_Click(object sender, EventArgs e)
+        public static Bitmap EnhanceContrast(Bitmap original)
+        {
+            // 1. Grayscale 변환
+            Bitmap gray = new Bitmap(original.Width, original.Height);
+            for (int y = 0; y < original.Height; y++)
+            {
+                for (int x = 0; x < original.Width; x++)
+                {
+                    Color pixel = original.GetPixel(x, y);
+                    int luminance = (int)(0.299 * pixel.R + 0.587 * pixel.G + 0.114 * pixel.B);
+                    gray.SetPixel(x, y, Color.FromArgb(luminance, luminance, luminance));
+                }
+            }
+
+            // 2. 이진화 처리 (thresholding)
+            int threshold = 128; // 적절히 조정 가능
+            Bitmap binary = new Bitmap(gray.Width, gray.Height);
+            for (int y = 0; y < gray.Height; y++)
+            {
+                for (int x = 0; x < gray.Width; x++)
+                {
+                    Color grayPixel = gray.GetPixel(x, y);
+                    int val = grayPixel.R > threshold ? 255 : 0;
+                    binary.SetPixel(x, y, Color.FromArgb(val, val, val));
+                }
+            }
+
+            return binary;
+        }
+
+
+        public static Bitmap EnhanceContrastFast(Bitmap source, int threshold = 128)
+        {
+            Bitmap grayBmp = new Bitmap(source.Width, source.Height, PixelFormat.Format24bppRgb);
+
+            Rectangle rect = new Rectangle(0, 0, source.Width, source.Height);
+            BitmapData srcData = source.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+            BitmapData dstData = grayBmp.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
+
+            unsafe
+            {
+                byte* srcPtr = (byte*)srcData.Scan0;
+                byte* dstPtr = (byte*)dstData.Scan0;
+
+                int stride = srcData.Stride;
+                for (int y = 0; y < source.Height; y++)
+                {
+                    for (int x = 0; x < source.Width; x++)
+                    {
+                        byte b = srcPtr[y * stride + x * 3];
+                        byte g = srcPtr[y * stride + x * 3 + 1];
+                        byte r = srcPtr[y * stride + x * 3 + 2];
+
+                        // 그레이스케일 변환
+                        byte gray = (byte)(0.299 * r + 0.587 * g + 0.114 * b);
+
+                        // 이진화
+                        byte bin = (gray > threshold) ? (byte)255 : (byte)0;
+
+                        dstPtr[y * stride + x * 3] = bin;       // B
+                        dstPtr[y * stride + x * 3 + 1] = bin;   // G
+                        dstPtr[y * stride + x * 3 + 2] = bin;   // R
+                    }
+                }
+            }
+
+            source.UnlockBits(srcData);
+            grayBmp.UnlockBits(dstData);
+
+            return grayBmp;
+        }
+
+
+        public static float PredictLinear(Dictionary<int, float> known, int targetLine)
+        {
+            int n = known.Count;
+            if (n < 2) return 0f; // 최소 두 개 필요
+
+            float sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+
+            foreach (var (line, x) in known)
+            {
+                sumX += line;
+                sumY += x;
+                sumXY += line * x;
+                sumXX += line * line;
+            }
+
+            float meanX = sumX / n;
+            float meanY = sumY / n;
+
+            float denominator = sumXX - n * meanX * meanX;
+            if (denominator == 0) return meanY;
+
+            float slope = (sumXY - n * meanX * meanY) / denominator;
+            float intercept = meanY - slope * meanX;
+
+            return slope * targetLine + intercept;
+        }
+
+        public static void FillMissingXPoints(
+    ref Dictionary<int, Dictionary<int, float>> xTable,
+    HashSet<(int line, int digitLevel)> xvisited,
+    int[] allLines,
+    int[] digitLevels)
+        {
+            foreach (int digitLevel in digitLevels)
+            {
+                // 해당 digitLevel에 대해 알려진 (line, x) 모음
+                Dictionary<int, float> known = new();
+                foreach (int line in allLines)
+                {
+                    if (xTable.ContainsKey(line) && xTable[line].ContainsKey(digitLevel))
+                    {
+                        known[line] = xTable[line][digitLevel];
+                    }
+                }
+
+                // 예측 필요 여부 확인
+                foreach (int line in allLines)
+                {
+                    if (!xvisited.Contains((line, digitLevel)))
+                    {
+                        float predictedX = PredictLinear(known, line);
+
+                        if (!xTable.ContainsKey(line))
+                            xTable[line] = new Dictionary<int, float>();
+
+                        xTable[line][digitLevel] = predictedX;
+                        // Console.WriteLine($"Predicted X for line {line}, level {digitLevel}: {predictedX}");
+                    }
+                }
+            }
+        }
+
+        public static void FillMissingYPoints(
+    ref Dictionary<int, float> yTable,
+    HashSet<int> visitedLines,
+    int[] allLines)
+        {
+            // 학습에 사용할 점들 (known)
+            Dictionary<int, float> known = new();
+            foreach (int line in allLines)
+            {
+                if (visitedLines.Contains(line) && yTable.ContainsKey(line))
+                {
+                    known[line] = yTable[line];
+                }
+            }
+
+            foreach (int line in allLines)
+            {
+                if (!visitedLines.Contains(line) && !yTable.ContainsKey(line))
+                {
+                    float predictedY = PredictLinear(known, line);
+                    yTable[line] = predictedY;
+
+                    // Console.WriteLine($"Predicted Y for line {line}: {predictedY}");
+                }
+            }
+        }
+
+		public static void FillMissingXQrSizes(
+	ref Dictionary<(int line, int digitLevel), SizeF> xQrSizes,
+	HashSet<(int line, int digitLevel)> visited,
+	int[] allLines,
+	int[] digitLevels)
+		{
+			foreach (int level in digitLevels)
+			{
+				// 해당 level에서의 known width 모음
+				List<float> knownWidths = new();
+				foreach (int line in allLines)
+				{
+					if (visited.Contains((line, level)) && xQrSizes.TryGetValue((line, level), out var size))
+						knownWidths.Add(size.Width);
+				}
+
+				float avgWidth = knownWidths.Count > 0 ? knownWidths.Average() : 40;
+
+				foreach (int line in allLines)
+				{
+					var key = (line, level);
+					if (!xQrSizes.ContainsKey(key))
+						xQrSizes[key] = new SizeF(avgWidth, 40); // 높이는 추후 Y쪽에서 예측
+				}
+			}
+		}
+
+        public static void FillMissingYQrSizes(
+    ref Dictionary<int, SizeF> yQrSizes,
+    HashSet<int> visitedLines,
+    int[] allLines)
+        {
+            List<float> knownHeights = new();
+            foreach (int line in allLines)
+            {
+                if (visitedLines.Contains(line) && yQrSizes.TryGetValue(line, out var size))
+                    knownHeights.Add(size.Height);
+            }
+
+            float avgHeight = knownHeights.Count > 0 ? knownHeights.Average() : 40;
+
+            foreach (int line in allLines)
+            {
+                if (!yQrSizes.ContainsKey(line))
+                    yQrSizes[line] = new SizeF(40, avgHeight); // 너비는 추후 X쪽에서 예측
+            }
+        }
+
+        public static void NormalizeXPositions(
+    ref Dictionary<int, Dictionary<int, float>> xTable,
+    List<int> digitLevels,
+    float expectedSpacing = 60f) // 자리 간 간격 예상값
+        {
+            foreach (var line in xTable.Keys.ToList())
+            {
+                var entries = xTable[line];
+                if (entries.Count == 1 || entries.Count == 2)
+                {
+                    // 인식된 digitLevel 정렬
+                    var sorted = entries.OrderBy(kv => kv.Key).ToList();
+
+                    // 가장 왼쪽 자리 기준으로 나머지를 생성
+                    var baseLevel = sorted[0].Key;
+                    var baseX = sorted[0].Value;
+
+                    foreach (int level in digitLevels)
+                    {
+                        if (!entries.ContainsKey(level))
+                        {
+                            int offset = digitLevels.IndexOf(level) - digitLevels.IndexOf(baseLevel);
+                            float newX = baseX + offset * expectedSpacing;
+
+                            entries[level] = newX;
+                        }
+                    }
+
+                    xTable[line] = entries.OrderBy(kv => kv.Key).ToDictionary(kv => kv.Key, kv => kv.Value);
+                }
+            }
+        }
+
+        public static void NormalizeXQrSizes(ref Dictionary<(int, int), SizeF> xQrSizes, float fallbackWidth = 40)
+        {
+            if (xQrSizes.Count == 0) return;
+
+            float avg = xQrSizes.Values.Average(s => s.Width);
+            float min = xQrSizes.Values.Min(s => s.Width);
+            float max = xQrSizes.Values.Max(s => s.Width);
+
+            foreach (var key in xQrSizes.Keys.ToList())
+            {
+                var s = xQrSizes[key];
+                if (s.Width < min * 0.8f || s.Width > max * 1.2f)
+                {
+                    xQrSizes[key] = new SizeF(avg, s.Height); // width만 평균으로 보정
+                }
+            }
+        }
+
+        private void scanButton_Click(object sender, EventArgs e)
 		{
 			Bitmap? bitmap = ScanWithWia(); // WIA 스캐너로 이미지 가져오기, null 가능
 			if (bitmap == null)
@@ -180,9 +441,25 @@ namespace wishKiosk
 				return;
 			}
 
-			var qrData = ExtractQrCodesWithSize(bitmap);
+			bitmap = EnhanceContrastFast(bitmap); // 대비 향상
 
-			var xTable = new Dictionary<int, Dictionary<int, float>>(); // line -> digitLevel -> x
+            var qrData = new HashSet<(string text, PointF point, SizeF size)>();
+            var seenTexts = new HashSet<string>(); // 중복된 텍스트 체크용
+            
+			for (int i = 0; i < 5; i++)
+            {
+                var qrResult = ExtractQrCodesWithSize(bitmap);
+                foreach (var qr in qrResult)
+                {
+                    if (!seenTexts.Contains(qr.text))
+                    {
+                        seenTexts.Add(qr.text);
+                        qrData.Add(qr);
+                    }
+                }
+            }
+
+            var xTable = new Dictionary<int, Dictionary<int, float>>(); // line -> digitLevel -> x
 			var yTable = new Dictionary<int, float>(); // line -> y
 			var menuMap = new Dictionary<int, string>();
 			for (int i = 1; i <= menu.Length; i++)
@@ -190,7 +467,9 @@ namespace wishKiosk
 				menuMap[i] = menu[i - 1];
 			}
 
-			Bitmap debugBitmap = new Bitmap(bitmap);
+			var xvisited = new HashSet<(int x, int y)>();
+
+            Bitmap debugBitmap = new Bitmap(bitmap);
 			Graphics g = Graphics.FromImage(debugBitmap);
 			Pen roiPen = new Pen(Color.Red, 2);
 
@@ -207,7 +486,8 @@ namespace wishKiosk
 						if (!xTable.ContainsKey(line))
 						{
 							xTable[line] = new Dictionary<int, float>();
-						}
+							xvisited.Add((line, digitLevel));
+                        }
 						xTable[line][digitLevel] = point.X;
 						xQrSizes[(line, digitLevel)] = size;
 					}
@@ -222,7 +502,26 @@ namespace wishKiosk
 				}
 			}
 
-			foreach (var menuEntry in yTable)
+            int[] allLines = menuMap.Keys.ToArray();
+            var yVisited = new HashSet<int>(yTable.Keys);
+            FillMissingYPoints(ref yTable, yVisited, allLines);
+
+            allLines = yTable.Keys.ToArray(); // 메뉴 번호 기준
+			List<int> digitLevels = new List<int>();
+			for(int i = 1; i <= digitCount; i++)
+			{
+				digitLevels.Add((int)Math.Pow(10, digitCount - i)); // 100, 10, 1
+            }
+
+            FillMissingXPoints(ref xTable, xvisited, allLines, digitLevels.ToArray());
+
+            FillMissingXQrSizes(ref xQrSizes, xvisited, allLines, digitLevels.ToArray());
+            FillMissingYQrSizes(ref yQrSizes, yVisited, allLines);
+
+            NormalizeXPositions(ref xTable, digitLevels);
+            NormalizeXQrSizes(ref xQrSizes);
+
+            foreach (var menuEntry in yTable)
 			{
 				int menuNum = menuEntry.Key;
 				float y = menuEntry.Value;
@@ -417,8 +716,8 @@ namespace wishKiosk
 			var item = device.Items[1];
 
 			// 컬러, 해상도 설정
-			SetWiaProperty(item, 6147, 500); // DPI X
-			SetWiaProperty(item, 6148, 500); // DPI Y
+			SetWiaProperty(item, 6147, 600); // DPI X
+			SetWiaProperty(item, 6148, 600); // DPI Y
 
 			try
 			{
