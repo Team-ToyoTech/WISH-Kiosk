@@ -45,13 +45,13 @@
             menuDataGridView.Location = new Point(12, 99);
             menuDataGridView.Name = "menuDataGridView";
             menuDataGridView.RowHeadersWidth = 62;
-            menuDataGridView.Size = new Size(350, 575);
+            menuDataGridView.Size = new Size(382, 575);
             menuDataGridView.TabIndex = 0;
             // 
             // cancelButton
             // 
             cancelButton.DialogResult = DialogResult.Cancel;
-            cancelButton.Location = new Point(214, 680);
+            cancelButton.Location = new Point(246, 680);
             cancelButton.Name = "cancelButton";
             cancelButton.Size = new Size(71, 34);
             cancelButton.TabIndex = 1;
@@ -61,7 +61,7 @@
             // okButton
             // 
             okButton.DialogResult = DialogResult.OK;
-            okButton.Location = new Point(291, 680);
+            okButton.Location = new Point(323, 680);
             okButton.Name = "okButton";
             okButton.Size = new Size(71, 34);
             okButton.TabIndex = 2;
@@ -71,10 +71,10 @@
             // 
             // digitCntNumericUpDown
             // 
-            digitCntNumericUpDown.Font = new Font("맑은 고딕", 11F);
-            digitCntNumericUpDown.Location = new Point(154, 26);
+            digitCntNumericUpDown.Font = new Font("맑은 고딕", 12F);
+            digitCntNumericUpDown.Location = new Point(210, 25);
             digitCntNumericUpDown.Name = "digitCntNumericUpDown";
-            digitCntNumericUpDown.Size = new Size(180, 37);
+            digitCntNumericUpDown.Size = new Size(166, 39);
             digitCntNumericUpDown.TabIndex = 3;
             digitCntNumericUpDown.ValueChanged += digitCntNumericUpDown_ValueChanged;
             // 
@@ -84,7 +84,7 @@
             digitCntGroup.Controls.Add(digitCntLabel);
             digitCntGroup.Location = new Point(12, 12);
             digitCntGroup.Name = "digitCntGroup";
-            digitCntGroup.Size = new Size(350, 81);
+            digitCntGroup.Size = new Size(382, 81);
             digitCntGroup.TabIndex = 5;
             digitCntGroup.TabStop = false;
             // 
@@ -94,21 +94,22 @@
             digitCntLabel.Font = new Font("맑은 고딕", 12F);
             digitCntLabel.Location = new Point(6, 27);
             digitCntLabel.Name = "digitCntLabel";
-            digitCntLabel.Size = new Size(142, 32);
+            digitCntLabel.Size = new Size(198, 32);
             digitCntLabel.TabIndex = 4;
-            digitCntLabel.Text = "수량 자릿수";
+            digitCntLabel.Text = "수량 입력 자릿수";
             // 
             // menuSettings
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(374, 723);
+            ClientSize = new Size(406, 723);
             Controls.Add(digitCntGroup);
             Controls.Add(okButton);
             Controls.Add(cancelButton);
             Controls.Add(menuDataGridView);
             Name = "menuSettings";
             Text = "WISH Menu Settings";
+            Load += menuSettings_Load;
             ((System.ComponentModel.ISupportInitialize)menuDataGridView).EndInit();
             ((System.ComponentModel.ISupportInitialize)digitCntNumericUpDown).EndInit();
             digitCntGroup.ResumeLayout(false);

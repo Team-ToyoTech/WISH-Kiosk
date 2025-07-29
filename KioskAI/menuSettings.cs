@@ -1,99 +1,118 @@
-﻿using System.IO;
+﻿using System.Data;
+using System.IO;
 using System.Text;
 
 namespace wishKiosk
 {
-	public partial class menuSettings : Form
-	{
-		public int digitCount = 3;
-		public string menuPath = string.Empty;
+    public partial class menuSettings : Form
+    {
+        public int digitCount = 3;
+        public string menuPath = string.Empty;
 
-		public menuSettings()
-		{
-			InitializeComponent();
-			this.StartPosition = FormStartPosition.CenterParent;
-			this.AcceptButton = okButton;
-			this.CancelButton = cancelButton;
+        public menuSettings()
+        {
+            InitializeComponent();
+            this.StartPosition = FormStartPosition.CenterParent;
+            this.AcceptButton = okButton;
+            this.CancelButton = cancelButton;
+        }
 
-			LoadCSV();
-		}
+        private void menuSettings_Load(object sender, EventArgs e)
+        {
+            digitCntNumericUpDown.Value = digitCount;
+            LoadCSV();
+        }
 
-		private void LoadCSV()
-		{
-			if (!File.Exists(menuPath))
-			{
-				MessageBox.Show("menu.csv 파일이 존재하지 않습니다.");
-				return;
-			}
+        private void LoadCSV()
+        {
+            if (!File.Exists(menuPath))
+            {
+                MessageBox.Show($"{menuPath} 파일이 존재하지 않습니다.");
+                return;
+            }
 
-			menuDataGridView.Rows.Clear();
-			menuDataGridView.Columns.Clear();
+            var table = new DataTable();
 
-			string[] lines = File.ReadAllLines(menuPath, Encoding.UTF8);
-			if (lines.Length == 0)
-			{
-				return;
-			}
+            try
+            {
+                using (var reader = new StreamReader(menuPath, Encoding.UTF8))
+                {
+                    if (reader.EndOfStream)
+                    {
+                        MessageBox.Show($"{menuPath} 파일이 비어 있습니다.");
+                        return;
+                    }
 
-			string[] headers = lines[0].Split(',');
-			foreach (string header in headers)
-			{
-				menuDataGridView.Columns.Add(header, header);
-			}
+                    string headerLine = reader.ReadLine()!.TrimStart('\uFEFF');
+                    string[] headers = headerLine.Split(',');
 
-			for (int i = 1; i < lines.Length; i++)
-			{
-				string[] cells = lines[i].Split(',');
-				menuDataGridView.Rows.Add(cells);
-			}
-		}
+                    foreach (var h in headers)
+                        table.Columns.Add(h.Trim());
 
-		private void SaveCSV()
-		{
-			var sb = new StringBuilder();
+                    while (!reader.EndOfStream)
+                    {
+                        string? line = reader.ReadLine();
+                        if (string.IsNullOrWhiteSpace(line))
+                            continue;
 
-			for (int i = 0; i < menuDataGridView.Columns.Count; i++)
-			{
-				sb.Append(menuDataGridView.Columns[i].HeaderText);
-				if (i < menuDataGridView.Columns.Count - 1)
-					sb.Append(",");
-			}
-			sb.AppendLine();
+                        string[] fields = line.Split(',');
+                        if (fields.Length != table.Columns.Count)
+                            continue;
 
-			foreach (DataGridViewRow row in menuDataGridView.Rows)
-			{
-				if (row.IsNewRow)
-				{
-					continue;
-				}
+                        table.Rows.Add(fields);
+                    }
+                }
 
-				for (int i = 0; i < menuDataGridView.Columns.Count; i++)
-				{
-					string value = row.Cells[i].Value.ToString() ?? "";
-					if (value.Contains(",") || value.Contains("\""))
-					{
-						value = "\"" + value.Replace("\"", "\"\"") + "\"";
-					}
-					sb.Append(value);
-					if (i < menuDataGridView.Columns.Count - 1)
-					{
-						sb.Append(",");
-					}
-				}
-				sb.AppendLine();
-			}
+                menuDataGridView.DataSource = table;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"{menuPath} 파일 읽기 중 오류가 발생했습니다: {ex.Message}");
+            }
+        }
 
-			File.WriteAllText(menuPath, sb.ToString(), new UTF8Encoding(true));
-		}
+        private void SaveCSV()
+        {
+            if (menuDataGridView.DataSource is not DataTable dt || dt.Columns.Count == 0)
+            {
+                MessageBox.Show("저장할 데이터가 없습니다.");
+                return;
+            }
 
-		private void okButton_Click(object sender, EventArgs e)
-		{
-			SaveCSV();
-		}
+            try
+            {
+                var sb = new StringBuilder();
 
-		private void digitCntNumericUpDown_ValueChanged(object sender, EventArgs e)
-		{
-			digitCount = (int)digitCntNumericUpDown.Value;
-		}
-	}
+                var columnNames = dt.Columns
+                                    .Cast<DataColumn>()
+                                    .Select(col => col.ColumnName);
+                sb.AppendLine(string.Join(",", columnNames));
+
+                foreach (DataRow row in dt.Rows)
+                {
+                    var fields = dt.Columns
+                                   .Cast<DataColumn>()
+                                   .Select(col => row[col]?.ToString() ?? "");
+                    sb.AppendLine(string.Join(",", fields));
+                }
+
+                File.WriteAllText(menuPath, sb.ToString(), Encoding.UTF8);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"{menuPath}에 파일 저장 중 오류가 발생했습니다: {ex.Message}");
+            }
+        }
+
+        private void okButton_Click(object sender, EventArgs e)
+        {
+            SaveCSV();
+            MessageBox.Show("설정이 성공적으로 저장되었습니다.");
+        }
+
+        private void digitCntNumericUpDown_ValueChanged(object sender, EventArgs e)
+        {
+            digitCount = (int)digitCntNumericUpDown.Value;
+        }
+    }
 }

@@ -1,10 +1,11 @@
-﻿using System.Drawing.Imaging;
+﻿using QRCoder;
+using System.Diagnostics;
+using System.Drawing.Imaging;
 using System.Drawing.Printing;
 using System.IO;
-using QRCoder;
 using WIA;
-using ZXing;
 using WishKiosk;
+using ZXing;
 
 namespace wishKiosk
 {
@@ -20,8 +21,10 @@ namespace wishKiosk
 		private int currentMenuIndex = 0;
 		public int digitCount = 3; // 수기 숫자 칸 개수
 		public string menuFilePath = "menu.csv";
+		public string digitFilePath = "digit.dat";
 
-		private string[] menu = new[] { "햄버거 세트", "피자 세트", "감자튀김 세트", "콜라" };
+		private string[] menu;
+		private int[] price;
 
 		public wishKiosk()
 		{
@@ -143,12 +146,30 @@ namespace wishKiosk
 
 		private void settingsButton_Click(object sender, EventArgs e)
 		{
-			settings Settings = new settings();
-			Settings.printDoc = printDoc;
-			Settings.digitCount = digitCount;
-			Settings.menuPath = menuFilePath;
+			settings Settings = new()
+			{
+				printDoc = printDoc,
+				digitCount = digitCount
+			};
+			if (!File.Exists(menuFilePath))
+			{
+				MessageBox.Show($"{menuFilePath} 파일이 존재하지 않습니다.");
+			}
+			else
+			{
+				Settings.menuPath = menuFilePath;
+			}
 			Settings.Show();
 			digitCount = Settings.digitCount;
+
+			if (!File.Exists(digitFilePath))
+			{
+				MessageBox.Show($"{digitFilePath} 파일이 존재하지 않습니다.");
+			}
+			else
+			{
+				File.WriteAllText(digitFilePath, digitCount.ToString());
+			}
 		}
 
 		private void scanButton_Click(object sender, EventArgs e)
@@ -390,7 +411,7 @@ namespace wishKiosk
 			{
 				MessageBox.Show("ES-50 스캐너를 찾을 수 없습니다.");
 				return null;
-            }
+			}
 
 			var device = scannerInfo.Connect();
 			var item = device.Items[1];
@@ -426,7 +447,176 @@ namespace wishKiosk
 					return;
 				}
 			}
-
 		}
-	}
+
+		private bool isNumber(string s)
+		{
+			foreach (char c in s)
+			{
+				if (!char.IsDigit(c))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
+		private void wishKiosk_Load(object sender, EventArgs e)
+		{
+			if (!File.Exists(digitFilePath))
+			{
+				File.WriteAllText(digitFilePath, digitCount.ToString());
+			}
+			else
+			{
+				string digitTxt = File.ReadAllText(digitFilePath);
+				if (isNumber(digitTxt))
+				{
+					digitCount = int.Parse(digitTxt);
+				}
+			}
+
+			// 메뉴, 가격 가져오기
+			if (!File.Exists(menuFilePath))
+			{
+				MessageBox.Show("menu.csv 파일이 존재하지 않습니다.");
+				return;
+			}
+
+			string[] lines = File.ReadAllLines(menuFilePath);
+
+			List<string> menuList = new List<string>();
+			List<int> priceList = new List<int>();
+
+			for (int i = 1; i < lines.Length; i++)
+			{
+				string[] splt = lines[i].Trim().Split(',');
+				string menuName = splt[0];
+				try
+				{
+					int priceValue = int.Parse(splt[1]);
+					menuList.Add(menuName);
+					priceList.Add(priceValue);
+				}
+				catch
+				{
+					MessageBox.Show($"{i}행의 가격이 잘못된 형식입니다.");
+					return;
+				}
+			}
+
+			menu = menuList.ToArray();
+			price = priceList.ToArray();
+		}
+
+        private void infoButton_Click(object sender, EventArgs e)
+        {
+            ShowMid(
+                "Project INFO\n\n" +
+                "Made By Team ToyoTech\n" +
+                "www.toyotech.dev\n\n" +
+                "WI:SH KIOSK\n" +
+                "Write It: Scan && Handle\n" +
+                "www.github.com/Team-ToyoTech/WISH-Kiosk\n", "WISH INFO");
+        }
+
+		// 가운데 정렬, 링크 포함 MessageBox
+        public static void ShowMid(string text, string caption = "")
+        {
+            using (Form dlg = new Form())
+            {
+                dlg.Text = caption;
+                dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
+                dlg.StartPosition = FormStartPosition.CenterParent;
+                dlg.MaximizeBox = dlg.MinimizeBox = false;
+                dlg.ShowInTaskbar = false;
+                dlg.AutoSize = true;
+                dlg.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+                dlg.Padding = new Padding(10);
+
+                dlg.Font = new Font(dlg.Font.FontFamily, 12f, FontStyle.Regular);
+
+                FlowLayoutPanel contentPanel = BuildContentPanel(text);
+                contentPanel.Anchor = AnchorStyles.None;
+
+                var layout = new TableLayoutPanel
+                {
+                    AutoSize = true,
+                    AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                    ColumnCount = 1,
+                    RowCount = 1,
+                    Dock = DockStyle.Fill
+                };
+                layout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+                layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+                layout.Controls.Add(contentPanel, 0, 0);
+
+                dlg.Controls.Add(layout);
+                dlg.ShowDialog();
+            }
+        }
+
+        // 텍스트 -> Label / URL -> LinkLabel
+        private static FlowLayoutPanel BuildContentPanel(string text)
+        {
+            var panel = new FlowLayoutPanel
+            {
+                FlowDirection = FlowDirection.TopDown,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                WrapContents = false,
+                Dock = DockStyle.None,
+                Margin = new Padding(0)
+            };
+
+            foreach (var raw in text.Split('\n'))
+            {
+                string line = raw.TrimEnd('\r');
+                if (string.IsNullOrWhiteSpace(line))
+                {
+                    panel.Controls.Add(new Label { AutoSize = true, Height = 6 });
+                    continue;
+                }
+
+                bool isUrl = line.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                              line.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ||
+                              line.StartsWith("www.", StringComparison.OrdinalIgnoreCase);
+
+                if (isUrl)
+                {
+                    string url = line.StartsWith("http", StringComparison.OrdinalIgnoreCase)
+                                 ? line
+                                 : $"https://{line}";
+
+                    var link = new LinkLabel
+                    {
+                        Text = line,
+                        AutoSize = true,
+                        TextAlign = ContentAlignment.MiddleCenter,
+                        LinkBehavior = LinkBehavior.AlwaysUnderline,
+                        Margin = new Padding(0, 2, 0, 2)
+                    };
+                    link.LinkClicked += (_, __) =>
+                    {
+                        Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+                    };
+                    link.Anchor = AnchorStyles.None;
+                    panel.Controls.Add(link);
+                }
+                else
+                {
+                    panel.Controls.Add(new Label
+                    {
+                        Text = line,
+                        AutoSize = true,
+                        TextAlign = ContentAlignment.MiddleCenter,
+                        MaximumSize = new Size(400, 0),
+                        Margin = new Padding(0, 2, 0, 2),
+                        Anchor = AnchorStyles.None
+                    });
+                }
+            }
+            return panel;
+        }
+    }
 }
