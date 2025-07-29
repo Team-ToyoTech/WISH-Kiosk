@@ -8,7 +8,7 @@ namespace wishKiosk
         public PrintDocument printDoc = new();
         public int digitCount;
         public string? menuPath;
-        public wishKiosk WishKiosk;
+        public wishKiosk? WishKiosk;
 
         public settings()
         {
