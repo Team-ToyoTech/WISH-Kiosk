@@ -97,7 +97,6 @@ namespace wishKiosk
                 }
 
                 File.WriteAllText(menuPath, sb.ToString(), Encoding.UTF8);
-                MessageBox.Show($"{menuPath}에 파일이 성공적으로 저장되었습니다.");
             }
             catch (Exception ex)
             {
@@ -108,6 +107,7 @@ namespace wishKiosk
         private void okButton_Click(object sender, EventArgs e)
         {
             SaveCSV();
+            MessageBox.Show("설정이 성공적으로 저장되었습니다.");
         }
 
         private void digitCntNumericUpDown_ValueChanged(object sender, EventArgs e)

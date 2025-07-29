@@ -32,6 +32,7 @@
             printButton = new Button();
             settingsButton = new Button();
             scanButton = new Button();
+            infoButton = new Button();
             SuspendLayout();
             // 
             // printButton
@@ -71,11 +72,25 @@
             scanButton.UseVisualStyleBackColor = true;
             scanButton.Click += scanButton_Click;
             // 
+            // infoButton
+            // 
+            infoButton.BackColor = Color.Transparent;
+            infoButton.BackgroundImage = (Image)resources.GetObject("infoButton.BackgroundImage");
+            infoButton.BackgroundImageLayout = ImageLayout.Zoom;
+            infoButton.Location = new Point(72, 11);
+            infoButton.Margin = new Padding(2);
+            infoButton.Name = "infoButton";
+            infoButton.Size = new Size(57, 59);
+            infoButton.TabIndex = 3;
+            infoButton.UseVisualStyleBackColor = false;
+            infoButton.Click += infoButton_Click;
+            // 
             // wishKiosk
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(617, 255);
+            Controls.Add(infoButton);
             Controls.Add(scanButton);
             Controls.Add(settingsButton);
             Controls.Add(printButton);
@@ -91,5 +106,6 @@
         private Button printButton;
         private Button settingsButton;
         private Button scanButton;
+        private Button infoButton;
     }
 }

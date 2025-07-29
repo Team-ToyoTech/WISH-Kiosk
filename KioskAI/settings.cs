@@ -5,9 +5,9 @@ namespace wishKiosk
 {
 	public partial class settings : Form
 	{
-		public PrintDocument printDoc = new PrintDocument();
-		public int digitCount = 3;
-		public string menuPath;
+		public PrintDocument printDoc = new();
+		public int digitCount;
+		public string? menuPath;
 
 		public settings()
 		{
@@ -16,7 +16,7 @@ namespace wishKiosk
 
 		private void printSettingsButton_Click(object sender, EventArgs e)
 		{
-			PrintDialog printDialog = new PrintDialog
+			PrintDialog printDialog = new()
 			{
 				Document = printDoc,   // 인쇄할 문서 지정
 				AllowSomePages = true, // 일부 페이지만 선택 가능
@@ -33,11 +33,13 @@ namespace wishKiosk
                 MessageBox.Show($"{menuPath} 파일이 존재하지 않습니다.");
                 return;
             }
-            menuSettings MenuSettings = new menuSettings();
-			MenuSettings.digitCount = digitCount;
-			MenuSettings.menuPath = menuPath;
-			var dialogRes = MenuSettings.ShowDialog();
-			if (dialogRes == DialogResult.OK)
+
+			menuSettings MenuSettings = new()
+			{
+				digitCount = digitCount,
+				menuPath = menuPath
+			};
+			if (MenuSettings.ShowDialog() == DialogResult.OK)
 			{
 				digitCount = MenuSettings.digitCount;
 			}
