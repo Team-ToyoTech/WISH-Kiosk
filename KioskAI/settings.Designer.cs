@@ -61,6 +61,7 @@
             Controls.Add(printSettingsButton);
             Name = "settings";
             Text = "WISH Settings";
+            FormClosing += settings_FormClosing;
             ResumeLayout(false);
         }
 

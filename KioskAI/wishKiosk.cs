@@ -148,7 +148,8 @@ namespace wishKiosk
 			settings Settings = new()
 			{
 				printDoc = printDoc,
-				digitCount = digitCount
+				digitCount = digitCount,
+				WishKiosk = this
 			};
 			if (!File.Exists(menuFilePath))
 			{
@@ -159,17 +160,20 @@ namespace wishKiosk
 				Settings.menuPath = menuFilePath;
 			}
 			Settings.Show();
-			digitCount = Settings.digitCount;
-
-			if (!File.Exists(digitFilePath))
-			{
-				MessageBox.Show($"{digitFilePath} 파일이 존재하지 않습니다.");
-			}
-			else
-			{
-				File.WriteAllText(digitFilePath, digitCount.ToString());
-			}
 		}
+
+		public void getDigitCnt(settings Settings)
+		{
+			digitCount = Settings.digitCount;
+            if (!File.Exists(digitFilePath))
+            {
+                MessageBox.Show($"{digitFilePath} 파일이 존재하지 않습니다.");
+            }
+            else
+            {
+                File.WriteAllText(digitFilePath, digitCount.ToString());
+            }
+        }
 
         public static Bitmap EnhanceContrast(Bitmap original)
         {
