@@ -433,6 +433,52 @@ namespace wishKiosk
             }
         }
 
+        public static void AlignXSpacingUniformly(
+    ref Dictionary<int, Dictionary<int, float>> xTable,
+    List<int> digitLevels,
+    float? spacingOverride = null)
+        {
+            digitLevels.Sort(); // 예: [100, 10, 1]
+
+            foreach (var line in xTable.Keys.ToList())
+            {
+                var levels = xTable[line];
+
+                // 제일 왼쪽 숫자 위치 찾기 (백/십/일 없어도 상관없음)
+                float left = levels.Values.Min();
+
+                // 간격 계산
+                float spacing;
+                if (spacingOverride.HasValue)
+                {
+                    spacing = spacingOverride.Value;
+                }
+                else
+                {
+                    if (levels.Count >= 2)
+                    {
+                        var ordered = levels.OrderBy(kv => kv.Value).ToList();
+                        spacing = (ordered.Last().Value - ordered.First().Value) / (digitLevels.Count - 1);
+                    }
+                    else
+                    {
+                        spacing = 60f; // 기본 간격 (임의값)
+                    }
+                }
+
+                // 균등 간격으로 재배치
+                for (int i = 0; i < digitLevels.Count; i++)
+                {
+                    int level = digitLevels[i];
+                    levels[level] = left + i * spacing;
+                }
+
+                xTable[line] = levels;
+            }
+        }
+
+
+
         private void scanButton_Click(object sender, EventArgs e)
 		{
 			Bitmap? bitmap = ScanWithWia(); // WIA 스캐너로 이미지 가져오기, null 가능
@@ -518,8 +564,10 @@ namespace wishKiosk
             FillMissingXQrSizes(ref xQrSizes, xvisited, allLines, digitLevels.ToArray());
             FillMissingYQrSizes(ref yQrSizes, yVisited, allLines);
 
-            NormalizeXPositions(ref xTable, digitLevels);
-            NormalizeXQrSizes(ref xQrSizes);
+
+            AlignXSpacingUniformly(ref xTable, digitLevels); // ✅ 여기서 균등 간격 강제
+            NormalizeXPositions(ref xTable, digitLevels);    // ✅ 여기서 소수점 보정 / 좌측 정렬
+            NormalizeXQrSizes(ref xQrSizes);                 // ✅ 크기 비율 정리
 
             foreach (var menuEntry in yTable)
 			{
