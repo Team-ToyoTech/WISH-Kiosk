@@ -3,7 +3,7 @@
   "DataSource": {
     "Type": "Folder",
     "Version": 1,
-    "FolderPath": "C:\\Users\\ASUS\\Desktop\\mnist_invert"
+    "FolderPath": "C:\\Users\\ASUS\\Desktop\\mnist_origin\\mnist_origin\\training"
   },
   "Environment": {
     "Type": "LocalGPU",
@@ -17,8 +17,8 @@
         "Version": 1,
         "Type": "Trial",
         "TrainerName": "ImageClassificationMulti",
-        "Score": 0.087365361600273556,
-        "RuntimeInSeconds": 902.599,
+        "Score": 0.097715492416970626,
+        "RuntimeInSeconds": 740.326,
         "Parameter": {
           "_SCHEMA_": "e0 * e1 * e2",
           "e0": {
@@ -56,7 +56,7 @@
     "Version": 2,
     "Subsampling": false,
     "Type": "ClassificationTrainingOption",
-    "TrainingTime": 0,
+    "TrainingTime": 2147483647,
     "ValidationOption": {
       "Version": 0,
       "Type": "TrainValidateSplitValidationOption",
