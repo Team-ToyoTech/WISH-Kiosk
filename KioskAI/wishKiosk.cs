@@ -350,7 +350,7 @@ namespace wishKiosk
 					var key = (line, level);
 					if (!xQrSizes.ContainsKey(key))
 					{
-						xQrSizes[key] = new SizeF(avgWidth, 40); // 높이는 추후 Y에서 예측
+						xQrSizes[key] = new SizeF(avgWidth, 40); // 높이는 Y에서 예측
 					}
 				}
 			}
@@ -372,7 +372,7 @@ namespace wishKiosk
             foreach (int line in allLines)
             {
                 if (!yQrSizes.ContainsKey(line))
-                    yQrSizes[line] = new SizeF(40, avgHeight); // 너비는 추후 X에서 예측
+                    yQrSizes[line] = new SizeF(40, avgHeight); // 너비는 X에서 예측
             }
         }
 
@@ -429,17 +429,17 @@ namespace wishKiosk
         }
 
         public static void AlignXSpacingUniformly(
-    ref Dictionary<int, Dictionary<int, float>> xTable,
-    List<int> digitLevels,
-    float? spacingOverride = null)
+			ref Dictionary<int, Dictionary<int, float>> xTable,
+			List<int> digitLevels,
+			float? spacingOverride = null)
         {
-            digitLevels.Sort(); // 예: [100, 10, 1]
+            digitLevels.Sort();
 
             foreach (var line in xTable.Keys.ToList())
             {
                 var levels = xTable[line];
 
-                // 제일 왼쪽 숫자 위치 찾기 (백/십/일 없어도 상관없음)
+                // 제일 왼쪽 숫자 위치 찾기
                 float left = levels.Values.Min();
 
                 // 간격 계산
@@ -457,11 +457,11 @@ namespace wishKiosk
                     }
                     else
                     {
-                        spacing = 60f; // 기본 간격 (임의값)
+                        spacing = 60f; // 기본 간격
                     }
                 }
 
-                // 균등 간격으로 재배치
+                // 균등 간격 재배치
                 for (int i = 0; i < digitLevels.Count; i++)
                 {
                     int level = digitLevels[i];
@@ -471,8 +471,6 @@ namespace wishKiosk
                 xTable[line] = levels;
             }
         }
-
-
 
         private void scanButton_Click(object sender, EventArgs e)
 		{
@@ -560,9 +558,9 @@ namespace wishKiosk
             FillMissingYQrSizes(ref yQrSizes, yVisited, allLines);
 
 
-            AlignXSpacingUniformly(ref xTable, digitLevels); // ✅ 여기서 균등 간격 강제
-            NormalizeXPositions(ref xTable, digitLevels);    // ✅ 여기서 소수점 보정 / 좌측 정렬
-            NormalizeXQrSizes(ref xQrSizes);                 // ✅ 크기 비율 정리
+            AlignXSpacingUniformly(ref xTable, digitLevels); // 균등 간격 강제
+            NormalizeXPositions(ref xTable, digitLevels);    // 소수점 보정 / 좌측 정렬
+            NormalizeXQrSizes(ref xQrSizes);                 // 크기 비율 정리
 
             foreach (var menuEntry in yTable)
 			{
