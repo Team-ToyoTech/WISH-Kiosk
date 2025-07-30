@@ -13,11 +13,11 @@ namespace wishKiosk
 	{
 		public float FontSize { get; set; } = 30f;
 		public PrintDocument printDoc = new PrintDocument();
-		private Pen gridPen = new Pen(Color.Gray, 1) { DashStyle = System.Drawing.Drawing2D.DashStyle.Dot };
-		private Brush blackBrush = Brushes.Black;
-		private int boxSize = 40;
-		private int spacing = 20;
-		private int lineSpacing = 120;
+		private readonly Pen gridPen = new Pen(Color.Gray, 1) { DashStyle = System.Drawing.Drawing2D.DashStyle.Dot };
+		private readonly Brush blackBrush = Brushes.Black;
+		private readonly int boxSize = 40;
+		private readonly int spacing = 20;
+		private readonly int lineSpacing = 120;
 		private int currentMenuIndex = 0;
 		public int digitCount = 3; // 숫자 칸 개수
 		public string menuFilePath = "menu.csv";
@@ -317,7 +317,7 @@ namespace wishKiosk
 		{
 			foreach (int digitLevel in digitLevels)
 			{
-				Dictionary<int, float> known = new();
+				Dictionary<int, float> known = [];
 				foreach (int line in allLines)
 				{
 					if (xTable.ContainsKey(line) && xTable[line].ContainsKey(digitLevel))
@@ -334,7 +334,7 @@ namespace wishKiosk
 
 						if (!xTable.ContainsKey(line))
 						{
-							xTable[line] = new Dictionary<int, float>();
+							xTable[line] = [];
 						}
 
 						xTable[line][digitLevel] = predictedX;
@@ -516,7 +516,7 @@ namespace wishKiosk
 			List<SizeF> allsize = new List<SizeF>();
 			foreach (var (text, point, size) in qrData)
 			{
-				if (text.Contains("-"))
+				if (text.Contains('-'))
 				{
 					var parts = text.Split('-');
 					if (int.TryParse(parts[0], out int line) && int.TryParse(parts[1], out int digitLevel))
@@ -531,7 +531,7 @@ namespace wishKiosk
 						allsize.Add(size);
 					}
 				}
-				else if (text.StartsWith("m"))
+				else if (text.StartsWith('m'))
 				{
 					if (int.TryParse(text.Substring(1), out int menuNum))
 					{
@@ -546,7 +546,7 @@ namespace wishKiosk
 			FillMissingYPoints(ref yTable, yVisited, allLines);
 
 			allLines = yTable.Keys.ToArray(); // 메뉴 번호 기준
-			List<int> digitLevels = new List<int>();
+			List<int> digitLevels = [];
 			for(int i = 1; i <= digitCount; i++)
 			{
 				digitLevels.Add((int)Math.Pow(10, digitCount - i));
@@ -642,7 +642,6 @@ namespace wishKiosk
 				orderCount = string.IsNullOrEmpty(orderCount) ? "0" : orderCount;
 				MessageBox.Show($"{menuMap[menuNum]}를 {orderCount}개 주문했습니다.");
 			}
-
 			bitmap.Dispose();
 		}
 
