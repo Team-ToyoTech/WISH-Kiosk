@@ -893,7 +893,7 @@ namespace wishKiosk
         /// </summary>
         /// <param name="text">contents</param>
         /// <param name="caption">title</param>
-        public static void ShowMid(string text, string caption = "")
+        private static void ShowMid(string text, string caption = "")
         {
             using (Form dlg = new Form())
             {
