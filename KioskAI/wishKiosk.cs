@@ -23,8 +23,8 @@ namespace wishKiosk
 		public string menuFilePath = "menu.csv";
 		public string digitFilePath = "digit.dat";
 
-		private string[] menu;
-		private int[] price;
+		private string?[] menu;
+		private int?[] price;
 
 		public wishKiosk()
 		{
@@ -121,7 +121,7 @@ namespace wishKiosk
 					Trimming = StringTrimming.EllipsisCharacter
 				};
 
-				e.Graphics.DrawString(menu[currentMenuIndex], font, blackBrush, textRect, format);
+				e.Graphics.DrawString(menu[currentMenuIndex] ?? "", font, blackBrush, textRect, format);
 
 				printedCount++;
 			}
@@ -135,6 +135,11 @@ namespace wishKiosk
 			font.Dispose();
 		}
 
+		/// <summary>
+		/// 주어진 텍스트 QR code 변환
+		/// </summary>
+		/// <param name="data">QR code contents</param>
+		/// <returns>QR code img</returns>
 		private Bitmap GenerateQRCode(string data)
 		{
 			QRCodeGenerator qrGen = new QRCodeGenerator();
@@ -162,7 +167,11 @@ namespace wishKiosk
 			Settings.Show();
 		}
 
-		public void getDigitCnt(settings Settings)
+        /// <summary>
+        /// settings에서 digitCount 받아와서 digit.dat 에 기록
+        /// </summary>
+        /// <param name="Settings">settings Form</param>
+        public void getDigitCnt(settings Settings)
 		{
 			digitCount = Settings.digitCount;
             if (!File.Exists(digitFilePath))
@@ -175,6 +184,12 @@ namespace wishKiosk
             }
         }
 
+		/*
+        /// <summary>
+        /// 고대비 이미지로 변환
+        /// </summary>
+        /// <param name="original">original image</param>
+        /// <returns>high contrast img</returns>
         public static Bitmap EnhanceContrast(Bitmap original)
         {
             Bitmap gray = new Bitmap(original.Width, original.Height);
@@ -201,8 +216,14 @@ namespace wishKiosk
             }
 
             return binary;
-        }
+        } */
 
+		/// <summary>
+		/// 빠른 고대비 변환
+		/// </summary>
+		/// <param name="source">original img</param>
+		/// <param name="threshold">기준값</param>
+		/// <returns>high contrast img</returns>
         public static Bitmap EnhanceContrastFast(Bitmap source, int threshold = 128)
         {
             Bitmap grayBmp = new Bitmap(source.Width, source.Height, PixelFormat.Format24bppRgb);
@@ -242,7 +263,13 @@ namespace wishKiosk
             return grayBmp;
         }
 
-		public static float PredictLinear(Dictionary<int, float> known, int targetLine)
+        /// <summary>
+        /// 최소제곱법 이용하여 예측
+        /// </summary>
+        /// <param name="known"></param>
+        /// <param name="targetLine"></param>
+        /// <returns></returns>
+        public static float PredictLinear(Dictionary<int, float> known, int targetLine)
 		{
 			int n = known.Count;
 			if (n < 2)
@@ -275,6 +302,13 @@ namespace wishKiosk
             return slope * targetLine + intercept;
         }
 
+        /// <summary>
+        /// 인식되지 않은 X좌표 최소제곱법으로 보정
+        /// </summary>
+        /// <param name="xTable"></param>
+        /// <param name="xvisited"></param>
+        /// <param name="allLines"></param>
+        /// <param name="digitLevels"></param>
         public static void FillMissingXPoints(
 			ref Dictionary<int, Dictionary<int, float>> xTable, 
 			HashSet<(int line, int digitLevel)> xvisited, 
@@ -310,6 +344,12 @@ namespace wishKiosk
             }
         }
 
+        /// <summary>
+        /// 인식되지 않은 Y좌표 최소제곱법으로 보정
+        /// </summary>
+        /// <param name="yTable"></param>
+        /// <param name="visitedLines"></param>
+        /// <param name="allLines"></param>
         public static void FillMissingYPoints(ref Dictionary<int, float> yTable, HashSet<int> visitedLines, int[] allLines)
         {
             Dictionary<int, float> known = new();
@@ -333,7 +373,7 @@ namespace wishKiosk
         }
 
         /// <summary>
-        /// X좌표와 Y좌표를 모두 최소제곱법으로 보정하는 함수
+        /// X좌표와 Y좌표를 모두 최소제곱법으로 보정
         /// </summary>
         /// <param name="xTable">line -> digitLevel -> X좌표</param>
         /// <param name="yTable">line -> Y좌표</param>
@@ -346,9 +386,7 @@ namespace wishKiosk
             int[] digitLevels
         )
         {
-            
-
-            // ===== Y좌표 보정 =====
+            // Y좌표 보정
             var yPts = yTable.Where(kv => allLines.Contains(kv.Key)).ToList();
             if (yPts.Count >= 2)
             {
@@ -370,7 +408,7 @@ namespace wishKiosk
                 }
             }
 
-            // ===== X좌표 보정 =====
+            // X좌표 보정
             foreach (var digitLevel in digitLevels)
             {
                 var pts = new List<(int line, float x)>();
@@ -410,7 +448,7 @@ namespace wishKiosk
                 }
             }
 
-            // ===== Y좌표 보정 =====
+            // Y좌표 보정 반복하여 정확도 개선
             yPts = yTable.Where(kv => allLines.Contains(kv.Key)).ToList();
             if (yPts.Count >= 2)
             {
@@ -432,9 +470,6 @@ namespace wishKiosk
                 }
             }
         }
-
-
-
 
         private void scanButton_Click(object sender, EventArgs e)
 		{
@@ -467,7 +502,7 @@ namespace wishKiosk
 			var menuMap = new Dictionary<int, string>();
 			for (int i = 1; i <= menu.Length; i++)
 			{
-				menuMap[i] = menu[i - 1];
+				menuMap[i] = menu[i - 1] ?? "";
 			}
 
 			var xvisited = new HashSet<(int x, int y)>();
@@ -611,7 +646,12 @@ namespace wishKiosk
 			bitmap.Dispose();
 		}
 
-		public static List<(string text, PointF point, SizeF size)> ExtractQrCodesWithSize(Bitmap bitmap)
+        /// <summary>
+        /// 이미지에서 QR 코드 추출 및 위치 반환
+        /// </summary>
+        /// <param name="bitmap">img</param>
+        /// <returns>QR code locations</returns>
+        public static List<(string text, PointF point, SizeF size)> ExtractQrCodesWithSize(Bitmap bitmap)
 		{
 			var results = new List<(string, PointF, SizeF)>();
 			var reader = new ZXing.BarcodeReaderGeneric();
@@ -639,8 +679,13 @@ namespace wishKiosk
 		}
 
 		static int i = 0;
-
-		static Rectangle ClampROI(Rectangle roi, Size bitmapSize)
+        /// <summary>
+        /// ROI를 이미지 크기에 맞게 조정
+        /// </summary>
+        /// <param name="roi"></param>
+        /// <param name="bitmapSize">img size</param>
+        /// <returns></returns>
+        static Rectangle ClampROI(Rectangle roi, Size bitmapSize)
 		{
 			int x = Math.Max(0, roi.X);
 			int y = Math.Max(0, roi.Y);
@@ -649,7 +694,14 @@ namespace wishKiosk
 
 			return new Rectangle(x, y, width, height);
 		}
+
         static int t = 0;
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="bitmap"></param>
+		/// <param name="roi"></param>
+		/// <returns></returns>
         static string OCRDigit(Bitmap bitmap, Rectangle roi)
 		{
 			using (var memoryStream = new MemoryStream())
@@ -685,7 +737,12 @@ namespace wishKiosk
 			}
 		}
 
-		static Bitmap PreprocessImage(Bitmap input)
+        /// <summary>
+        /// 이미지 흑백 변환
+        /// </summary>
+        /// <param name="input">img</param>
+        /// <returns>preprocessed img</returns>
+        static Bitmap PreprocessImage(Bitmap input)
 		{
 			Bitmap result = new Bitmap(input.Width, input.Height);
 			for (int y = 0; y < input.Height; y++)
@@ -817,7 +874,7 @@ namespace wishKiosk
 			}
 
 			menu = menuList.ToArray();
-			price = priceList.ToArray();
+            price = priceList.Select(p => (int?)p).ToArray();
 		}
 
         private void infoButton_Click(object sender, EventArgs e)
@@ -831,7 +888,11 @@ namespace wishKiosk
                 "www.github.com/Team-ToyoTech/WISH-Kiosk\n", "WISH INFO");
         }
 
-		// 가운데 정렬, 링크 포함 MessageBox
+        /// <summary>
+        /// 가운데 정렬, 링크 포함된 MessageBox
+        /// </summary>
+        /// <param name="text">contents</param>
+        /// <param name="caption">title</param>
         public static void ShowMid(string text, string caption = "")
         {
             using (Form dlg = new Form())
@@ -867,7 +928,11 @@ namespace wishKiosk
             }
         }
 
-        // 텍스트 -> Label / URL -> LinkLabel
+        /// <summary>
+        /// text to labels, links to linkLabels
+        /// </summary>
+        /// <param name="text">contents</param>
+        /// <returns></returns>
         private static FlowLayoutPanel BuildContentPanel(string text)
         {
             var panel = new FlowLayoutPanel

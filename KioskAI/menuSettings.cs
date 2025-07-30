@@ -23,6 +23,9 @@ namespace wishKiosk
             LoadCSV();
         }
 
+        /// <summary>
+        /// menu.csv에서 메뉴 로드
+        /// </summary>
         private void LoadCSV()
         {
             if (!File.Exists(menuPath))
@@ -71,6 +74,9 @@ namespace wishKiosk
             }
         }
 
+        /// <summary>
+        /// 데이터 menu.csv에 저장
+        /// </summary>
         private void SaveCSV()
         {
             if (menuDataGridView.DataSource is not DataTable dt || dt.Columns.Count == 0)
