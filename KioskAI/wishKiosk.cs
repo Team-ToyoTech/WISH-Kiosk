@@ -1,10 +1,12 @@
-﻿using QRCoder;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.Drawing.Printing;
 using System.IO;
+using Microsoft.ML.OnnxRuntime;
+using Microsoft.ML.OnnxRuntime.Tensors;
+using Newtonsoft.Json;
+using QRCoder;
 using WIA;
-using WishKiosk;
 using ZXing;
 
 namespace wishKiosk
@@ -29,7 +31,8 @@ namespace wishKiosk
 		public wishKiosk()
 		{
 			InitializeComponent();
-		}
+			InitOCR();
+        }
 
 		private void printButton_Click(object sender, EventArgs e)
 		{
@@ -693,54 +696,97 @@ namespace wishKiosk
 			return new Rectangle(x, y, width, height);
 		}
 
-		static int t = 0;
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="bitmap"></param>
-		/// <param name="roi"></param>
-		/// <returns></returns>
-		static string OCRDigit(Bitmap bitmap, Rectangle roi)
-		{
-			using (var memoryStream = new MemoryStream())
-			{
-				try
-				{
-					Rectangle safeROI = ClampROI(roi, bitmap.Size);
-					Bitmap cropped = new Bitmap(safeROI.Width, safeROI.Height, PixelFormat.Format24bppRgb);
-					using (Graphics g = Graphics.FromImage(cropped))
-					{
-						g.DrawImage(bitmap, new Rectangle(0, 0, cropped.Width, cropped.Height), safeROI, GraphicsUnit.Pixel);
-					}
+        private static InferenceSession _session;
+        private static string[] _labels;
 
-					Bitmap preprocessed = PreprocessImage(cropped);
+        public static void InitOCR()
+        {
+            _session = new InferenceSession("tmnist_model_64.onnx");
+            _labels = JsonConvert.DeserializeObject<string[]>(File.ReadAllText("labels.json"));
+        }
 
-					preprocessed.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Png);
-					preprocessed.Save($"ocr_debug_{t++}.png", System.Drawing.Imaging.ImageFormat.Png);
-					memoryStream.Position = 0;
+        static int t = 0;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="bitmap"></param>
+        /// <param name="roi"></param>
+        /// <returns></returns>
+        public static string OCRDigit(Bitmap bitmap, Rectangle roi)
+        {
+            using (var memoryStream = new MemoryStream())
+            {
+                try
+                {
+                    // ROI 안전 클램프
+                    Rectangle safeROI = ClampROI(roi, bitmap.Size);
+                    Bitmap cropped = new Bitmap(safeROI.Width, safeROI.Height, PixelFormat.Format24bppRgb);
+                    using (Graphics g = Graphics.FromImage(cropped))
+                    {
+                        g.DrawImage(bitmap, new Rectangle(0, 0, cropped.Width, cropped.Height), safeROI, GraphicsUnit.Pixel);
+                    }
 
-					var imageBytes = memoryStream.ToArray();
-					MNIST.ModelInput sampleData = new MNIST.ModelInput()
-					{
-						ImageSource = imageBytes,
-					};
-					var sortedScoresWithLabel = MNIST.PredictAllLabels(sampleData);
-					return sortedScoresWithLabel.First().Key == "NaN" ? "" : sortedScoresWithLabel.First().Key;
-				}
-				catch (Exception ex)
-				{
-					MessageBox.Show($"OCR Error: {ex.Message}");
-					return "";
-				}
-			}
-		}
+                    // 전처리 + 64x64 변환
+                    Bitmap resized = new Bitmap(64, 64, PixelFormat.Format24bppRgb);
+                    using (Graphics g = Graphics.FromImage(resized))
+                    {
+                        g.DrawImage(cropped, new Rectangle(0, 0, 64, 64));
+                    }
 
-		/// <summary>
-		/// 이미지 흑백 변환
-		/// </summary>
-		/// <param name="input">img</param>
-		/// <returns>preprocessed img</returns>
-		static Bitmap PreprocessImage(Bitmap input)
+                    Bitmap preprocessed = PreprocessImage(resized); // 필요 시 흑백, 이진화 등
+                    //preprocessed.Save($"ocr_debug_{t++}.png", ImageFormat.Png);
+
+                    // Tensor 변환
+                    var inputTensor = ImageToTensor(preprocessed);
+
+                    // ONNX 입력 생성
+                    var inputs = new List<NamedOnnxValue>
+                {
+                    NamedOnnxValue.CreateFromTensor("input", inputTensor)
+                };
+
+                    // 추론
+                    using (var results = _session.Run(inputs))
+                    {
+                        var output = results.First().AsEnumerable<float>().ToArray();
+                        int predictedIndex = Array.IndexOf(output, output.Max());
+                        string label = _labels[predictedIndex];
+
+                        return label == "NaN" ? "" : label;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"OCR Error: {ex.Message}");
+                    return "";
+                }
+            }
+        }
+
+        private static DenseTensor<float> ImageToTensor(Bitmap image)
+        {
+            // ONNX 모델은 [1, 1, 64, 64] 입력 (그레이스케일)
+            var tensor = new DenseTensor<float>(new[] { 1, 1, 64, 64 });
+            for (int y = 0; y < 64; y++)
+            {
+                for (int x = 0; x < 64; x++)
+                {
+                    Color c = image.GetPixel(x, y);
+                    // 흑백 변환 후 -1~1 정규화
+                    float gray = (c.R + c.G + c.B) / 3f / 255f;
+                    gray = (gray - 0.5f) / 0.5f; // [-1,1]
+                    tensor[0, 0, y, x] = gray;
+                }
+            }
+            return tensor;
+        }
+
+        /// <summary>
+        /// 이미지 흑백 변환
+        /// </summary>
+        /// <param name="input">img</param>
+        /// <returns>preprocessed img</returns>
+        static Bitmap PreprocessImage(Bitmap input)
 		{
 			Bitmap result = new Bitmap(input.Width, input.Height);
 			for (int y = 0; y < input.Height; y++)
