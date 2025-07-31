@@ -5,4 +5,4 @@
 
 * using [QRCoder](https://github.com/codebude/QRCoder), [ZXing](https://github.com/zxing/zxing) and WIA
 * [Server](https://github.com/Team-ToyoTech/WISH-Server)
-* [image data preprocess](https://github.com/meozigoon/imagePreprocess)
+* [Image Data Preprocess](https://github.com/Team-ToyoTech/WISH-ImagePreprocess)
