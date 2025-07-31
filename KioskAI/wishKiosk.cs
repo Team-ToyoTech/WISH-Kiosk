@@ -1024,7 +1024,7 @@ namespace wishKiosk
 				string line = raw.TrimEnd('\r');
 				if (string.IsNullOrWhiteSpace(line))
 				{
-					panel.Controls.Add(new Label { AutoSize = true, Height = 6 });
+					panel.Controls.Add(new System.Windows.Forms.Label { AutoSize = true, Height = 6 });
 					continue;
 				}
 
@@ -1053,7 +1053,7 @@ namespace wishKiosk
 				}
 				else
 				{
-					panel.Controls.Add(new Label
+					panel.Controls.Add(new System.Windows.Forms.Label
 					{
 						Text = line,
 						AutoSize = true,
