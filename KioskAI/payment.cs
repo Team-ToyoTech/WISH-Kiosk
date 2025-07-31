@@ -32,8 +32,8 @@ namespace wishKiosk
 				ev.Handled = true;
 			};
 
-			paymentView.NavigationStarting += OnNavigationStarting;
 			await StartPaymentAsync();
+			paymentView.NavigationStarting += OnNavigationStarting;
 		}
 
 		private async Task StartPaymentAsync()
