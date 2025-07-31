@@ -101,11 +101,12 @@ namespace wishKiosk
         private void OrderButton_Click(object sender, EventArgs e)
         {
             MessageBox.Show("주문이 완료되었습니다.");
+            this.Close();
         }
 
         private void CancelButton_Click(object sender, EventArgs e)
         {
-            Close();
+            this.Close();
         }
     }
 }

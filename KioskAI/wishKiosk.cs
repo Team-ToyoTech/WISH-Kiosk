@@ -1,11 +1,13 @@
-﻿using System.Diagnostics;
-using System.Drawing.Imaging;
-using System.Drawing.Printing;
-using System.IO;
-using Microsoft.ML.OnnxRuntime;
+﻿using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 using Newtonsoft.Json;
 using QRCoder;
+using System.Diagnostics;
+using System.Drawing.Imaging;
+using System.Drawing.Printing;
+using System.IO;
+using System.Text;
+using System.Windows.Controls;
 using WIA;
 using ZXing;
 
@@ -49,13 +51,16 @@ namespace wishKiosk
 				}
 			}
 
-			// 메뉴, 가격 가져오기
 			if (!File.Exists(menuFilePath))
 			{
-				MessageBox.Show($"{menuFilePath} 파일이 존재하지 않습니다.");
-				return;
+                using (var writer = new StreamWriter(menuFilePath, false, Encoding.UTF8))
+                {
+                    writer.WriteLine("메뉴명,가격");
+                }
+                return;
 			}
 
+			// 메뉴, 가격 가져오기
 			string[]? lines = File.ReadAllLines(menuFilePath);
 
 			List<string> menuList = new List<string>();
