@@ -25,14 +25,62 @@ namespace wishKiosk
 		public string menuFilePath = "menu.csv";
 		public string digitFilePath = "digit.dat";
 
-		private string?[] menu;
-		private int?[] price;
+		private string[]? menu;
+		private int[]? price;
 
 		public wishKiosk()
 		{
 			InitializeComponent();
 			InitOCR();
-        }
+		}
+
+		private void wishKiosk_Load(object sender, EventArgs e)
+		{
+			if (!File.Exists(digitFilePath))
+			{
+				File.WriteAllText(digitFilePath, digitCount.ToString());
+			}
+			else
+			{
+				string digitTxt = File.ReadAllText(digitFilePath);
+				if (isNumber(digitTxt))
+				{
+					digitCount = int.Parse(digitTxt);
+				}
+			}
+
+			// 메뉴, 가격 가져오기
+			if (!File.Exists(menuFilePath))
+			{
+				MessageBox.Show($"{menuFilePath} 파일이 존재하지 않습니다.");
+				return;
+			}
+
+			string[]? lines = File.ReadAllLines(menuFilePath);
+
+			List<string> menuList = new List<string>();
+			List<int> priceList = new List<int>();
+
+			for (int i = 1; i < lines.Length; i++)
+			{
+				string[]? splt = lines[i].Trim().Split(',');
+				string menuName = splt[0];
+				try
+				{
+					int priceValue = int.Parse(splt[1]);
+					menuList.Add(menuName);
+					priceList.Add(priceValue);
+				}
+				catch
+				{
+					MessageBox.Show($"{i}행의 가격이 잘못된 형식입니다.");
+					return;
+				}
+			}
+
+			menu = menuList.ToArray();
+			price = priceList.ToArray();
+		}
 
 		private void printButton_Click(object sender, EventArgs e)
 		{
@@ -341,9 +389,9 @@ namespace wishKiosk
 						}
 
 						xTable[line][digitLevel] = predictedX;
-                        // Console.WriteLine($"Predicted X for line {line}, level {digitLevel}: {predictedX}"); // 디버깅용
-                    }
-                }
+						// Console.WriteLine($"Predicted X for line {line}, level {digitLevel}: {predictedX}"); // 디버깅용
+					}
+				}
 			}
 		}
 
@@ -370,9 +418,9 @@ namespace wishKiosk
 				{
 					float predictedY = PredictLinear(known, line);
 					yTable[line] = predictedY;
-                    // Console.WriteLine($"Predicted Y for line {line}: {predictedY}"); // 디버깅용
-                }
-            }
+					// Console.WriteLine($"Predicted Y for line {line}: {predictedY}"); // 디버깅용
+				}
+			}
 		}
 
 		/// <summary>
@@ -605,9 +653,9 @@ namespace wishKiosk
 			}
 
 			debugBitmap.Save("debug_output.png", System.Drawing.Imaging.ImageFormat.Png);
-            // MessageBox.Show("ROI가 표시된 이미지가 저장되었습니다."); // 디버깅용
+			// MessageBox.Show("ROI가 표시된 이미지가 저장되었습니다."); // 디버깅용
 
-            foreach (var menuEntry in yTable)
+			foreach (var menuEntry in yTable)
 			{
 				int menuNum = menuEntry.Key;
 				float y = menuEntry.Value;
@@ -636,15 +684,23 @@ namespace wishKiosk
 							);
 
 							string digit = OCRDigit(bitmap, roi);
-                            // MessageBox.Show($"OCR result at ({x}, {y}) = '{digit}'"); // 디버깅용
-                            orderCount += digit;
+							// MessageBox.Show($"OCR result at ({x}, {y}) = '{digit}'"); // 디버깅용
+							orderCount += digit;
 						}
 					}
 				}
 
 				orderCount = string.IsNullOrEmpty(orderCount) ? "0" : orderCount;
-				MessageBox.Show($"{menuMap[menuNum]}를 {orderCount}개 주문했습니다.");
-			}
+				var msgBoxRes = MessageBox.Show($"{menuMap[menuNum]}를 {orderCount}개 주문했습니다.", "주문 확인", MessageBoxButtons.OKCancel);
+				if (msgBoxRes == DialogResult.OK)
+				{
+                    MessageBox.Show($"{menuMap[menuNum]} {orderCount}개, {price[menuNum] * int.Parse(orderCount)}원 주문이 완료되었습니다.");
+				}
+				else
+				{
+					MessageBox.Show("주문이 취소되었습니다.");
+                }
+            }
 			bitmap.Dispose();
 		}
 
@@ -696,97 +752,104 @@ namespace wishKiosk
 			return new Rectangle(x, y, width, height);
 		}
 
-        private static InferenceSession _session;
-        private static string[] _labels;
+		private static InferenceSession? _session;
+		private static string[]? _labels;
+		/// <summary>
+		/// OCR 초기화
+		/// </summary>
+		public static void InitOCR()
+		{
+			_session = new InferenceSession("tmnist_model_64.onnx");
+			_labels = JsonConvert.DeserializeObject<string[]>(File.ReadAllText("labels.json"));
+		}
 
-        public static void InitOCR()
-        {
-            _session = new InferenceSession("tmnist_model_64.onnx");
-            _labels = JsonConvert.DeserializeObject<string[]>(File.ReadAllText("labels.json"));
-        }
+		static int t = 0;
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="bitmap"></param>
+		/// <param name="roi"></param>
+		/// <returns></returns>
+		public static string OCRDigit(Bitmap bitmap, Rectangle roi)
+		{
+			using (var memoryStream = new MemoryStream())
+			{
+				try
+				{
+					// ROI 안전 클램프
+					Rectangle safeROI = ClampROI(roi, bitmap.Size);
+					Bitmap cropped = new Bitmap(safeROI.Width, safeROI.Height, PixelFormat.Format24bppRgb);
+					using (Graphics g = Graphics.FromImage(cropped))
+					{
+						g.DrawImage(bitmap, new Rectangle(0, 0, cropped.Width, cropped.Height), safeROI, GraphicsUnit.Pixel);
+					}
 
-        static int t = 0;
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="bitmap"></param>
-        /// <param name="roi"></param>
-        /// <returns></returns>
-        public static string OCRDigit(Bitmap bitmap, Rectangle roi)
-        {
-            using (var memoryStream = new MemoryStream())
-            {
-                try
-                {
-                    // ROI 안전 클램프
-                    Rectangle safeROI = ClampROI(roi, bitmap.Size);
-                    Bitmap cropped = new Bitmap(safeROI.Width, safeROI.Height, PixelFormat.Format24bppRgb);
-                    using (Graphics g = Graphics.FromImage(cropped))
-                    {
-                        g.DrawImage(bitmap, new Rectangle(0, 0, cropped.Width, cropped.Height), safeROI, GraphicsUnit.Pixel);
-                    }
+					// 전처리 + 64x64 변환
+					Bitmap resized = new Bitmap(64, 64, PixelFormat.Format24bppRgb);
+					using (Graphics g = Graphics.FromImage(resized))
+					{
+						g.DrawImage(cropped, new Rectangle(0, 0, 64, 64));
+					}
 
-                    // 전처리 + 64x64 변환
-                    Bitmap resized = new Bitmap(64, 64, PixelFormat.Format24bppRgb);
-                    using (Graphics g = Graphics.FromImage(resized))
-                    {
-                        g.DrawImage(cropped, new Rectangle(0, 0, 64, 64));
-                    }
+					Bitmap preprocessed = PreprocessImage(resized); // 필요 시 흑백, 이진화 등
+					// preprocessed.Save($"ocr_debug_{t++}.png", ImageFormat.Png);
 
-                    Bitmap preprocessed = PreprocessImage(resized); // 필요 시 흑백, 이진화 등
-                    //preprocessed.Save($"ocr_debug_{t++}.png", ImageFormat.Png);
+					// Tensor 변환
+					var inputTensor = ImageToTensor(preprocessed);
 
-                    // Tensor 변환
-                    var inputTensor = ImageToTensor(preprocessed);
+					// ONNX 입력 생성
+					var inputs = new List<NamedOnnxValue>
+					{
+						NamedOnnxValue.CreateFromTensor("input", inputTensor)
+					};
 
-                    // ONNX 입력 생성
-                    var inputs = new List<NamedOnnxValue>
-                {
-                    NamedOnnxValue.CreateFromTensor("input", inputTensor)
-                };
+					// 추론
+					using (var results = _session.Run(inputs))
+					{
+						var output = results.First().AsEnumerable<float>().ToArray();
+						int predictedIndex = Array.IndexOf(output, output.Max());
+						string label = _labels[predictedIndex];
 
-                    // 추론
-                    using (var results = _session.Run(inputs))
-                    {
-                        var output = results.First().AsEnumerable<float>().ToArray();
-                        int predictedIndex = Array.IndexOf(output, output.Max());
-                        string label = _labels[predictedIndex];
+						return label == "NaN" ? "" : label;
+					}
+				}
+				catch (Exception ex)
+				{
+					MessageBox.Show($"OCR Error: {ex.Message}");
+					return "";
+				}
+			}
+		}
 
-                        return label == "NaN" ? "" : label;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"OCR Error: {ex.Message}");
-                    return "";
-                }
-            }
-        }
+		/// <summary>
+		/// 이미지를 ONNX 모델 입력 텐서로 변환
+		/// </summary>
+		/// <param name="image">img</param>
+		/// <returns>Tensor</returns>
+		private static DenseTensor<float> ImageToTensor(Bitmap image)
+		{
+			// ONNX 모델 [1, 1, 64, 64] 입력 (그레이스케일)
+			var tensor = new DenseTensor<float>(new[] { 1, 1, 64, 64 });
+			for (int y = 0; y < 64; y++)
+			{
+				for (int x = 0; x < 64; x++)
+				{
+					Color c = image.GetPixel(x, y);
+					// 흑백 변환 후 -1~1 정규화
+					float gray = (c.R + c.G + c.B) / 3f / 255f;
+					gray = (gray - 0.5f) / 0.5f; // [-1,1]
+					tensor[0, 0, y, x] = gray;
+				}
+			}
+			return tensor;
+		}
 
-        private static DenseTensor<float> ImageToTensor(Bitmap image)
-        {
-            // ONNX 모델은 [1, 1, 64, 64] 입력 (그레이스케일)
-            var tensor = new DenseTensor<float>(new[] { 1, 1, 64, 64 });
-            for (int y = 0; y < 64; y++)
-            {
-                for (int x = 0; x < 64; x++)
-                {
-                    Color c = image.GetPixel(x, y);
-                    // 흑백 변환 후 -1~1 정규화
-                    float gray = (c.R + c.G + c.B) / 3f / 255f;
-                    gray = (gray - 0.5f) / 0.5f; // [-1,1]
-                    tensor[0, 0, y, x] = gray;
-                }
-            }
-            return tensor;
-        }
-
-        /// <summary>
-        /// 이미지 흑백 변환
-        /// </summary>
-        /// <param name="input">img</param>
-        /// <returns>preprocessed img</returns>
-        static Bitmap PreprocessImage(Bitmap input)
+		/// <summary>
+		/// 이미지 흑백 변환
+		/// </summary>
+		/// <param name="input">img</param>
+		/// <returns>preprocessed img</returns>
+		static Bitmap PreprocessImage(Bitmap input)
 		{
 			Bitmap result = new Bitmap(input.Width, input.Height);
 			for (int y = 0; y < input.Height; y++)
@@ -871,54 +934,6 @@ namespace wishKiosk
 				}
 			}
 			return true;
-		}
-
-		private void wishKiosk_Load(object sender, EventArgs e)
-		{
-			if (!File.Exists(digitFilePath))
-			{
-				File.WriteAllText(digitFilePath, digitCount.ToString());
-			}
-			else
-			{
-				string digitTxt = File.ReadAllText(digitFilePath);
-				if (isNumber(digitTxt))
-				{
-					digitCount = int.Parse(digitTxt);
-				}
-			}
-
-			// 메뉴, 가격 가져오기
-			if (!File.Exists(menuFilePath))
-			{
-				MessageBox.Show($"{menuFilePath} 파일이 존재하지 않습니다.");
-				return;
-			}
-
-			string[] lines = File.ReadAllLines(menuFilePath);
-
-			List<string> menuList = new List<string>();
-			List<int> priceList = new List<int>();
-
-			for (int i = 1; i < lines.Length; i++)
-			{
-				string[] splt = lines[i].Trim().Split(',');
-				string menuName = splt[0];
-				try
-				{
-					int priceValue = int.Parse(splt[1]);
-					menuList.Add(menuName);
-					priceList.Add(priceValue);
-				}
-				catch
-				{
-					MessageBox.Show($"{i}행의 가격이 잘못된 형식입니다.");
-					return;
-				}
-			}
-
-			menu = menuList.ToArray();
-			price = priceList.Select(p => (int?)p).ToArray();
 		}
 
 		private void infoButton_Click(object sender, EventArgs e)
