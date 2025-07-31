@@ -1,6 +1,6 @@
-﻿namespace wishKiosk
+﻿namespace WishKiosk
 {
-    partial class menuSettings
+    partial class MenuSettings
     {
         /// <summary>
         /// Required designer variable.
@@ -98,7 +98,7 @@
             digitCntLabel.TabIndex = 4;
             digitCntLabel.Text = "수량 입력 자릿수";
             // 
-            // menuSettings
+            // MenuSettings
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -107,10 +107,10 @@
             Controls.Add(okButton);
             Controls.Add(cancelButton);
             Controls.Add(menuDataGridView);
-            Name = "menuSettings";
+            Name = "MenuSettings";
             Text = "WISH Menu Settings";
-            FormClosing += menuSettings_FormClosing;
-            Load += menuSettings_Load;
+            FormClosing += MenuSettings_FormClosing;
+            Load += MenuSettings_Load;
             ((System.ComponentModel.ISupportInitialize)menuDataGridView).EndInit();
             ((System.ComponentModel.ISupportInitialize)digitCntNumericUpDown).EndInit();
             digitCntGroup.ResumeLayout(false);

@@ -1,6 +1,6 @@
-﻿namespace wishKiosk
+﻿namespace WishKiosk
 {
-    partial class wishKiosk
+    partial class WishKiosk
     {
         /// <summary>
         ///  Required designer variable.
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(wishKiosk));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(WishKiosk));
             printButton = new Button();
             settingsButton = new Button();
             scanButton = new Button();
@@ -85,7 +85,7 @@
             infoButton.UseVisualStyleBackColor = false;
             infoButton.Click += infoButton_Click;
             // 
-            // wishKiosk
+            // WishKiosk
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
@@ -95,9 +95,9 @@
             Controls.Add(settingsButton);
             Controls.Add(printButton);
             Margin = new Padding(2);
-            Name = "wishKiosk";
+            Name = "WishKiosk";
             Text = "WISH Kiosk";
-            Load += wishKiosk_Load;
+            Load += WishKiosk_Load;
             ResumeLayout(false);
         }
 
