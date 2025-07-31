@@ -227,7 +227,7 @@ namespace wishKiosk
 		/// settings에서 digitCount 받아와서 digit.dat 에 기록
 		/// </summary>
 		/// <param name="Settings">settings Form</param>
-		public void getDigitCnt(settings Settings)
+		public void getData(settings Settings)
 		{
 			digitCount = Settings.digitCount;
 			if (!File.Exists(digitFilePath))
@@ -238,7 +238,42 @@ namespace wishKiosk
 			{
 				File.WriteAllText(digitFilePath, digitCount.ToString());
 			}
-		}
+
+            if (!File.Exists(menuFilePath))
+            {
+                using (var writer = new StreamWriter(menuFilePath, false, Encoding.UTF8))
+                {
+                    writer.WriteLine("메뉴명,가격");
+                }
+                return;
+            }
+
+            // 메뉴, 가격 가져오기
+            string[]? lines = File.ReadAllLines(menuFilePath);
+
+            List<string> menuList = new List<string>();
+            List<int> priceList = new List<int>();
+
+            for (int i = 1; i < lines.Length; i++)
+            {
+                string[]? splt = lines[i].Trim().Split(',');
+                string menuName = splt[0];
+                try
+                {
+                    int priceValue = int.Parse(splt[1]);
+                    menuList.Add(menuName);
+                    priceList.Add(priceValue);
+                }
+                catch
+                {
+                    MessageBox.Show($"{i}행의 가격이 잘못된 형식입니다.");
+                    return;
+                }
+            }
+
+            menu = menuList.ToArray();
+            price = priceList.ToArray();
+        }
 
 		/*
 		/// <summary>

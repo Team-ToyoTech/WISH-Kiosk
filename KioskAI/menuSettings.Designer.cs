@@ -109,6 +109,7 @@
             Controls.Add(menuDataGridView);
             Name = "menuSettings";
             Text = "WISH Menu Settings";
+            FormClosing += menuSettings_FormClosing;
             Load += menuSettings_Load;
             ((System.ComponentModel.ISupportInitialize)menuDataGridView).EndInit();
             ((System.ComponentModel.ISupportInitialize)digitCntNumericUpDown).EndInit();
