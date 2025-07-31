@@ -1,38 +1,38 @@
-﻿namespace WishKiosk
+﻿namespace wishKiosk
 {
-    partial class Payment
+    partial class payment
     {
-        private Microsoft.Web.WebView2.WinForms.WebView2 PaymentView;
+        private Microsoft.Web.WebView2.WinForms.WebView2 paymentView;
 
         private void InitializeComponent()
         {
-            PaymentView = new Microsoft.Web.WebView2.WinForms.WebView2();
-            ((System.ComponentModel.ISupportInitialize)PaymentView).BeginInit();
+            paymentView = new Microsoft.Web.WebView2.WinForms.WebView2();
+            ((System.ComponentModel.ISupportInitialize)paymentView).BeginInit();
             SuspendLayout();
             // 
-            // PaymentView
+            // paymentView
             // 
-            PaymentView.AllowExternalDrop = true;
-            PaymentView.CreationProperties = null;
-            PaymentView.DefaultBackgroundColor = Color.White;
-            PaymentView.Dock = DockStyle.Fill;
-            PaymentView.Location = new Point(0, 0);
-            PaymentView.Name = "PaymentView";
-            PaymentView.Size = new Size(1608, 1138);
-            PaymentView.Source = new Uri("about:blank", UriKind.Absolute);
-            PaymentView.TabIndex = 0;
-            PaymentView.ZoomFactor = 1D;
+            paymentView.AllowExternalDrop = true;
+            paymentView.CreationProperties = null;
+            paymentView.DefaultBackgroundColor = Color.White;
+            paymentView.Dock = DockStyle.Fill;
+            paymentView.Location = new Point(0, 0);
+            paymentView.Name = "paymentView";
+            paymentView.Size = new Size(1608, 1138);
+            paymentView.Source = new Uri("about:blank", UriKind.Absolute);
+            paymentView.TabIndex = 0;
+            paymentView.ZoomFactor = 1D;
             // 
-            // Payment
+            // payment
             // 
             AutoScaleMode = AutoScaleMode.None;
             ClientSize = new Size(1608, 1138);
-            Controls.Add(PaymentView);
-            Name = "Payment";
+            Controls.Add(paymentView);
+            Name = "payment";
             Text = "결제";
             WindowState = FormWindowState.Maximized;
-            Load += Payment_Load;
-            ((System.ComponentModel.ISupportInitialize)PaymentView).EndInit();
+            Load += payment_Load;
+            ((System.ComponentModel.ISupportInitialize)paymentView).EndInit();
             ResumeLayout(false);
         }
     }

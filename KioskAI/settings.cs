@@ -1,16 +1,16 @@
 ﻿using System.Drawing.Printing;
 using System.IO;
 
-namespace WishKiosk
+namespace wishKiosk
 {
-    public partial class Settings : Form
+    public partial class settings : Form
     {
         public PrintDocument printDoc = new();
         public int digitCount;
         public string? menuPath;
-        public WishKiosk? wishKiosk;
+        public wishKiosk? WishKiosk;
 
-        public Settings()
+        public settings()
         {
             InitializeComponent();
         }
@@ -35,24 +35,24 @@ namespace WishKiosk
                 return;
             }
 
-            MenuSettings menuSettings = new(wishKiosk, this)
+            menuSettings MenuSettings = new(WishKiosk, this)
             {
                 digitCount = digitCount,
                 menuPath = menuPath
             };
-            if (menuSettings.ShowDialog() == DialogResult.OK)
+            if (MenuSettings.ShowDialog() == DialogResult.OK)
             {
-                digitCount = menuSettings.digitCount;
+                digitCount = MenuSettings.digitCount;
             }
         }
 
-        private void Settings_FormClosing(object sender, FormClosingEventArgs e)
+        private void settings_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (wishKiosk == null)
+            if (WishKiosk == null)
             {
-                throw new Exception("wishKiosk 인스턴스가 설정되지 않았습니다."); // MessageBox로 표시 고려, 사용자에게 노출?
+                throw new Exception("WishKiosk 인스턴스가 설정되지 않았습니다."); // MessageBox로 표시 고려, 사용자에게 노출?
             }
-            wishKiosk.getData(this);
+            WishKiosk.getData(this);
         }
     }
 }

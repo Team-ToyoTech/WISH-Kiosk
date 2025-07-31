@@ -1,6 +1,6 @@
-﻿namespace WishKiosk
+﻿namespace wishKiosk
 {
-    partial class Settings
+    partial class settings
     {
         /// <summary>
         /// Required designer variable.
@@ -52,16 +52,16 @@
             menuButton.UseVisualStyleBackColor = true;
             menuButton.Click += menuButton_Click;
             // 
-            // Settings
+            // settings
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(323, 164);
             Controls.Add(menuButton);
             Controls.Add(printSettingsButton);
-            Name = "Settings";
+            Name = "settings";
             Text = "WISH Settings";
-            FormClosing += Settings_FormClosing;
+            FormClosing += settings_FormClosing;
             ResumeLayout(false);
         }
 

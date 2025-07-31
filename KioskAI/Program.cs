@@ -1,4 +1,4 @@
-namespace WishKiosk
+namespace wishKiosk
 {
     internal static class Program
     {
@@ -11,7 +11,7 @@ namespace WishKiosk
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            Application.Run(new WishKiosk());
+            Application.Run(new wishKiosk());
         }
     }
 }

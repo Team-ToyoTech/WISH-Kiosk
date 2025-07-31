@@ -11,9 +11,9 @@ using System.Windows.Controls;
 using WIA;
 using ZXing;
 
-namespace WishKiosk
+namespace wishKiosk
 {
-	public partial class WishKiosk : Form
+	public partial class wishKiosk : Form
 	{
 		public float FontSize { get; set; } = 30f;
 		public PrintDocument printDoc = new();
@@ -30,13 +30,13 @@ namespace WishKiosk
 		private string[]? menu;
 		private int[] price;
 
-		public WishKiosk()
+		public wishKiosk()
 		{
 			InitializeComponent();
 			InitOCR();
 		}
 
-		private void WishKiosk_Load(object sender, EventArgs e)
+		private void wishKiosk_Load(object sender, EventArgs e)
 		{
 			if (!File.Exists(digitFilePath))
 			{
@@ -206,11 +206,11 @@ namespace WishKiosk
 
 		private void settingsButton_Click(object sender, EventArgs e)
 		{
-			Settings settings = new()
+			settings Settings = new()
 			{
 				printDoc = printDoc,
 				digitCount = digitCount,
-				wishKiosk = this
+				WishKiosk = this
 			};
 			if (!File.Exists(menuFilePath))
 			{
@@ -218,18 +218,18 @@ namespace WishKiosk
 			}
 			else
 			{
-				settings.menuPath = menuFilePath;
+				Settings.menuPath = menuFilePath;
 			}
-			settings.Show();
+			Settings.Show();
 		}
 
 		/// <summary>
-		/// settings에서 digitCount, 메뉴 정보 가져와 파일에 저장
+		/// settings에서 digitCount 받아와서 digit.dat 에 기록
 		/// </summary>
-		/// <param name="settings">settings Form</param>
-		public void getData(Settings settings)
+		/// <param name="Settings">settings Form</param>
+		public void getData(settings Settings)
 		{
-			digitCount = settings.digitCount;
+			digitCount = Settings.digitCount;
 			if (!File.Exists(digitFilePath))
 			{
 				MessageBox.Show($"{digitFilePath} 파일이 존재하지 않습니다.");
@@ -748,7 +748,7 @@ namespace WishKiosk
             }
 
             int[] menuNums = yTable.Keys.ToArray();
-            OrderResult orderRes = new(menuMap, menuNums, price, orderCnts);
+            orderResult orderRes = new(menuMap, menuNums, price, orderCnts);
 			orderRes.Show();
 
             bitmap.Dispose();

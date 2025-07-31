@@ -1,11 +1,11 @@
-﻿namespace WishKiosk
+﻿namespace wishKiosk
 {
-    partial class OrderResult
+    partial class orderResult
     {
         private System.Windows.Forms.Panel panelMain;
         private System.Windows.Forms.DataGridView orderResultDataGridView;
         private System.Windows.Forms.Label totalLabel;
-        private System.Windows.Forms.Button orderButton;
+        private System.Windows.Forms.Button OrderButton;
         private System.Windows.Forms.Button CancelButton_;
 
         private void InitializeComponent()
@@ -13,9 +13,9 @@
             panelMain = new Panel();
             orderResultDataGridView = new DataGridView();
             totalLabel = new Label();
-            orderButton = new Button();
+            OrderButton = new Button();
             CancelButton_ = new Button();
-            CounterorderButton = new Button();
+            CounterOrderButton = new Button();
             panelMain.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)orderResultDataGridView).BeginInit();
             SuspendLayout();
@@ -23,10 +23,10 @@
             // panelMain
             // 
             panelMain.AutoScroll = true;
-            panelMain.Controls.Add(CounterorderButton);
+            panelMain.Controls.Add(CounterOrderButton);
             panelMain.Controls.Add(orderResultDataGridView);
             panelMain.Controls.Add(totalLabel);
-            panelMain.Controls.Add(orderButton);
+            panelMain.Controls.Add(OrderButton);
             panelMain.Controls.Add(CancelButton_);
             panelMain.Dock = DockStyle.Fill;
             panelMain.Location = new Point(0, 0);
@@ -60,16 +60,16 @@
             totalLabel.TabIndex = 1;
             totalLabel.Text = "총액: 0원";
             // 
-            // orderButton
+            // OrderButton
             // 
-            orderButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            orderButton.Location = new Point(542, 840);
-            orderButton.Margin = new Padding(4, 4, 4, 4);
-            orderButton.Name = "orderButton";
-            orderButton.Size = new Size(122, 49);
-            orderButton.TabIndex = 2;
-            orderButton.Text = "결제하기";
-            orderButton.Click += orderButton_Click;
+            OrderButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            OrderButton.Location = new Point(542, 840);
+            OrderButton.Margin = new Padding(4, 4, 4, 4);
+            OrderButton.Name = "OrderButton";
+            OrderButton.Size = new Size(122, 49);
+            OrderButton.TabIndex = 2;
+            OrderButton.Text = "결제하기";
+            OrderButton.Click += OrderButton_Click;
             // 
             // CancelButton_
             // 
@@ -82,15 +82,15 @@
             CancelButton_.Text = "취소";
             CancelButton_.Click += CancelButton_Click;
             // 
-            // CounterorderButton
+            // CounterOrderButton
             // 
-            CounterorderButton.Location = new Point(286, 840);
-            CounterorderButton.Name = "CounterorderButton";
-            CounterorderButton.Size = new Size(249, 46);
-            CounterorderButton.TabIndex = 4;
-            CounterorderButton.Text = "카운터에서 결제하기";
-            CounterorderButton.UseVisualStyleBackColor = true;
-            CounterorderButton.Click += CounterorderButton_Click;
+            CounterOrderButton.Location = new Point(286, 840);
+            CounterOrderButton.Name = "CounterOrderButton";
+            CounterOrderButton.Size = new Size(249, 46);
+            CounterOrderButton.TabIndex = 4;
+            CounterOrderButton.Text = "카운터에서 결제하기";
+            CounterOrderButton.UseVisualStyleBackColor = true;
+            CounterOrderButton.Click += CounterOrderButton_Click;
             // 
             // orderResult
             // 
@@ -108,6 +108,6 @@
             ((System.ComponentModel.ISupportInitialize)orderResultDataGridView).EndInit();
             ResumeLayout(false);
         }
-        private Button CounterorderButton;
+        private Button CounterOrderButton;
     }
 }

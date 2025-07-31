@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36203.30
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WishKiosk", "KioskAI\WishKiosk.csproj", "{6B02A625-AFA1-4D7B-83EE-C73D44AB0092}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "wishKiosk", "KioskAI\wishKiosk.csproj", "{6B02A625-AFA1-4D7B-83EE-C73D44AB0092}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

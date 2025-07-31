@@ -1,8 +1,8 @@
 ﻿using Microsoft.VisualBasic;
 
-namespace WishKiosk
+namespace wishKiosk
 {
-    public partial class OrderResult : Form
+    public partial class orderResult : Form
     {
         private readonly Dictionary<int, string> menuMap;
         private readonly int[] menuNum;
@@ -11,7 +11,7 @@ namespace WishKiosk
 
         private int total = 0;
 
-        public OrderResult(
+        public orderResult(
             Dictionary<int, string> menuMap,
             int[] menuNum,
             int[] price,
@@ -24,10 +24,10 @@ namespace WishKiosk
             this.price = price;
             this.menuOrderCount = menuOrderCount;
 
-            Load += OrderResult_Load;
+            Load += orderResult_Load;
         }
 
-        private void OrderResult_Load(object sender, EventArgs e)
+        private void orderResult_Load(object sender, EventArgs e)
         {
             orderResultDataGridView.Columns.Add("MenuName", "메뉴명");
             orderResultDataGridView.Columns.Add("Quantity", "수량");
@@ -43,7 +43,7 @@ namespace WishKiosk
 
             orderResultDataGridView.AllowUserToAddRows = false;
             orderResultDataGridView.SelectionMode = DataGridViewSelectionMode.CellSelect;
-            // orderResultDataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+            orderResultDataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
             orderResultDataGridView.CurrentCell = null;
             orderResultDataGridView.Columns["MenuName"].ReadOnly = true;
             orderResultDataGridView.Columns["Quantity"].ReadOnly = true;
@@ -99,10 +99,10 @@ namespace WishKiosk
             totalLabel.Text = $"총액: {total}원";
         }
 
-        private void orderButton_Click(object sender, EventArgs e)
+        private void OrderButton_Click(object sender, EventArgs e)
         {
-            Payment payment = new(total);
-            var res = payment.ShowDialog();
+            payment Payment = new(total);
+            var res = Payment.ShowDialog();
             if (res == DialogResult.OK)
             {
                 MessageBox.Show("주문이 완료되었습니다.");
@@ -119,7 +119,7 @@ namespace WishKiosk
             this.Close();
         }
 
-        private void CounterorderButton_Click(object sender, EventArgs e)
+        private void CounterOrderButton_Click(object sender, EventArgs e)
         {
             MessageBox.Show("주문이 완료되었습니다.\n주문이 완료되면 카운터에서 결제해 주세요");
             this.Close();
