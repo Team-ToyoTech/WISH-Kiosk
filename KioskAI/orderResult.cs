@@ -41,6 +41,7 @@ namespace wishKiosk
 
             orderResultDataGridView.AllowUserToAddRows = false;
             orderResultDataGridView.SelectionMode = DataGridViewSelectionMode.CellSelect;
+            orderResultDataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
             orderResultDataGridView.CurrentCell = null;
             orderResultDataGridView.Columns["MenuName"].ReadOnly = true;
             orderResultDataGridView.Columns["Quantity"].ReadOnly = true;
@@ -55,8 +56,12 @@ namespace wishKiosk
                 orderResultDataGridView.Rows.Add(name, qty, linePrice);
             }
 
-            UpdateTotalLabel();
             orderResultDataGridView.CellClick += orderResultDataGridView_CellClick;
+
+            int originalWidth = orderResultDataGridView.Columns[3].Width;
+            orderResultDataGridView.Columns[3].Width = originalWidth / 2;
+
+            UpdateTotalLabel();
         }
 
         private void orderResultDataGridView_CellClick(object sender, DataGridViewCellEventArgs e)
@@ -80,6 +85,9 @@ namespace wishKiosk
             }
         }
 
+        /// <summary>
+        /// 총액 Label 업데이트
+        /// </summary>
         private void UpdateTotalLabel()
         {
             int total = 0;
