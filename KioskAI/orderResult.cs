@@ -105,7 +105,7 @@ namespace WishKiosk
             var res = payment.ShowDialog();
             if (res == DialogResult.OK)
             {
-                MessageBox.Show("주문이 완료되었습니다.");
+                MessageBox.Show("결제가 완료되었습니다.");
                 this.Close();
             }
             else
