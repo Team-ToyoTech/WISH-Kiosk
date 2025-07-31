@@ -14,6 +14,8 @@ namespace wishKiosk
 		private readonly HttpClient http = new HttpClient();
 
 		public record PaymentResponse(string status);
+		
+		private bool isrunning = true;
 
         public payment(int amount)
 		{
@@ -48,26 +50,36 @@ namespace wishKiosk
 			paymentView.Source = new Uri("http://localhost:4000/checkout/" + orderId);
 		}
 
-		private async void OnNavigationStarting(object? s, CoreWebView2NavigationStartingEventArgs e)
+        private async void OnNavigationStarting(object? s, CoreWebView2NavigationStartingEventArgs e)
 		{
-			var res = await http.GetFromJsonAsync<PaymentResponse>("http://localhost:4000/ispaying/" + orderId);
-			if (res?.status == "paid")
+			if(!isrunning)
+				return;
+			isrunning = false;
+
+            while (true)
 			{
-				MessageBox.Show("결제 완료");
-				DialogResult = DialogResult.OK;
-				Close();
-				e.Cancel = false;
-			}
-			else if (res?.status == "failed")
-			{
-				MessageBox.Show("결제 실패");
-				DialogResult = DialogResult.Abort;
-				Close();
-				e.Cancel = true;
-			}
-            else
-            {
-                // 결제 진행 중
+				var res = await http.GetFromJsonAsync<PaymentResponse>("http://localhost:4000/ispaying/" + orderId);
+				if (res?.status == "paid")
+				{
+					MessageBox.Show("결제 완료");
+					DialogResult = DialogResult.OK;
+					this.Close();
+					e.Cancel = false;
+                    return;
+				}
+				else if (res?.status == "failed")
+				{
+					MessageBox.Show("결제 실패");
+					DialogResult = DialogResult.Abort;
+					this.Close();
+					e.Cancel = true;
+                    return;
+				}
+				else
+				{
+					// 결제 진행 중
+				}
+				await Task.Delay(500); // 0.5초 대기
             }
 
             //if (e.Uri.StartsWith("https://yourserver.com/api/payments/kakao/success", StringComparison.Ordinal))
