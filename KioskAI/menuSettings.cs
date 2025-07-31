@@ -8,13 +8,17 @@ namespace wishKiosk
     {
         public int digitCount = 3;
         public string menuPath = string.Empty;
+        private wishKiosk? WishKiosk;
+        private settings? Settings;
 
-        public menuSettings()
+        public menuSettings(wishKiosk WishKiosk, settings Settings)
         {
             InitializeComponent();
             this.StartPosition = FormStartPosition.CenterParent;
             this.AcceptButton = okButton;
             this.CancelButton = cancelButton;
+            this.WishKiosk = WishKiosk;
+            this.Settings = Settings;
         }
 
         private void menuSettings_Load(object sender, EventArgs e)
@@ -119,6 +123,11 @@ namespace wishKiosk
         private void digitCntNumericUpDown_ValueChanged(object sender, EventArgs e)
         {
             digitCount = (int)digitCntNumericUpDown.Value;
+        }
+
+        private void menuSettings_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            WishKiosk.getData(Settings);
         }
     }
 }
