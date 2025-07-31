@@ -14,8 +14,8 @@ namespace wishKiosk
 	public partial class wishKiosk : Form
 	{
 		public float FontSize { get; set; } = 30f;
-		public PrintDocument printDoc = new PrintDocument();
-		private readonly Pen gridPen = new Pen(Color.Gray, 1) { DashStyle = System.Drawing.Drawing2D.DashStyle.Dot };
+		public PrintDocument printDoc = new();
+		private readonly Pen gridPen = new(Color.Gray, 1) { DashStyle = System.Drawing.Drawing2D.DashStyle.Dot };
 		private readonly Brush blackBrush = Brushes.Black;
 		private readonly int boxSize = 40;
 		private readonly int spacing = 20;
