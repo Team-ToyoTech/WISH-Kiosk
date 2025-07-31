@@ -22,6 +22,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.ML" Version="4.0.2" />
     <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.22.1" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3351.48" />
     <PackageReference Include="QRCoder" Version="1.6.0" />
     <PackageReference Include="SciSharp.TensorFlow.Redist" Version="2.16.0" />
     <PackageReference Include="ZXing.Net" Version="0.16.10" />

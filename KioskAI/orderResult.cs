@@ -9,6 +9,8 @@ namespace wishKiosk
         private readonly int[] price;
         private readonly List<int> menuOrderCount;
 
+        private int total = 0;
+
         public orderResult(
             Dictionary<int, string> menuMap,
             int[] menuNum,
@@ -90,7 +92,6 @@ namespace wishKiosk
         /// </summary>
         private void UpdateTotalLabel()
         {
-            int total = 0;
             for (int i = 0; i < menuNum.Length; i++)
             {
                 total += price[i] * menuOrderCount[i];
@@ -100,8 +101,17 @@ namespace wishKiosk
 
         private void OrderButton_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("주문이 완료되었습니다.");
-            this.Close();
+            payment Payment = new(total);
+            var res = Payment.ShowDialog();
+            if (res == DialogResult.OK)
+            {
+                MessageBox.Show("결제가 완료되었습니다.");
+                this.Close();
+            }
+            else
+            {
+                MessageBox.Show("결제를 실패하였습니다. 다시 진행해주세요");
+            }
         }
 
         private void CancelButton_Click(object sender, EventArgs e)
