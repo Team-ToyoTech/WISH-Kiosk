@@ -26,7 +26,7 @@ namespace wishKiosk
 		public string digitFilePath = "digit.dat";
 
 		private string[]? menu;
-		private int[]? price;
+		private int[] price;
 
 		public wishKiosk()
 		{
@@ -655,7 +655,9 @@ namespace wishKiosk
 			debugBitmap.Save("debug_output.png", System.Drawing.Imaging.ImageFormat.Png);
 			// MessageBox.Show("ROI가 표시된 이미지가 저장되었습니다."); // 디버깅용
 
-			foreach (var menuEntry in yTable)
+			List<int> orderCnts = new();
+
+            foreach (var menuEntry in yTable)
 			{
 				int menuNum = menuEntry.Key;
 				float y = menuEntry.Value;
@@ -691,17 +693,25 @@ namespace wishKiosk
 				}
 
 				orderCount = string.IsNullOrEmpty(orderCount) ? "0" : orderCount;
-				var msgBoxRes = MessageBox.Show($"{menuMap[menuNum]}를 {orderCount}개 주문했습니다.", "주문 확인", MessageBoxButtons.OKCancel);
-				if (msgBoxRes == DialogResult.OK)
-				{
-                    MessageBox.Show($"{menuMap[menuNum]} {orderCount}개, {price[menuNum] * int.Parse(orderCount)}원 주문이 완료되었습니다.");
-				}
-				else
-				{
-					MessageBox.Show("주문이 취소되었습니다.");
-                }
+				orderCnts.Add(int.Parse(orderCount));
+
+				// 디버깅용
+				// var msgBoxRes = MessageBox.Show($"{menuMap[menuNum]}를 {orderCount}개 주문했습니다.", "주문 확인", MessageBoxButtons.OKCancel); // 디버깅용
+				// if (msgBoxRes == DialogResult.OK)
+				// {
+                //     MessageBox.Show($"{menuMap[menuNum]} {orderCount}개, {price[menuNum - 1] * int.Parse(orderCount)}원 주문이 완료되었습니다.");
+				// }
+				// else
+				// {
+				// 	MessageBox.Show("주문이 취소되었습니다.");
+                // }
             }
-			bitmap.Dispose();
+
+            int[] menuNums = yTable.Keys.ToArray();
+            orderResult orderRes = new(menuMap, menuNums, price, orderCnts);
+			orderRes.Show();
+
+            bitmap.Dispose();
 		}
 
 		/// <summary>
