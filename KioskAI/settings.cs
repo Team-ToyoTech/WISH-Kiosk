@@ -8,7 +8,7 @@ namespace wishKiosk
         public PrintDocument printDoc = new();
         public int digitCount;
         public string? menuPath;
-        public wishKiosk WishKiosk;
+        public wishKiosk? WishKiosk;
 
         public settings()
         {
@@ -48,6 +48,10 @@ namespace wishKiosk
 
         private void settings_FormClosing(object sender, FormClosingEventArgs e)
         {
+            if (WishKiosk == null)
+            {
+                throw new Exception("WishKiosk 인스턴스가 설정되지 않았습니다."); // MessageBox로 표시 고려, 사용자에게 노출?
+            }
             WishKiosk.getDigitCnt(this);
         }
     }

@@ -13,18 +13,18 @@ namespace wishKiosk
 	{
 		public float FontSize { get; set; } = 30f;
 		public PrintDocument printDoc = new PrintDocument();
-		private Pen gridPen = new Pen(Color.Gray, 1) { DashStyle = System.Drawing.Drawing2D.DashStyle.Dot };
-		private Brush blackBrush = Brushes.Black;
-		private int boxSize = 40;
-		private int spacing = 20;
-		private int lineSpacing = 120;
+		private readonly Pen gridPen = new Pen(Color.Gray, 1) { DashStyle = System.Drawing.Drawing2D.DashStyle.Dot };
+		private readonly Brush blackBrush = Brushes.Black;
+		private readonly int boxSize = 40;
+		private readonly int spacing = 20;
+		private readonly int lineSpacing = 120;
 		private int currentMenuIndex = 0;
 		public int digitCount = 3; // 숫자 칸 개수
 		public string menuFilePath = "menu.csv";
 		public string digitFilePath = "digit.dat";
 
-		private string[] menu;
-		private int[] price;
+		private string?[] menu;
+		private int?[] price;
 
 		public wishKiosk()
 		{
@@ -121,7 +121,7 @@ namespace wishKiosk
 					Trimming = StringTrimming.EllipsisCharacter
 				};
 
-				e.Graphics.DrawString(menu[currentMenuIndex], font, blackBrush, textRect, format);
+				e.Graphics.DrawString(menu[currentMenuIndex] ?? "", font, blackBrush, textRect, format);
 
 				printedCount++;
 			}
@@ -135,6 +135,11 @@ namespace wishKiosk
 			font.Dispose();
 		}
 
+		/// <summary>
+		/// 주어진 텍스트 QR code 변환
+		/// </summary>
+		/// <param name="data">QR code contents</param>
+		/// <returns>QR code img</returns>
 		private Bitmap GenerateQRCode(string data)
 		{
 			QRCodeGenerator qrGen = new QRCodeGenerator();
@@ -162,86 +167,108 @@ namespace wishKiosk
 			Settings.Show();
 		}
 
+		/// <summary>
+		/// settings에서 digitCount 받아와서 digit.dat 에 기록
+		/// </summary>
+		/// <param name="Settings">settings Form</param>
 		public void getDigitCnt(settings Settings)
 		{
 			digitCount = Settings.digitCount;
-            if (!File.Exists(digitFilePath))
-            {
-                MessageBox.Show($"{digitFilePath} 파일이 존재하지 않습니다.");
-            }
-            else
-            {
-                File.WriteAllText(digitFilePath, digitCount.ToString());
-            }
-        }
+			if (!File.Exists(digitFilePath))
+			{
+				MessageBox.Show($"{digitFilePath} 파일이 존재하지 않습니다.");
+			}
+			else
+			{
+				File.WriteAllText(digitFilePath, digitCount.ToString());
+			}
+		}
 
-        public static Bitmap EnhanceContrast(Bitmap original)
-        {
-            Bitmap gray = new Bitmap(original.Width, original.Height);
-            for (int y = 0; y < original.Height; y++)
-            {
-                for (int x = 0; x < original.Width; x++)
-                {
-                    Color pixel = original.GetPixel(x, y);
-                    int luminance = (int)(0.299 * pixel.R + 0.587 * pixel.G + 0.114 * pixel.B);
-                    gray.SetPixel(x, y, Color.FromArgb(luminance, luminance, luminance));
-                }
-            }
+		/*
+		/// <summary>
+		/// 고대비 이미지로 변환 // 실행 시간 문제
+		/// </summary>
+		/// <param name="original">original image</param>
+		/// <returns>high contrast img</returns>
+		public static Bitmap EnhanceContrast(Bitmap original)
+		{
+			Bitmap gray = new Bitmap(original.Width, original.Height);
+			for (int y = 0; y < original.Height; y++)
+			{
+				for (int x = 0; x < original.Width; x++)
+				{
+					Color pixel = original.GetPixel(x, y);
+					int luminance = (int)(0.299 * pixel.R + 0.587 * pixel.G + 0.114 * pixel.B);
+					gray.SetPixel(x, y, Color.FromArgb(luminance, luminance, luminance));
+				}
+			}
 
-            int threshold = 128;
-            Bitmap binary = new Bitmap(gray.Width, gray.Height);
-            for (int y = 0; y < gray.Height; y++)
-            {
-                for (int x = 0; x < gray.Width; x++)
-                {
-                    Color grayPixel = gray.GetPixel(x, y);
-                    int val = grayPixel.R > threshold ? 255 : 0;
-                    binary.SetPixel(x, y, Color.FromArgb(val, val, val));
-                }
-            }
+			int threshold = 128;
+			Bitmap binary = new Bitmap(gray.Width, gray.Height);
+			for (int y = 0; y < gray.Height; y++)
+			{
+				for (int x = 0; x < gray.Width; x++)
+				{
+					Color grayPixel = gray.GetPixel(x, y);
+					int val = grayPixel.R > threshold ? 255 : 0;
+					binary.SetPixel(x, y, Color.FromArgb(val, val, val));
+				}
+			}
 
-            return binary;
-        }
+			return binary;
+		} */
 
-        public static Bitmap EnhanceContrastFast(Bitmap source, int threshold = 128)
-        {
-            Bitmap grayBmp = new Bitmap(source.Width, source.Height, PixelFormat.Format24bppRgb);
+		/// <summary>
+		/// 빠른 고대비 변환
+		/// </summary>
+		/// <param name="source">original img</param>
+		/// <param name="threshold">기준값</param>
+		/// <returns>high contrast img</returns>
+		public static Bitmap EnhanceContrastFast(Bitmap source, int threshold = 128)
+		{
+			Bitmap grayBmp = new Bitmap(source.Width, source.Height, PixelFormat.Format24bppRgb);
 
-            Rectangle rect = new Rectangle(0, 0, source.Width, source.Height);
-            BitmapData srcData = source.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
-            BitmapData dstData = grayBmp.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
+			Rectangle rect = new Rectangle(0, 0, source.Width, source.Height);
+			BitmapData srcData = source.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+			BitmapData dstData = grayBmp.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
 
-            unsafe
-            {
-                byte* srcPtr = (byte*)srcData.Scan0;
-                byte* dstPtr = (byte*)dstData.Scan0;
+			unsafe
+			{
+				byte* srcPtr = (byte*)srcData.Scan0;
+				byte* dstPtr = (byte*)dstData.Scan0;
 
-                int stride = srcData.Stride;
-                for (int y = 0; y < source.Height; y++)
-                {
-                    for (int x = 0; x < source.Width; x++)
-                    {
-                        byte b = srcPtr[y * stride + x * 3];
-                        byte g = srcPtr[y * stride + x * 3 + 1];
-                        byte r = srcPtr[y * stride + x * 3 + 2];
+				int stride = srcData.Stride;
+				for (int y = 0; y < source.Height; y++)
+				{
+					for (int x = 0; x < source.Width; x++)
+					{
+						byte b = srcPtr[y * stride + x * 3];
+						byte g = srcPtr[y * stride + x * 3 + 1];
+						byte r = srcPtr[y * stride + x * 3 + 2];
 
-                        byte gray = (byte)(0.299 * r + 0.587 * g + 0.114 * b);
+						byte gray = (byte)(0.299 * r + 0.587 * g + 0.114 * b);
 
-                        byte bin = (gray > threshold) ? (byte)255 : (byte)0;
+						byte bin = (gray > threshold) ? (byte)255 : (byte)0;
 
-                        dstPtr[y * stride + x * 3] = bin;     // B
-                        dstPtr[y * stride + x * 3 + 1] = bin; // G
-                        dstPtr[y * stride + x * 3 + 2] = bin; // R
-                    }
-                }
-            }
+						dstPtr[y * stride + x * 3] = bin;     // B
+						dstPtr[y * stride + x * 3 + 1] = bin; // G
+						dstPtr[y * stride + x * 3 + 2] = bin; // R
+					}
+				}
+			}
 
-            source.UnlockBits(srcData);
-            grayBmp.UnlockBits(dstData);
+			source.UnlockBits(srcData);
+			grayBmp.UnlockBits(dstData);
 
-            return grayBmp;
-        }
+			return grayBmp;
+		}
 
+		/// <summary>
+		/// 최소제곱법 이용하여 예측
+		/// </summary>
+		/// <param name="known"></param>
+		/// <param name="targetLine"></param>
+		/// <returns></returns>
 		public static float PredictLinear(Dictionary<int, float> known, int targetLine)
 		{
 			int n = known.Count;
@@ -252,235 +279,199 @@ namespace wishKiosk
 
 			float sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
 
-            foreach (var (line, x) in known)
-            {
-                sumX += line;
-                sumY += x;
-                sumXY += line * x;
-                sumXX += line * line;
-            }
+			foreach (var (line, x) in known)
+			{
+				sumX += line;
+				sumY += x;
+				sumXY += line * x;
+				sumXX += line * line;
+			}
 
-            float meanX = sumX / n;
-            float meanY = sumY / n;
+			float meanX = sumX / n;
+			float meanY = sumY / n;
 
-            float denominator = sumXX - n * meanX * meanX;
+			float denominator = sumXX - n * meanX * meanX;
 			if (denominator == 0)
 			{
 				return meanY;
 			}
 
-            float slope = (sumXY - n * meanX * meanY) / denominator;
-            float intercept = meanY - slope * meanX;
+			float slope = (sumXY - n * meanX * meanY) / denominator;
+			float intercept = meanY - slope * meanX;
 
-            return slope * targetLine + intercept;
-        }
+			return slope * targetLine + intercept;
+		}
 
-        public static void FillMissingXPoints(
+		/// <summary>
+		/// 인식되지 않은 X좌표 최소제곱법으로 보정
+		/// </summary>
+		/// <param name="xTable"></param>
+		/// <param name="xvisited"></param>
+		/// <param name="allLines"></param>
+		/// <param name="digitLevels"></param>
+		public static void FillMissingXPoints(
 			ref Dictionary<int, Dictionary<int, float>> xTable, 
 			HashSet<(int line, int digitLevel)> xvisited, 
 			int[] allLines, 
 			int[] digitLevels)
-        {
-            foreach (int digitLevel in digitLevels)
-            {
-                Dictionary<int, float> known = new();
-                foreach (int line in allLines)
-                {
-                    if (xTable.ContainsKey(line) && xTable[line].ContainsKey(digitLevel))
-                    {
-                        known[line] = xTable[line][digitLevel];
-                    }
-                }
-
-                foreach (int line in allLines)
-                {
-                    if (!xvisited.Contains((line, digitLevel)))
-                    {
-                        float predictedX = PredictLinear(known, line);
-
-						if (!xTable.ContainsKey(line))
-						{
-							xTable[line] = new Dictionary<int, float>();
-						}
-
-                        xTable[line][digitLevel] = predictedX;
-                        // Console.WriteLine($"Predicted X for line {line}, level {digitLevel}: {predictedX}");
-                    }
-                }
-            }
-        }
-
-        public static void FillMissingYPoints(ref Dictionary<int, float> yTable, HashSet<int> visitedLines, int[] allLines)
-        {
-            Dictionary<int, float> known = new();
-            foreach (int line in allLines)
-            {
-                if (visitedLines.Contains(line) && yTable.ContainsKey(line))
-                {
-                    known[line] = yTable[line];
-                }
-            }
-
-            foreach (int line in allLines)
-            {
-                if (!visitedLines.Contains(line) && !yTable.ContainsKey(line))
-                {
-                    float predictedY = PredictLinear(known, line);
-                    yTable[line] = predictedY;
-                    // Console.WriteLine($"Predicted Y for line {line}: {predictedY}");
-                }
-            }
-        }
-
-		public static void FillMissingXQrSizes(
-			ref Dictionary<(int line, int digitLevel), SizeF> xQrSizes, 
-			HashSet<(int line, int digitLevel)> visited, 
-			int[] allLines, 
-			int[] digitLevels)
 		{
-			foreach (int level in digitLevels)
+			foreach (int digitLevel in digitLevels)
 			{
-				List<float> knownWidths = new();
+				Dictionary<int, float> known = [];
 				foreach (int line in allLines)
 				{
-					if (visited.Contains((line, level)) && xQrSizes.TryGetValue((line, level), out var size))
+					if (xTable.ContainsKey(line) && xTable[line].ContainsKey(digitLevel))
 					{
-						knownWidths.Add(size.Width);
+						known[line] = xTable[line][digitLevel];
 					}
 				}
 
-				float avgWidth = knownWidths.Count > 0 ? knownWidths.Average() : 40;
-
 				foreach (int line in allLines)
 				{
-					var key = (line, level);
-					if (!xQrSizes.ContainsKey(key))
+					if (!xvisited.Contains((line, digitLevel)))
 					{
-						xQrSizes[key] = new SizeF(avgWidth, 40); // 높이는 Y에서 예측
+						float predictedX = PredictLinear(known, line);
+
+						if (!xTable.ContainsKey(line))
+						{
+							xTable[line] = [];
+						}
+
+						xTable[line][digitLevel] = predictedX;
+                        // Console.WriteLine($"Predicted X for line {line}, level {digitLevel}: {predictedX}"); // 디버깅용
+                    }
+                }
+			}
+		}
+
+		/// <summary>
+		/// 인식되지 않은 Y좌표 최소제곱법으로 보정
+		/// </summary>
+		/// <param name="yTable"></param>
+		/// <param name="visitedLines"></param>
+		/// <param name="allLines"></param>
+		public static void FillMissingYPoints(ref Dictionary<int, float> yTable, HashSet<int> visitedLines, int[] allLines)
+		{
+			Dictionary<int, float> known = new();
+			foreach (int line in allLines)
+			{
+				if (visitedLines.Contains(line) && yTable.ContainsKey(line))
+				{
+					known[line] = yTable[line];
+				}
+			}
+
+			foreach (int line in allLines)
+			{
+				if (!visitedLines.Contains(line) && !yTable.ContainsKey(line))
+				{
+					float predictedY = PredictLinear(known, line);
+					yTable[line] = predictedY;
+                    // Console.WriteLine($"Predicted Y for line {line}: {predictedY}"); // 디버깅용
+                }
+            }
+		}
+
+		/// <summary>
+		/// X좌표와 Y좌표를 모두 최소제곱법으로 보정
+		/// </summary>
+		/// <param name="xTable">line -> digitLevel -> X좌표</param>
+		/// <param name="yTable">line -> Y좌표</param>
+		/// <param name="allLines">존재해야 하는 모든 줄 번호</param>
+		/// <param name="digitLevels">자리수 인덱스 목록 (0=백, 1=십, 2=일)</param>
+		public void FillMissingXYWithLeastSquares(
+			ref Dictionary<int, Dictionary<int, float>> xTable,
+			ref Dictionary<int, float> yTable,
+			int[] allLines,
+			int[] digitLevels
+		)
+		{
+			// Y좌표 보정
+			var yPts = yTable.Where(kv => allLines.Contains(kv.Key)).ToList();
+			if (yPts.Count >= 2)
+			{
+				float sumX = yPts.Sum(p => p.Key);
+				float sumY = yPts.Sum(p => p.Value);
+				float sumXX = yPts.Sum(p => p.Key * p.Key);
+				float sumXY = yPts.Sum(p => p.Key * p.Value);
+				int n = yPts.Count;
+
+				float slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+				float intercept = (sumY - slope * sumX) / n;
+
+				foreach (var line in allLines)
+				{
+					if (!yTable.ContainsKey(line))
+					{
+						yTable[line] = slope * line + intercept;
+					}
+				}
+			}
+
+			// X좌표 보정
+			foreach (var digitLevel in digitLevels)
+			{
+				var pts = new List<(int line, float x)>();
+
+				foreach (var line in allLines)
+				{
+					if (xTable.ContainsKey(line) && xTable[line].ContainsKey(digitLevel))
+					{
+						pts.Add((line, xTable[line][digitLevel]));
+					}
+				}
+
+				if (pts.Count >= 2)
+				{
+					// 최소제곱법 계산
+					float sumX = pts.Sum(p => p.line);
+					float sumY = pts.Sum(p => p.x);
+					float sumXX = pts.Sum(p => p.line * p.line);
+					float sumXY = pts.Sum(p => p.line * p.x);
+					int n = pts.Count;
+
+					float slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+					float intercept = (sumY - slope * sumX) / n;
+
+					// 누락된 X 좌표 채우기
+					foreach (var line in allLines)
+					{
+						if (!xTable.ContainsKey(line))
+							xTable[line] = new Dictionary<int, float>();
+
+						if (!xTable[line].ContainsKey(digitLevel))
+						{
+							float predictedX = slope * line + intercept;
+							xTable[line][digitLevel] = predictedX;
+						}
+					}
+				}
+			}
+
+			// Y좌표 보정 반복하여 정확도 개선
+			yPts = yTable.Where(kv => allLines.Contains(kv.Key)).ToList();
+			if (yPts.Count >= 2)
+			{
+				float sumX = yPts.Sum(p => p.Key);
+				float sumY = yPts.Sum(p => p.Value);
+				float sumXX = yPts.Sum(p => p.Key * p.Key);
+				float sumXY = yPts.Sum(p => p.Key * p.Value);
+				int n = yPts.Count;
+
+				float slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+				float intercept = (sumY - slope * sumX) / n;
+
+				foreach (var line in allLines)
+				{
+					if (!yTable.ContainsKey(line))
+					{
+						yTable[line] = slope * line + intercept;
 					}
 				}
 			}
 		}
 
-        public static void FillMissingYQrSizes(ref Dictionary<int, SizeF> yQrSizes, HashSet<int> visitedLines, int[] allLines)
-        {
-            List<float> knownHeights = new();
-            foreach (int line in allLines)
-            {
-				if (visitedLines.Contains(line) && yQrSizes.TryGetValue(line, out var size))
-				{
-					knownHeights.Add(size.Height);
-				}
-            }
-
-            float avgHeight = knownHeights.Count > 0 ? knownHeights.Average() : 40;
-
-            foreach (int line in allLines)
-            {
-				if (!yQrSizes.ContainsKey(line))
-				{
-					yQrSizes[line] = new SizeF(40, avgHeight); // 너비는 X에서 예측
-				}
-            }
-        }
-
-        public static void NormalizeXPositions(
-			ref Dictionary<int, Dictionary<int, float>> xTable, 
-			List<int> digitLevels, 
-			float expectedSpacing = 60f)
-        {
-            foreach (var line in xTable.Keys.ToList())
-            {
-                var entries = xTable[line];
-                if (entries.Count == 1 || entries.Count == 2)
-                {
-                    var sorted = entries.OrderBy(kv => kv.Key).ToList();
-
-                    var baseLevel = sorted[0].Key;
-                    var baseX = sorted[0].Value;
-
-                    foreach (int level in digitLevels)
-                    {
-                        if (!entries.ContainsKey(level))
-                        {
-                            int offset = digitLevels.IndexOf(level) - digitLevels.IndexOf(baseLevel);
-                            float newX = baseX + offset * expectedSpacing;
-
-                            entries[level] = newX;
-                        }
-                    }
-
-                    xTable[line] = entries.OrderBy(kv => kv.Key).ToDictionary(kv => kv.Key, kv => kv.Value);
-                }
-            }
-        }
-
-        public static void NormalizeXQrSizes(ref Dictionary<(int, int), SizeF> xQrSizes, float fallbackWidth = 40)
-        {
-			if (xQrSizes.Count == 0)
-			{
-				return;
-			}
-
-            float avg = xQrSizes.Values.Average(s => s.Width);
-            float min = xQrSizes.Values.Min(s => s.Width);
-            float max = xQrSizes.Values.Max(s => s.Width);
-
-            foreach (var key in xQrSizes.Keys.ToList())
-            {
-                var s = xQrSizes[key];
-                if (s.Width < min * 0.8f || s.Width > max * 1.2f)
-                {
-                    xQrSizes[key] = new SizeF(avg, s.Height); // width 평균으로 보정
-                }
-            }
-        }
-
-        public static void AlignXSpacingUniformly(
-			ref Dictionary<int, Dictionary<int, float>> xTable,
-			List<int> digitLevels,
-			float? spacingOverride = null)
-        {
-            digitLevels.Sort();
-
-            foreach (var line in xTable.Keys.ToList())
-            {
-                var levels = xTable[line];
-
-                // 제일 왼쪽 숫자 위치 찾기
-                float left = levels.Values.Min();
-
-                // 간격 계산
-                float spacing;
-                if (spacingOverride.HasValue)
-                {
-                    spacing = spacingOverride.Value;
-                }
-                else
-                {
-                    if (levels.Count >= 2)
-                    {
-                        var ordered = levels.OrderBy(kv => kv.Value).ToList();
-                        spacing = (ordered.Last().Value - ordered.First().Value) / (digitLevels.Count - 1);
-                    }
-                    else
-                    {
-                        spacing = 60f; // 기본 간격
-                    }
-                }
-
-                // 균등 간격 재배치
-                for (int i = 0; i < digitLevels.Count; i++)
-                {
-                    int level = digitLevels[i];
-                    levels[level] = left + i * spacing;
-                }
-
-                xTable[line] = levels;
-            }
-        }
-
-        private void scanButton_Click(object sender, EventArgs e)
+		private void scanButton_Click(object sender, EventArgs e)
 		{
 			Bitmap? bitmap = ScanWithWia(); // WIA 스캐너로 이미지 가져오기, nullable
 			if (bitmap == null)
@@ -490,42 +481,42 @@ namespace wishKiosk
 
 			bitmap = EnhanceContrastFast(bitmap);
 
-            var qrData = new HashSet<(string text, PointF point, SizeF size)>();
-            var seenTexts = new HashSet<string>(); // 중복 텍스트 체크
-            
+			var qrData = new HashSet<(string text, PointF point, SizeF size)>();
+			var seenTexts = new HashSet<string>(); // 중복 텍스트 제거
+			
 			for (int i = 0; i < 5; i++)
-            {
-                var qrResult = ExtractQrCodesWithSize(bitmap);
-                foreach (var qr in qrResult)
-                {
-                    if (!seenTexts.Contains(qr.text))
-                    {
-                        seenTexts.Add(qr.text);
-                        qrData.Add(qr);
-                    }
-                }
-            }
+			{
+				var qrResult = ExtractQrCodesWithSize(bitmap);
+				foreach (var qr in qrResult)
+				{
+					if (!seenTexts.Contains(qr.text))
+					{
+						seenTexts.Add(qr.text);
+						qrData.Add(qr);
+					}
+				}
+			}
 
-            var xTable = new Dictionary<int, Dictionary<int, float>>(); // line -> digitLevel -> x
+			var xTable = new Dictionary<int, Dictionary<int, float>>(); // line -> digitLevel -> x
 			var yTable = new Dictionary<int, float>(); // line -> y
 			var menuMap = new Dictionary<int, string>();
 			for (int i = 1; i <= menu.Length; i++)
 			{
-				menuMap[i] = menu[i - 1];
+				menuMap[i] = menu[i - 1] ?? "";
 			}
 
 			var xvisited = new HashSet<(int x, int y)>();
 
-            Bitmap debugBitmap = new Bitmap(bitmap);
+			Bitmap debugBitmap = new Bitmap(bitmap);
 			Graphics g = Graphics.FromImage(debugBitmap);
 			Pen roiPen = new Pen(Color.Red, 2);
 
 			Dictionary<(int menuNum, int level), SizeF> xQrSizes = new();
 			Dictionary<int, SizeF> yQrSizes = new();
-
+			List<SizeF> allsize = new List<SizeF>();
 			foreach (var (text, point, size) in qrData)
 			{
-				if (text.Contains("-"))
+				if (text.Contains('-'))
 				{
 					var parts = text.Split('-');
 					if (int.TryParse(parts[0], out int line) && int.TryParse(parts[1], out int digitLevel))
@@ -534,12 +525,13 @@ namespace wishKiosk
 						{
 							xTable[line] = new Dictionary<int, float>();
 							xvisited.Add((line, digitLevel));
-                        }
+						}
 						xTable[line][digitLevel] = point.X;
 						xQrSizes[(line, digitLevel)] = size;
+						allsize.Add(size);
 					}
 				}
-				else if (text.StartsWith("m"))
+				else if (text.StartsWith('m'))
 				{
 					if (int.TryParse(text.Substring(1), out int menuNum))
 					{
@@ -549,28 +541,32 @@ namespace wishKiosk
 				}
 			}
 
-            int[] allLines = menuMap.Keys.ToArray();
-            var yVisited = new HashSet<int>(yTable.Keys);
-            FillMissingYPoints(ref yTable, yVisited, allLines);
+			int[] allLines = menuMap.Keys.ToArray();
+			var yVisited = new HashSet<int>(yTable.Keys);
+			FillMissingYPoints(ref yTable, yVisited, allLines);
 
-            allLines = yTable.Keys.ToArray(); // 메뉴 번호 기준
-			List<int> digitLevels = new List<int>();
+			allLines = yTable.Keys.ToArray(); // 메뉴 번호 기준
+			List<int> digitLevels = [];
 			for(int i = 1; i <= digitCount; i++)
 			{
 				digitLevels.Add((int)Math.Pow(10, digitCount - i));
-            }
+			}
 
-            FillMissingXPoints(ref xTable, xvisited, allLines, digitLevels.ToArray());
+			FillMissingXPoints(ref xTable, xvisited, allLines, digitLevels.ToArray());
 
-            FillMissingXQrSizes(ref xQrSizes, xvisited, allLines, digitLevels.ToArray());
-            FillMissingYQrSizes(ref yQrSizes, yVisited, allLines);
+			FillMissingXYWithLeastSquares(
+				ref xTable,
+				ref yTable,
+				allLines,
+				digitLevels.ToArray()
+			);
 
-
-            AlignXSpacingUniformly(ref xTable, digitLevels); // 균등 간격 강제
-            NormalizeXPositions(ref xTable, digitLevels);    // 소수점 보정 / 좌측 정렬
-            NormalizeXQrSizes(ref xQrSizes);                 // 크기 비율 정리
-
-            foreach (var menuEntry in yTable)
+			List<int> leveling = new List<int>();
+			for(int i = 1; i <= digitCount; i++)
+			{
+				leveling.Add((int)Math.Pow(10, digitCount - i));
+			}
+			foreach (var menuEntry in yTable)
 			{
 				int menuNum = menuEntry.Key;
 				float y = menuEntry.Value;
@@ -582,14 +578,14 @@ namespace wishKiosk
 
 				if (xTable.ContainsKey(menuNum))
 				{
-					foreach (int level in new[] { 100, 10, 1 })
+					foreach (int level in leveling)
 					{
 						if (xTable[menuNum].ContainsKey(level))
 						{
 							float x = xTable[menuNum][level];
 
-							float qrWidth = xQrSizes.TryGetValue((menuNum, level), out var sizeX) ? sizeX.Width : 40;
-							float qrHeight = yQrSizes.TryGetValue(menuNum, out var sizeY) ? sizeY.Height : 40;
+							float qrWidth = xQrSizes.TryGetValue((menuNum, level), out var sizeX) ? sizeX.Width : (allsize.Sum(x => x.Width)/allsize.Count);
+							float qrHeight = yQrSizes.TryGetValue(menuNum, out var sizeY) ? sizeY.Height : (allsize.Sum(x => x.Height) / allsize.Count);
 
 							Rectangle roi = new Rectangle(
 								(int)(x - qrWidth),
@@ -606,9 +602,9 @@ namespace wishKiosk
 			}
 
 			debugBitmap.Save("debug_output.png", System.Drawing.Imaging.ImageFormat.Png);
-			// MessageBox.Show("ROI가 표시된 이미지가 저장되었습니다.");
+            // MessageBox.Show("ROI가 표시된 이미지가 저장되었습니다."); // 디버깅용
 
-			foreach (var menuEntry in yTable)
+            foreach (var menuEntry in yTable)
 			{
 				int menuNum = menuEntry.Key;
 				float y = menuEntry.Value;
@@ -621,13 +617,13 @@ namespace wishKiosk
 				string orderCount = "";
 				if (xTable.ContainsKey(menuNum))
 				{
-					foreach (int level in new[] { 100, 10, 1 })
+					foreach (int level in leveling)
 					{
 						if (xTable[menuNum].ContainsKey(level))
 						{
 							float x = xTable[menuNum][level];
-							float qrWidth = xQrSizes.TryGetValue((menuNum, level), out var xSize) ? xSize.Width : 40;
-							float qrHeight = yQrSizes.TryGetValue(menuNum, out var ySize) ? ySize.Height : 40;
+							float qrWidth = xQrSizes.TryGetValue((menuNum, level), out var sizeX) ? sizeX.Width : (allsize.Sum(x => x.Width) / allsize.Count);
+							float qrHeight = yQrSizes.TryGetValue(menuNum, out var sizeY) ? sizeY.Height : (allsize.Sum(x => x.Height) / allsize.Count);
 
 							Rectangle roi = new Rectangle(
 								(int)(x - qrWidth),
@@ -637,8 +633,8 @@ namespace wishKiosk
 							);
 
 							string digit = OCRDigit(bitmap, roi);
-							// MessageBox.Show($"OCR result at ({x}, {y}) = '{digit}'");
-							orderCount += digit;
+                            // MessageBox.Show($"OCR result at ({x}, {y}) = '{digit}'"); // 디버깅용
+                            orderCount += digit;
 						}
 					}
 				}
@@ -649,6 +645,11 @@ namespace wishKiosk
 			bitmap.Dispose();
 		}
 
+		/// <summary>
+		/// 이미지에서 QR 코드 추출 및 위치 반환
+		/// </summary>
+		/// <param name="bitmap">img</param>
+		/// <returns>QR code locations</returns>
 		public static List<(string text, PointF point, SizeF size)> ExtractQrCodesWithSize(Bitmap bitmap)
 		{
 			var results = new List<(string, PointF, SizeF)>();
@@ -672,12 +673,16 @@ namespace wishKiosk
 					}
 				}
 			}
-
 			return results;
 		}
 
 		static int i = 0;
-
+		/// <summary>
+		/// ROI를 이미지 크기에 맞게 조정
+		/// </summary>
+		/// <param name="roi"></param>
+		/// <param name="bitmapSize">img size</param>
+		/// <returns></returns>
 		static Rectangle ClampROI(Rectangle roi, Size bitmapSize)
 		{
 			int x = Math.Max(0, roi.X);
@@ -688,6 +693,13 @@ namespace wishKiosk
 			return new Rectangle(x, y, width, height);
 		}
 
+		static int t = 0;
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="bitmap"></param>
+		/// <param name="roi"></param>
+		/// <returns></returns>
 		static string OCRDigit(Bitmap bitmap, Rectangle roi)
 		{
 			using (var memoryStream = new MemoryStream())
@@ -704,6 +716,7 @@ namespace wishKiosk
 					Bitmap preprocessed = PreprocessImage(cropped);
 
 					preprocessed.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Png);
+					preprocessed.Save($"ocr_debug_{t++}.png", System.Drawing.Imaging.ImageFormat.Png);
 					memoryStream.Position = 0;
 
 					var imageBytes = memoryStream.ToArray();
@@ -722,6 +735,11 @@ namespace wishKiosk
 			}
 		}
 
+		/// <summary>
+		/// 이미지 흑백 변환
+		/// </summary>
+		/// <param name="input">img</param>
+		/// <returns>preprocessed img</returns>
 		static Bitmap PreprocessImage(Bitmap input)
 		{
 			Bitmap result = new Bitmap(input.Width, input.Height);
@@ -827,7 +845,7 @@ namespace wishKiosk
 			// 메뉴, 가격 가져오기
 			if (!File.Exists(menuFilePath))
 			{
-				MessageBox.Show("menu.csv 파일이 존재하지 않습니다.");
+				MessageBox.Show($"{menuFilePath} 파일이 존재하지 않습니다.");
 				return;
 			}
 
@@ -854,117 +872,123 @@ namespace wishKiosk
 			}
 
 			menu = menuList.ToArray();
-			price = priceList.ToArray();
+			price = priceList.Select(p => (int?)p).ToArray();
 		}
 
-        private void infoButton_Click(object sender, EventArgs e)
-        {
-            ShowMid(
-                "Project INFO\n\n" +
-                "Made By Team ToyoTech\n" +
-                "www.toyotech.dev\n\n" +
-                "WI:SH KIOSK\n" +
-                "Write It: Scan && Handle\n" +
-                "www.github.com/Team-ToyoTech/WISH-Kiosk\n", "WISH INFO");
-        }
+		private void infoButton_Click(object sender, EventArgs e)
+		{
+			ShowMid(
+				"Project INFO\n\n" +
+				"Made By Team ToyoTech\n" +
+				"www.toyotech.dev\n\n" +
+				"WI:SH KIOSK\n" +
+				"Write It: Scan && Handle\n" +
+				"www.github.com/Team-ToyoTech/WISH-Kiosk\n", "WISH INFO");
+		}
 
-		// 가운데 정렬, 링크 포함 MessageBox
-        public static void ShowMid(string text, string caption = "")
-        {
-            using (Form dlg = new Form())
-            {
-                dlg.Text = caption;
-                dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
-                dlg.StartPosition = FormStartPosition.CenterParent;
-                dlg.MaximizeBox = dlg.MinimizeBox = false;
-                dlg.ShowInTaskbar = false;
-                dlg.AutoSize = true;
-                dlg.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-                dlg.Padding = new Padding(10);
+		/// <summary>
+		/// 가운데 정렬, 링크 포함된 MessageBox
+		/// </summary>
+		/// <param name="text">contents</param>
+		/// <param name="caption">title</param>
+		private static void ShowMid(string text, string caption = "")
+		{
+			using (Form dlg = new Form())
+			{
+				dlg.Text = caption;
+				dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
+				dlg.StartPosition = FormStartPosition.CenterParent;
+				dlg.MaximizeBox = dlg.MinimizeBox = false;
+				dlg.ShowInTaskbar = false;
+				dlg.AutoSize = true;
+				dlg.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+				dlg.Padding = new Padding(10);
 
-                dlg.Font = new Font(dlg.Font.FontFamily, 12f, FontStyle.Regular);
+				dlg.Font = new Font(dlg.Font.FontFamily, 12f, FontStyle.Regular);
 
-                FlowLayoutPanel contentPanel = BuildContentPanel(text);
-                contentPanel.Anchor = AnchorStyles.None;
+				FlowLayoutPanel contentPanel = BuildContentPanel(text);
+				contentPanel.Anchor = AnchorStyles.None;
 
-                var layout = new TableLayoutPanel
-                {
-                    AutoSize = true,
-                    AutoSizeMode = AutoSizeMode.GrowAndShrink,
-                    ColumnCount = 1,
-                    RowCount = 1,
-                    Dock = DockStyle.Fill
-                };
-                layout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-                layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-                layout.Controls.Add(contentPanel, 0, 0);
+				var layout = new TableLayoutPanel
+				{
+					AutoSize = true,
+					AutoSizeMode = AutoSizeMode.GrowAndShrink,
+					ColumnCount = 1,
+					RowCount = 1,
+					Dock = DockStyle.Fill
+				};
+				layout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+				layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+				layout.Controls.Add(contentPanel, 0, 0);
 
-                dlg.Controls.Add(layout);
-                dlg.ShowDialog();
-            }
-        }
+				dlg.Controls.Add(layout);
+				dlg.ShowDialog();
+			}
+		}
 
-        // 텍스트 -> Label / URL -> LinkLabel
-        private static FlowLayoutPanel BuildContentPanel(string text)
-        {
-            var panel = new FlowLayoutPanel
-            {
-                FlowDirection = FlowDirection.TopDown,
-                AutoSize = true,
-                AutoSizeMode = AutoSizeMode.GrowAndShrink,
-                WrapContents = false,
-                Dock = DockStyle.None,
-                Margin = new Padding(0)
-            };
+		/// <summary>
+		/// text to labels, links to linkLabels
+		/// </summary>
+		/// <param name="text">contents</param>
+		/// <returns></returns>
+		private static FlowLayoutPanel BuildContentPanel(string text)
+		{
+			var panel = new FlowLayoutPanel
+			{
+				FlowDirection = FlowDirection.TopDown,
+				AutoSize = true,
+				AutoSizeMode = AutoSizeMode.GrowAndShrink,
+				WrapContents = false,
+				Dock = DockStyle.None,
+				Margin = new Padding(0)
+			};
 
-            foreach (var raw in text.Split('\n'))
-            {
-                string line = raw.TrimEnd('\r');
-                if (string.IsNullOrWhiteSpace(line))
-                {
-                    panel.Controls.Add(new Label { AutoSize = true, Height = 6 });
-                    continue;
-                }
+			foreach (var raw in text.Split('\n'))
+			{
+				string line = raw.TrimEnd('\r');
+				if (string.IsNullOrWhiteSpace(line))
+				{
+					panel.Controls.Add(new Label { AutoSize = true, Height = 6 });
+					continue;
+				}
 
-                bool isUrl = line.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
-                              line.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ||
-                              line.StartsWith("www.", StringComparison.OrdinalIgnoreCase);
+				bool isUrl = line.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || 
+					line.StartsWith("https://", StringComparison.OrdinalIgnoreCase) || 
+					line.StartsWith("www.", StringComparison.OrdinalIgnoreCase);
 
-                if (isUrl)
-                {
-                    string url = line.StartsWith("http", StringComparison.OrdinalIgnoreCase)
-                                 ? line
-                                 : $"https://{line}";
+				if (isUrl)
+				{
+					string url = line.StartsWith("http", StringComparison.OrdinalIgnoreCase) ? line : $"https://{line}";
 
-                    var link = new LinkLabel
-                    {
-                        Text = line,
-                        AutoSize = true,
-                        TextAlign = ContentAlignment.MiddleCenter,
-                        LinkBehavior = LinkBehavior.AlwaysUnderline,
-                        Margin = new Padding(0, 2, 0, 2)
-                    };
-                    link.LinkClicked += (_, __) =>
-                    {
-                        Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
-                    };
-                    link.Anchor = AnchorStyles.None;
-                    panel.Controls.Add(link);
-                }
-                else
-                {
-                    panel.Controls.Add(new Label
-                    {
-                        Text = line,
-                        AutoSize = true,
-                        TextAlign = ContentAlignment.MiddleCenter,
-                        MaximumSize = new Size(400, 0),
-                        Margin = new Padding(0, 2, 0, 2),
-                        Anchor = AnchorStyles.None
-                    });
-                }
-            }
-            return panel;
-        }
-    }
+					var link = new LinkLabel
+					{
+						Text = line,
+						AutoSize = true,
+						TextAlign = ContentAlignment.MiddleCenter,
+						LinkBehavior = LinkBehavior.AlwaysUnderline,
+						Margin = new Padding(0, 2, 0, 2)
+					};
+					link.LinkClicked += (_, __) =>
+					{
+						Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+					};
+					link.Anchor = AnchorStyles.None;
+					panel.Controls.Add(link);
+				}
+				else
+				{
+					panel.Controls.Add(new Label
+					{
+						Text = line,
+						AutoSize = true,
+						TextAlign = ContentAlignment.MiddleCenter,
+						MaximumSize = new Size(400, 0),
+						Margin = new Padding(0, 2, 0, 2),
+						Anchor = AnchorStyles.None
+					});
+				}
+			}
+			return panel;
+		}
+	}
 }
