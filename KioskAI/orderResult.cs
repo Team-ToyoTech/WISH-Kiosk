@@ -9,7 +9,7 @@ namespace wishKiosk
 		private readonly int[] price;
 		private readonly List<int> menuOrderCount;
 		private Dictionary<string, int> totalOrderResult = [];
-		private int orderNum = 0;
+		private uint orderNum = 0;
 		private readonly Dictionary<string, int> menuPrice = [];
 
         private int total = 0;
@@ -116,7 +116,7 @@ namespace wishKiosk
 			if (res == DialogResult.OK)
 			{
 				MessageBox.Show("주문이 완료되었습니다.");
-				if (int.TryParse(Payment.orderNum, out int orderNumber))
+				if (uint.TryParse(Payment.orderNum?.ToString(), out uint orderNumber))
 				{
 					orderNum = orderNumber;
                 }
