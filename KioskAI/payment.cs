@@ -191,7 +191,7 @@ namespace wishKiosk
             float left = e.MarginBounds.Left;
             float top = e.MarginBounds.Top;
             float width = e.MarginBounds.Width;
-            float lineHeight = FontSize + 6;
+            float lineHeight = FontSize + 10;
 
             // 타이틀
             using (var titleFont = new Font("Arial", FontSize + 8, FontStyle.Bold))
