@@ -93,7 +93,8 @@ namespace wishKiosk
 		{
 			printDoc.PrintPage += printDocument_PrintPage;
 			printDoc.Print();
-		}
+            printDoc.PrintPage -= printDocument_PrintPage;
+        }
 
 		/// <summary>
 		/// 프린트할 페이지 제작

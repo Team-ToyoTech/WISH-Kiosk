@@ -138,12 +138,14 @@ namespace wishKiosk
                             // 영수증 출력
                             printDoc.PrintPage += printDocument_PrintReceiptPage;
                             printDoc.Print();
+                            printDoc.PrintPage -= printDocument_PrintReceiptPage;
                         }
                         else
                         {
                             // 주문 번호만 출력
                             printDoc.PrintPage += printDocument_PrintOrderNumPage;
                             printDoc.Print();
+                            printDoc.PrintPage -= printDocument_PrintOrderNumPage;
                         }
                         DialogResult = DialogResult.OK;
                         this.Close();
