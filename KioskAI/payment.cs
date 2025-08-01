@@ -58,14 +58,29 @@ namespace wishKiosk
         /// <returns></returns>
 		private async Task StartPaymentAsync()
 		{
-			var body = new { amount = totalPrice };
-			var res = await http.PostAsJsonAsync("http://localhost:4000/pay", body); // 실제 서버 주소로 변경 필요
-            res.EnsureSuccessStatusCode();
+            try
+            {
+                var body = new { amount = totalPrice };
+                var res = await http.PostAsJsonAsync("http://localhost:4000/pay", body); // 실제 서버 주소로 변경 필요
+                res.EnsureSuccessStatusCode();
 
-			var json = await res.Content.ReadFromJsonAsync<JsonElement>();
-			orderId = json.GetProperty("redirectId").GetString()!;
+                var json = await res.Content.ReadFromJsonAsync<JsonElement>();
+                orderId = json.GetProperty("redirectId").GetString()!;
 
-			paymentView.Source = new Uri("http://localhost:4000/checkout/" + orderId); // 실제 서버 주소로 변경 필요
+                paymentView.Source = new Uri("http://localhost:4000/checkout/" + orderId); // 실제 서버 주소로 변경 필요
+            }
+            catch (HttpRequestException ex)
+            {
+                MessageBox.Show("결제 시작 실패: " + ex.Message);
+                DialogResult = DialogResult.Abort;
+                this.Close();
+            }
+            catch (JsonException ex)
+            {
+                MessageBox.Show("응답 처리 오류: " + ex.Message);
+                DialogResult = DialogResult.Abort;
+                this.Close();
+            }
         }
 
         /// <summary>
@@ -74,11 +89,26 @@ namespace wishKiosk
         /// <returns></returns>
         private async Task SendSelectedMenu()
         {
-            var res = await http.PostAsJsonAsync("http://localhost:4000/order/add/" + orderId, orderItems);
-            res.EnsureSuccessStatusCode();
+            try
+            {
+                var res = await http.PostAsJsonAsync("http://localhost:4000/order/add/" + orderId, orderItems);
+                res.EnsureSuccessStatusCode();
 
-            var json = await res.Content.ReadFromJsonAsync<JsonElement>();
-            orderNum = json.GetProperty("orderNumber").GetUInt32()!;
+                var json = await res.Content.ReadFromJsonAsync<JsonElement>();
+                orderNum = json.GetProperty("orderNumber").GetUInt32()!;
+            }
+            catch (HttpRequestException ex)
+            {
+                MessageBox.Show("주문 정보 전송 실패: " + ex.Message);
+                DialogResult = DialogResult.Abort;
+                this.Close();
+            }
+            catch (JsonException ex)
+            {
+                MessageBox.Show("응답 처리 오류: " + ex.Message);
+                DialogResult = DialogResult.Abort;
+                this.Close();
+            }
         }
 
         /// <summary>
@@ -94,45 +124,64 @@ namespace wishKiosk
 
 			while (true)
 			{
-				var res = await http.GetFromJsonAsync<PaymentResponse>("http://localhost:4000/ispaying/" + orderId); // 실제 서버 주소로 변경 필요
-                if (res?.status == "paid")
-				{
-					MessageBox.Show("결제 완료");
+                try
+                {
+                    var res = await http.GetFromJsonAsync<PaymentResponse>("http://localhost:4000/ispaying/" + orderId); // 실제 서버 주소로 변경 필요
+                    if (res?.status == "paid")
+                    {
+                        MessageBox.Show("결제 완료");
 
-                    var msgRes = MessageBox.Show("영수증을 출력하시겠습니까?", "주문 완료", MessageBoxButtons.YesNo);
+                        var msgRes = MessageBox.Show("영수증을 출력하시겠습니까?", "주문 완료", MessageBoxButtons.YesNo);
 
 
-					if (msgRes == DialogResult.Yes)
-					{
-                        // 영수증 출력
-                        printDoc.PrintPage += printDocument_PrintReceiptPage;
-                        printDoc.Print();
+                        if (msgRes == DialogResult.Yes)
+                        {
+                            // 영수증 출력
+                            printDoc.PrintPage += printDocument_PrintReceiptPage;
+                            printDoc.Print();
+                        }
+                        else
+                        {
+                            // 주문 번호만 출력
+                            printDoc.PrintPage += printDocument_PrintOrderNumPage;
+                            printDoc.Print();
+                        }
+                        DialogResult = DialogResult.OK;
+                        await SendSelectedMenu(); // 주문 정보 서버에 전송
+                        this.Close();
+                        e.Cancel = false;
+                        return;
                     }
-					else
-					{
-                        // 주문 번호만 출력
-                        printDoc.PrintPage += printDocument_PrintOrderNumPage;
-                        printDoc.Print();
+                    else if (res?.status == "failed")
+                    {
+                        MessageBox.Show("결제 실패");
+                        DialogResult = DialogResult.Abort;
+                        this.Close();
+                        e.Cancel = true;
+                        return;
                     }
-					DialogResult = DialogResult.OK;
-                    await SendSelectedMenu(); // 주문 정보 서버에 전송
+                    else
+                    {
+                        // 결제 진행 중
+                    }
+                }
+                catch (HttpRequestException ex)
+                {
+                    MessageBox.Show("서버 연결 실패: " + ex.Message);
+                    DialogResult = DialogResult.Abort;
                     this.Close();
-					e.Cancel = false;
-					return;
-				}
-				else if (res?.status == "failed")
-				{
-					MessageBox.Show("결제 실패");
-					DialogResult = DialogResult.Abort;
-					this.Close();
-					e.Cancel = true;
-					return;
-				}
-				else
-				{
-					// 결제 진행 중
-				}
-				await Task.Delay(500); // 0.5초 대기
+                    e.Cancel = true;
+                    return;
+                }
+                catch (JsonException ex)
+                {
+                    MessageBox.Show("응답 처리 오류: " + ex.Message);
+                    DialogResult = DialogResult.Abort;
+                    this.Close();
+                    e.Cancel = true;
+                    return;
+                }
+                await Task.Delay(500); // 0.5초 대기
 			}
 		}
 
@@ -147,7 +196,7 @@ namespace wishKiosk
             float left = e.MarginBounds.Left;
             float top = e.MarginBounds.Top;
             float width = e.MarginBounds.Width;
-            float lineHeight = FontSize + 6;
+            float lineHeight = FontSize + 10;
 
             // 타이틀
             using (var titleFont = new Font("Arial", FontSize + 8, FontStyle.Bold))
@@ -167,7 +216,7 @@ namespace wishKiosk
                 y += lineHeight;
 
                 g.DrawLine(Pens.Black, left, y, left + width, y);
-                y += 4;
+                y += lineHeight * 3;
 
                 // 주문번호
                 using (var orderFont = new Font("Arial", FontSize + 4, FontStyle.Bold))
@@ -253,7 +302,7 @@ namespace wishKiosk
                 DrawLabelValue(g, font, left, width, y, "결제 금액", (totalPrice + (int)(totalPrice * 0.1)).ToString("#,0"));
                 y += lineHeight;
                 DrawLabelValue(g, font, left, width, y, "카카오페이", (totalPrice + (int)(totalPrice * 0.1)).ToString("#,0"));
-                y += lineHeight;
+                y += lineHeight * 3;
 
                 // 주문번호
                 using (var orderFont = new Font("Arial", FontSize + 4, FontStyle.Bold))
