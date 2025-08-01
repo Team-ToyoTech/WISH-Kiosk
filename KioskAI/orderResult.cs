@@ -121,7 +121,7 @@ namespace wishKiosk
 
         private void CounterOrderButton_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("주문이 완료되었습니다.\n주문이 완료되면 카운터에서 결제해 주세요");
+            MessageBox.Show("주문이 완료되었습니다.\n카운터에서 결제해 주세요");
             this.Close();
         }
     }
