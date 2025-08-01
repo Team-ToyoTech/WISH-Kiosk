@@ -10,7 +10,7 @@ namespace wishKiosk
 	public partial class payment : Form
 	{
 		private readonly int totalPrice;
-        private float FontSize { get; set; } = 25f;
+        private float FontSize { get; set; } = 20f;
         private string? orderId;
         public uint? orderNum;
         private List<OrderItem> orderItems = [];
@@ -106,30 +106,24 @@ namespace wishKiosk
 					if (msgRes == DialogResult.Yes)
 					{
                         // 영수증 출력
-                        printDoc.PrintPage += printDocument_PrintReceiptPage;
-						printDoc.Print();
-                        PrintDialog printDialog = new()
+                        printDoc = new()
                         {
-                            Document = printDoc,   // 인쇄할 문서 지정
-                            AllowSomePages = true, // 일부 페이지만 선택 가능
-                            AllowSelection = true, // 선택한 부분만 인쇄 가능
-                            UseEXDialog = true     // Windows 스타일의 대화상자 사용
+                            PrintController = new StandardPrintController()
                         };
-                        printDialog.ShowDialog();
+
+                        printDoc.PrintPage += printDocument_PrintReceiptPage;
+                        printDoc.Print();
                     }
 					else
 					{
                         // 주문 번호만 출력
+                        printDoc = new()
+                        {
+                            PrintController = new StandardPrintController()
+                        };
+
                         printDoc.PrintPage += printDocument_PrintOrderNumPage;
                         printDoc.Print();
-                        PrintDialog printDialog = new()
-                        {
-                            Document = printDoc,   // 인쇄할 문서 지정
-                            AllowSomePages = true, // 일부 페이지만 선택 가능
-                            AllowSelection = true, // 선택한 부분만 인쇄 가능
-                            UseEXDialog = true     // Windows 스타일의 대화상자 사용
-                        };
-                        printDialog.ShowDialog();
                     }
 					DialogResult = DialogResult.OK;
                     await SendSelectedMenu(); // 주문 정보 서버에 전송
@@ -270,6 +264,7 @@ namespace wishKiosk
                 DrawLabelValue(g, font, left, width, y, "결제 금액", (totalPrice + (int)(totalPrice * 0.1)).ToString("#,0"));
                 y += lineHeight;
                 DrawLabelValue(g, font, left, width, y, "카카오페이", (totalPrice + (int)(totalPrice * 0.1)).ToString("#,0"));
+                y += lineHeight;
 
                 // 주문번호
                 using (var orderFont = new Font("Arial", FontSize + 4, FontStyle.Bold))
