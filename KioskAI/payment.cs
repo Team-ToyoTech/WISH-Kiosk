@@ -16,7 +16,9 @@ namespace wishKiosk
         private List<OrderItem> orderItems = [];
         private readonly HttpClient http = new();
 
-		private record PaymentResponse(string status);
+        public PrintDocument printDoc = new();
+
+        private record PaymentResponse(string status);
         private record OrderItem(string Name, int Count);
 
         private readonly Dictionary<string, int> menuPrice = [];
@@ -97,31 +99,18 @@ namespace wishKiosk
 				{
 					MessageBox.Show("결제 완료");
 
-                    PrintDocument printDoc = new()
-                    {
-                        PrintController = new StandardPrintController() // 설정창 없이 인쇄 
-                    };
-
                     var msgRes = MessageBox.Show("영수증을 출력하시겠습니까?", "주문 완료", MessageBoxButtons.YesNo);
+
+
 					if (msgRes == DialogResult.Yes)
 					{
                         // 영수증 출력
-                        printDoc = new()
-                        {
-                            PrintController = new StandardPrintController()
-                        };
-
                         printDoc.PrintPage += printDocument_PrintReceiptPage;
                         printDoc.Print();
                     }
 					else
 					{
                         // 주문 번호만 출력
-                        printDoc = new()
-                        {
-                            PrintController = new StandardPrintController()
-                        };
-
                         printDoc.PrintPage += printDocument_PrintOrderNumPage;
                         printDoc.Print();
                     }

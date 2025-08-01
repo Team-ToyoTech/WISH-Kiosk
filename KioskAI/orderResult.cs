@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualBasic;
+using System.Drawing.Printing;
 
 namespace wishKiosk
 {
@@ -11,6 +12,7 @@ namespace wishKiosk
 		private Dictionary<string, int> totalOrderResult = [];
 		private uint orderNum = 0;
 		private readonly Dictionary<string, int> menuPrice = [];
+		public PrintDocument printDoc = new();
 
         private int total = 0;
 
@@ -112,7 +114,8 @@ namespace wishKiosk
 		private void OrderButton_Click(object sender, EventArgs e)
 		{
 			payment Payment = new(total, totalOrderResult, menuPrice);
-			var res = Payment.ShowDialog();
+			Payment.printDoc = printDoc;
+            var res = Payment.ShowDialog();
 			if (res == DialogResult.OK)
 			{
 				MessageBox.Show("주문이 완료되었습니다.");
@@ -120,6 +123,7 @@ namespace wishKiosk
 				{
 					orderNum = orderNumber;
                 }
+				this.Close();
             }
 			else
 			{

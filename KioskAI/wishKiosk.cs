@@ -757,7 +757,8 @@ namespace wishKiosk
 
 			int[] menuNums = yTable.Keys.ToArray();
 			orderResult orderRes = new(menuMap, menuNums, price, orderCnts, menuPrice);
-			orderRes.Show();
+			orderRes.printDoc = printDoc;
+            orderRes.Show();
 
 			bitmap.Dispose();
 		}
