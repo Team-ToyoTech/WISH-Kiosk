@@ -81,27 +81,6 @@ namespace wishKiosk
 				}
 				await Task.Delay(500); // 0.5초 대기
             }
-
-            //if (e.Uri.StartsWith("https://yourserver.com/api/payments/kakao/success", StringComparison.Ordinal))
-            //{
-            //    var qs = System.Web.HttpUtility.ParseQueryString(new Uri(e.Uri).Query);
-            //    string? key = qs["paymentKey"];
-            //
-            //    await http.PostAsJsonAsync("https://yourserver.com/api/payments/kakao/confirm",
-            //                               new { orderId = orderId, paymentKey = key, amount = amount });
-            //
-            //    MessageBox.Show("결제 완료");
-            //    DialogResult = DialogResult.OK;
-            //    Close();
-            //    e.Cancel = true;
-            //}
-            //else if (e.Uri.StartsWith("https://yourserver.com/api/payments/kakao/fail", StringComparison.Ordinal))
-            //{
-            //    MessageBox.Show("결제 실패");
-            //    DialogResult = DialogResult.Abort;
-            //    Close();
-            //    e.Cancel = true;
-            //}
         }
 	}
 }
