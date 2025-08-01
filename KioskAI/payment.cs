@@ -15,7 +15,7 @@ namespace wishKiosk
 
 		public record PaymentResponse(string status);
 		
-		private bool isrunning = true;
+		private bool isRunning = true;
 
 		public payment(int amount)
 		{
@@ -41,27 +41,41 @@ namespace wishKiosk
 		private async Task StartPaymentAsync()
 		{
 			var body = new { amount = amount};
-			var res = await http.PostAsJsonAsync("http://localhost:4000/pay", body);
-			res.EnsureSuccessStatusCode();
+			var res = await http.PostAsJsonAsync("http://localhost:4000/pay", body); // 실제 서버 주소로 변경 필요
+            res.EnsureSuccessStatusCode();
 
 			var json = await res.Content.ReadFromJsonAsync<JsonElement>();
 			orderId = json.GetProperty("redirectId").GetString()!;
 
-			paymentView.Source = new Uri("http://localhost:4000/checkout/" + orderId);
-		}
+			paymentView.Source = new Uri("http://localhost:4000/checkout/" + orderId); // 실제 서버 주소로 변경 필요
+        }
 
-		private async void OnNavigationStarting(object? s, CoreWebView2NavigationStartingEventArgs e)
+        /// <summary>
+        /// 서버에서 결제 상태 확인, 결제 완료 또는 실패 시 처리
+        /// </summary>
+        /// <param name="s"></param>
+        /// <param name="e"></param>
+        private async void OnNavigationStarting(object? s, CoreWebView2NavigationStartingEventArgs e)
 		{
-			if (!isrunning)
+			if (!isRunning)
 				return;
-			isrunning = false;
+			isRunning = false;
 
 			while (true)
 			{
-				var res = await http.GetFromJsonAsync<PaymentResponse>("http://localhost:4000/ispaying/" + orderId);
-				if (res?.status == "paid")
+				var res = await http.GetFromJsonAsync<PaymentResponse>("http://localhost:4000/ispaying/" + orderId); // 실제 서버 주소로 변경 필요
+                if (res?.status == "paid")
 				{
 					MessageBox.Show("결제 완료");
+					var msgRes = MessageBox.Show("영수증을 출력하시겠습니까?", "주문 완료", MessageBoxButtons.YesNo);
+					if (msgRes == DialogResult.Yes)
+					{
+						// 영수증 출력
+					}
+					else
+					{
+						// 주문 번호만 출력
+					}
 					DialogResult = DialogResult.OK;
 					this.Close();
 					e.Cancel = false;
