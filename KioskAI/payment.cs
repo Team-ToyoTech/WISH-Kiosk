@@ -17,7 +17,7 @@ namespace wishKiosk
 		
 		private bool isrunning = true;
 
-        public payment(int amount)
+		public payment(int amount)
 		{
 			InitializeComponent();
 			this.amount = amount;
@@ -50,13 +50,13 @@ namespace wishKiosk
 			paymentView.Source = new Uri("http://localhost:4000/checkout/" + orderId);
 		}
 
-        private async void OnNavigationStarting(object? s, CoreWebView2NavigationStartingEventArgs e)
+		private async void OnNavigationStarting(object? s, CoreWebView2NavigationStartingEventArgs e)
 		{
-			if(!isrunning)
+			if (!isrunning)
 				return;
 			isrunning = false;
 
-            while (true)
+			while (true)
 			{
 				var res = await http.GetFromJsonAsync<PaymentResponse>("http://localhost:4000/ispaying/" + orderId);
 				if (res?.status == "paid")
@@ -65,7 +65,7 @@ namespace wishKiosk
 					DialogResult = DialogResult.OK;
 					this.Close();
 					e.Cancel = false;
-                    return;
+					return;
 				}
 				else if (res?.status == "failed")
 				{
@@ -73,14 +73,14 @@ namespace wishKiosk
 					DialogResult = DialogResult.Abort;
 					this.Close();
 					e.Cancel = true;
-                    return;
+					return;
 				}
 				else
 				{
 					// 결제 진행 중
 				}
 				await Task.Delay(500); // 0.5초 대기
-            }
-        }
+			}
+		}
 	}
 }
