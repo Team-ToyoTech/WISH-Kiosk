@@ -3,7 +3,6 @@ using System.Drawing.Printing;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Tab;
 
 namespace wishKiosk
 {
@@ -129,7 +128,7 @@ namespace wishKiosk
                     var res = await http.GetFromJsonAsync<PaymentResponse>("http://localhost:4000/ispaying/" + orderId); // 실제 서버 주소로 변경 필요
                     if (res?.status == "paid")
                     {
-                        MessageBox.Show("결제 완료");
+                        // MessageBox.Show("결제 완료"); // 디버깅용
                         await SendSelectedMenu(); // 주문 정보 서버에 전송
 
                         var msgRes = MessageBox.Show("영수증을 출력하시겠습니까?", "주문 완료", MessageBoxButtons.YesNo);
@@ -296,12 +295,12 @@ namespace wishKiosk
                 y += lineHeight;
 
                 // 부가세, 합계
-                int tax = totalPrice / 11;  // 10% 부가세
-                DrawLabelValue(g, font, left, width, y, "부가세", ((int)(totalPrice * 0.1)).ToString("#,0"));
+                int tax = totalPrice / 11; // 부가세
+                DrawLabelValue(g, font, left, width, y, "부가세", (tax.ToString("#,0")));
                 y += lineHeight;
-                DrawLabelValue(g, font, left, width, y, "결제 금액", (totalPrice + (int)(totalPrice * 0.1)).ToString("#,0"));
+                DrawLabelValue(g, font, left, width, y, "결제 금액", (totalPrice.ToString("#,0")));
                 y += lineHeight;
-                DrawLabelValue(g, font, left, width, y, "카카오페이", (totalPrice + (int)(totalPrice * 0.1)).ToString("#,0"));
+                DrawLabelValue(g, font, left, width, y, "카카오페이", (totalPrice.ToString("#,0")));
                 y += lineHeight * 3;
 
                 // 주문번호
