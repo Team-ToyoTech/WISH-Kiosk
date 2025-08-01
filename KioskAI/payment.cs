@@ -84,7 +84,7 @@ namespace wishKiosk
         }
 
         /// <summary>
-        /// 서버에 선택된 메뉴 전송
+        /// 서버에 선택된 메뉴 전송, 주문 번호 받아오기
         /// </summary>
         /// <returns></returns>
         private async Task SendSelectedMenu()
@@ -95,7 +95,7 @@ namespace wishKiosk
                 res.EnsureSuccessStatusCode();
 
                 var json = await res.Content.ReadFromJsonAsync<JsonElement>();
-                orderNum = json.GetProperty("orderNumber").GetUInt32()!;
+                orderNum = json.GetProperty("orderNumber").GetUInt32()!; // 주문 번호 받아오기
             }
             catch (HttpRequestException ex)
             {
@@ -130,10 +130,9 @@ namespace wishKiosk
                     if (res?.status == "paid")
                     {
                         MessageBox.Show("결제 완료");
+                        await SendSelectedMenu(); // 주문 정보 서버에 전송
 
                         var msgRes = MessageBox.Show("영수증을 출력하시겠습니까?", "주문 완료", MessageBoxButtons.YesNo);
-
-
                         if (msgRes == DialogResult.Yes)
                         {
                             // 영수증 출력
@@ -147,7 +146,6 @@ namespace wishKiosk
                             printDoc.Print();
                         }
                         DialogResult = DialogResult.OK;
-                        await SendSelectedMenu(); // 주문 정보 서버에 전송
                         this.Close();
                         e.Cancel = false;
                         return;
