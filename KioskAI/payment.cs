@@ -211,7 +211,7 @@ namespace wishKiosk
 
             using (var font = new Font("Arial", FontSize))
             {
-                string dateLine = "[주 문]" + DateTime.Now.ToString("yyyy-MM-dd  HH:mm");
+                string dateLine = "[주 문] " + DateTime.Now.ToString("yyyy-MM-dd  HH:mm");
                 g.DrawString(dateLine, font, Brushes.Black, left, y);
                 y += lineHeight;
 
@@ -255,7 +255,7 @@ namespace wishKiosk
 
             using (var font = new Font("Arial", FontSize))
             {
-                string dateLine = "[주 문]" + DateTime.Now.ToString("yyyy-MM-dd  HH:mm");
+                string dateLine = "[주 문] " + DateTime.Now.ToString("yyyy-MM-dd  HH:mm");
                 g.DrawString(dateLine, font, Brushes.Black, left, y);
                 y += lineHeight;
 
