@@ -15,8 +15,8 @@ namespace wishKiosk
 {
 	public partial class wishKiosk : Form
 	{
-		public float FontSize { get; set; } = 30f;
-		public PrintDocument printDoc = new();
+		private float FontSize { get; set; } = 30f;
+		private PrintDocument printDoc = new();
 		private readonly Pen gridPen = new(Color.Gray, 1) { DashStyle = System.Drawing.Drawing2D.DashStyle.Dot };
 		private readonly Brush blackBrush = Brushes.Black;
 		private readonly int boxSize = 40;
@@ -24,8 +24,9 @@ namespace wishKiosk
 		private readonly int lineSpacing = 120;
 		private int currentMenuIndex = 0;
 		public int digitCount = 3; // 숫자 칸 개수
-		public string menuFilePath = "menu.csv";
-		public string digitFilePath = "digit.dat";
+		public readonly string menuFilePath = "menu.csv";
+		public readonly string digitFilePath = "digit.dat";
+		public Dictionary<string, int> menuPrice = [];
 
 		private string[]? menu;
 		private int[] price;
@@ -53,11 +54,11 @@ namespace wishKiosk
 
 			if (!File.Exists(menuFilePath))
 			{
-                using (var writer = new StreamWriter(menuFilePath, false, Encoding.UTF8))
-                {
-                    writer.WriteLine("메뉴명,가격");
-                }
-                return;
+				using (var writer = new StreamWriter(menuFilePath, false, Encoding.UTF8))
+				{
+					writer.WriteLine("메뉴명,가격");
+				}
+				return;
 			}
 
 			// 메뉴, 가격 가져오기
@@ -75,7 +76,8 @@ namespace wishKiosk
 					int priceValue = int.Parse(splt[1]);
 					menuList.Add(menuName);
 					priceList.Add(priceValue);
-				}
+					menuPrice[menuName] = priceValue;
+                }
 				catch
 				{
 					MessageBox.Show($"{i}행의 가격이 잘못된 형식입니다.");
@@ -89,11 +91,16 @@ namespace wishKiosk
 
 		private void printButton_Click(object sender, EventArgs e)
 		{
-			printDoc.PrintPage += printDocument1_PrintPage;
+			printDoc.PrintPage += printDocument_PrintPage;
 			printDoc.Print();
 		}
 
-		private void printDocument1_PrintPage(object sender, PrintPageEventArgs e)
+		/// <summary>
+		/// 프린트할 페이지 제작
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
+		private void printDocument_PrintPage(object sender, PrintPageEventArgs e)
 		{
 			Font font = new Font("Arial", FontSize);
 			int startX = 100;
@@ -239,41 +246,42 @@ namespace wishKiosk
 				File.WriteAllText(digitFilePath, digitCount.ToString());
 			}
 
-            if (!File.Exists(menuFilePath))
-            {
-                using (var writer = new StreamWriter(menuFilePath, false, Encoding.UTF8))
-                {
-                    writer.WriteLine("메뉴명,가격");
+			if (!File.Exists(menuFilePath))
+			{
+				using (var writer = new StreamWriter(menuFilePath, false, Encoding.UTF8))
+				{
+					writer.WriteLine("메뉴명,가격");
+				}
+				return;
+			}
+
+			// 메뉴, 가격 가져오기
+			string[]? lines = File.ReadAllLines(menuFilePath);
+
+			List<string> menuList = new List<string>();
+			List<int> priceList = new List<int>();
+
+			for (int i = 1; i < lines.Length; i++)
+			{
+				string[]? splt = lines[i].Trim().Split(',');
+				string menuName = splt[0];
+				try
+				{
+					int priceValue = int.Parse(splt[1]);
+					menuList.Add(menuName);
+					priceList.Add(priceValue);
+                    menuPrice[menuName] = priceValue;
                 }
-                return;
-            }
+				catch
+				{
+					MessageBox.Show($"{i}행의 가격이 잘못된 형식입니다.");
+					return;
+				}
+			}
 
-            // 메뉴, 가격 가져오기
-            string[]? lines = File.ReadAllLines(menuFilePath);
-
-            List<string> menuList = new List<string>();
-            List<int> priceList = new List<int>();
-
-            for (int i = 1; i < lines.Length; i++)
-            {
-                string[]? splt = lines[i].Trim().Split(',');
-                string menuName = splt[0];
-                try
-                {
-                    int priceValue = int.Parse(splt[1]);
-                    menuList.Add(menuName);
-                    priceList.Add(priceValue);
-                }
-                catch
-                {
-                    MessageBox.Show($"{i}행의 가격이 잘못된 형식입니다.");
-                    return;
-                }
-            }
-
-            menu = menuList.ToArray();
-            price = priceList.ToArray();
-        }
+			menu = menuList.ToArray();
+			price = priceList.ToArray();
+		}
 
 		/*
 		/// <summary>
@@ -697,7 +705,7 @@ namespace wishKiosk
 
 			List<int> orderCnts = new();
 
-            foreach (var menuEntry in yTable)
+			foreach (var menuEntry in yTable)
 			{
 				int menuNum = menuEntry.Key;
 				float y = menuEntry.Value;
@@ -739,19 +747,19 @@ namespace wishKiosk
 				// var msgBoxRes = MessageBox.Show($"{menuMap[menuNum]}를 {orderCount}개 주문했습니다.", "주문 확인", MessageBoxButtons.OKCancel); // 디버깅용
 				// if (msgBoxRes == DialogResult.OK)
 				// {
-                //     MessageBox.Show($"{menuMap[menuNum]} {orderCount}개, {price[menuNum - 1] * int.Parse(orderCount)}원 주문이 완료되었습니다.");
+				//     MessageBox.Show($"{menuMap[menuNum]} {orderCount}개, {price[menuNum - 1] * int.Parse(orderCount)}원 주문이 완료되었습니다.");
 				// }
 				// else
 				// {
 				// 	MessageBox.Show("주문이 취소되었습니다.");
-                // }
-            }
+				// }
+			}
 
-            int[] menuNums = yTable.Keys.ToArray();
-            orderResult orderRes = new(menuMap, menuNums, price, orderCnts);
+			int[] menuNums = yTable.Keys.ToArray();
+			orderResult orderRes = new(menuMap, menuNums, price, orderCnts, menuPrice);
 			orderRes.Show();
 
-            bitmap.Dispose();
+			bitmap.Dispose();
 		}
 
 		/// <summary>
@@ -809,9 +817,16 @@ namespace wishKiosk
 		/// </summary>
 		public static void InitOCR()
 		{
-			_session = new InferenceSession("tmnist_model_64.onnx");
-			_labels = JsonConvert.DeserializeObject<string[]>(File.ReadAllText("labels.json"));
-		}
+			try
+			{
+				_session = new InferenceSession("tmnist_model_64.onnx");
+				_labels = JsonConvert.DeserializeObject<string[]>(File.ReadAllText("labels.json"));
+			}
+			catch
+			{
+				MessageBox.Show("모델이 없습니다.");
+            }
+        }
 
 		static int t = 0;
 		/// <summary>
@@ -878,7 +893,7 @@ namespace wishKiosk
 		/// <returns>Tensor</returns>
 		private static DenseTensor<float> ImageToTensor(Bitmap image)
 		{
-			// ONNX 모델 [1, 1, 64, 64] 입력 (그레이스케일)
+			// ONNX 모델, 그레이스케일
 			var tensor = new DenseTensor<float>(new[] { 1, 1, 64, 64 });
 			for (int y = 0; y < 64; y++)
 			{
