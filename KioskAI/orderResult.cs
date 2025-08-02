@@ -152,12 +152,6 @@ namespace wishKiosk
 
 		private void CounterOrderButton_Click(object sender, EventArgs e)
 		{
-			orderItems.Clear();
-            foreach (var item in totalOrderResult)
-            {
-                orderItems.Add(new orderResult.OrderItem(item.Key, item.Value));
-            }
-
             _ = SendSelectedMenu();
             printDoc.PrintPage += printDocument_PrintOrderNumPage;
             printDoc.Print();
@@ -173,6 +167,12 @@ namespace wishKiosk
         {
             try
             {
+                orderItems.Clear();
+                foreach (var item in totalOrderResult)
+                {
+                    orderItems.Add(new orderResult.OrderItem(item.Key, item.Value));
+                }
+
                 var body = new { amount = total, orders = orderItems };
                 var res = await http.PostAsJsonAsync(serverUrl + "/pay/counter", body);
                 res.EnsureSuccessStatusCode();
