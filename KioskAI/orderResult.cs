@@ -25,7 +25,6 @@ namespace wishKiosk
 
 		private List<OrderItem> orderItems = [];
         public record OrderItem(string Name, int Count);
-		private record OrderResult(int OrderNumber, string orderId);
 
         private int total = 0;
 
@@ -152,6 +151,11 @@ namespace wishKiosk
 
 		private void CounterOrderButton_Click(object sender, EventArgs e)
 		{
+            foreach (var item in totalOrderResult)
+            {
+                orderItems.Add(new orderResult.OrderItem(item.Key, item.Value));
+            }
+
             _ = SendSelectedMenu();
             printDoc.PrintPage += printDocument_PrintOrderNumPage;
             printDoc.Print();
