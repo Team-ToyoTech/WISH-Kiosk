@@ -1,4 +1,4 @@
-namespace wishKioskDID
+namespace wishKioskDIDDisplay
 {
     internal static class Program
     {
