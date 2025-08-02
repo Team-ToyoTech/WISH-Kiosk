@@ -150,9 +150,9 @@ namespace wishKiosk
 			this.Close();
 		}
 
-		private async Task CounterOrderButton_Click(object sender, EventArgs e)
+		private void CounterOrderButton_Click(object sender, EventArgs e)
 		{
-            await SendSelectedMenu();
+            _ = SendSelectedMenu();
             printDoc.PrintPage += printDocument_PrintOrderNumPage;
             printDoc.Print();
             printDoc.PrintPage -= printDocument_PrintOrderNumPage;
