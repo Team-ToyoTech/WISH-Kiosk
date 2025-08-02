@@ -12,15 +12,14 @@ namespace wishKiosk
         private float FontSize { get; set; } = 20f;
         private string? orderId;
         public uint? orderNum;
-        private List<OrderItem> orderItems = [];
+        public List<orderResult.OrderItem> orderItems = [];
         private readonly HttpClient http = new();
 
-        string serverUrl = "http://localhost:4000"; // 실제 서버 주소로 변경 필요
+        private readonly string serverUrl = "http://localhost:4000"; // 실제 서버 주소로 변경 필요
 
         public PrintDocument printDoc = new();
 
         private record PaymentResponse(string status);
-        private record OrderItem(string Name, int Count);
 
         private readonly Dictionary<string, int> menuPrice = [];
 
@@ -34,7 +33,7 @@ namespace wishKiosk
 
             foreach (var item in totalOrderResult)
             {
-                orderItems.Add(new OrderItem(item.Key, item.Value));
+                orderItems.Add(new orderResult.OrderItem(item.Key, item.Value));
             }
         }
 

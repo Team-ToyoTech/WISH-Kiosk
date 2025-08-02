@@ -9,7 +9,7 @@ namespace wishKioskDIDDisplay
 
         string serverUrl = "http://localhost:4000"; // 실제 서버 주소로 변경 필요
 
-        private record ResponseJson(int[] orderNum);
+        private int[]? incompleteOrderNums, completeOrderNums;
 
         public displayMain()
         {
@@ -21,8 +21,41 @@ namespace wishKioskDIDDisplay
             while (true)
             {
                 _ = FetchAndDisplayValueAsync();
-                Task.Delay(500);
+                Delay(500);
             }
+        }
+
+        private void Delay(int ms)
+        {
+            DateTime dateTimeNow = DateTime.Now;
+            TimeSpan duration = new TimeSpan(0, 0, 0, 0, ms);
+            DateTime dateTimeAdd = dateTimeNow.Add(duration);
+            while (dateTimeAdd >= dateTimeNow)
+            {
+                System.Windows.Forms.Application.DoEvents();
+                dateTimeNow = DateTime.Now;
+            }
+            return;
+        }
+
+        private bool ArrCmp(int[]? arr1, int[]? arr2)
+        {
+            if (arr1 == null || arr2 == null)
+            {
+                return false;
+            }
+            if (arr1.Length != arr2.Length)
+            {
+                return false;
+            }
+            for (int i = 0; i < arr1.Length; i++)
+            {
+                if (arr1[i] != arr2[i])
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         private async Task FetchAndDisplayValueAsync()
@@ -32,24 +65,36 @@ namespace wishKioskDIDDisplay
                 HttpResponseMessage response = await httpClient.GetAsync(serverUrl + "/order/getid");
                 response.EnsureSuccessStatusCode();
 
-                string json = await response.Content.ReadAsStringAsync();
-                var result = JsonSerializer.Deserialize<ResponseJson>(json);
+                string incompleteJson = await response.Content.ReadAsStringAsync();
+                var incompleteResult = JsonSerializer.Deserialize<int[]>(incompleteJson);
 
-                if (result != null)
+                if (incompleteResult != null)
                 {
-                    this.Invoke((Action)(() =>
+                    if (!ArrCmp(incompleteResult, incompleteOrderNums))
                     {
-                        int count = 0;
-                        foreach (int orderNum in result.orderNum)
+                        incompleteOrderNums = incompleteResult;
+                        orderIncompleteLabel.Text = "";
+                        this.Invoke((Action)(() =>
                         {
-                            count++;
-                            orderIncompleteLabel.Text += $" {orderNum} ";
-                            if (count % 5 == 0)
+                            if (incompleteResult.Length == 0)
                             {
-                                orderIncompleteLabel.Text += "\n";
+                                orderIncompleteLabel.Text = "준비중인 주문이 없습니다";
                             }
-                        }
-                    }));
+                            else
+                            {
+                                int count = 0;
+                                foreach (int orderNum in incompleteResult)
+                                {
+                                    count++;
+                                    orderIncompleteLabel.Text += $" {orderNum} ";
+                                    if (count % 5 == 0)
+                                    {
+                                        orderIncompleteLabel.Text += "\n";
+                                    }
+                                }
+                            }
+                        }));
+                    }
                 }
                 else
                 {
@@ -59,18 +104,30 @@ namespace wishKioskDIDDisplay
                 response = await httpClient.GetAsync(serverUrl + "/order/complete/getid");
                 response.EnsureSuccessStatusCode();
 
-                json = await response.Content.ReadAsStringAsync();
-                result = JsonSerializer.Deserialize<ResponseJson>(json);
+                string completeJson = await response.Content.ReadAsStringAsync();
+                var completeResult = JsonSerializer.Deserialize<int[]>(completeJson);
 
-                if (result != null)
+                if (completeResult != null)
                 {
-                    this.Invoke((Action)(() =>
+                    if (!ArrCmp(completeResult, completeOrderNums))
                     {
-                        foreach (int orderNum in result.orderNum)
+                        completeOrderNums = completeResult;
+                        orderCompleteLabel.Text = "";
+                        this.Invoke((Action)(() =>
                         {
-                            orderCompleteLabel.Text += $"{orderNum}\n";
-                        }
-                    }));
+                            if (completeResult.Length == 0)
+                            {
+                                orderIncompleteLabel.Text = "";
+                            }
+                            else
+                            {
+                                foreach (int orderNum in completeResult)
+                                {
+                                    orderCompleteLabel.Text += $"{orderNum}\n";
+                                }
+                            }
+                        }));
+                    }
                 }
                 else
                 {

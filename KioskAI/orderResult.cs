@@ -1,5 +1,10 @@
 ﻿using Microsoft.VisualBasic;
 using System.Drawing.Printing;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Text.Json;
+using System.Threading.Tasks;
+using static System.Net.WebRequestMethods;
 
 namespace wishKiosk
 {
@@ -10,9 +15,15 @@ namespace wishKiosk
 		private readonly int[] price;
 		private readonly List<int> menuOrderCount;
 		private Dictionary<string, int> totalOrderResult = [];
-		private uint orderNum = 0;
+		private uint? orderNum = 0;
 		private readonly Dictionary<string, int> menuPrice = [];
 		public PrintDocument printDoc = new();
+
+		private HttpClient http = new();
+		private readonly string serverUrl = "http://localhost:4000"; // 실제 서버 주소로 변경 필요
+
+		private List<OrderItem> orderItems = [];
+        public record OrderItem(string Name, int Count);
 
         private int total = 0;
 
@@ -123,7 +134,8 @@ namespace wishKiosk
 				{
 					orderNum = orderNumber;
                 }
-				this.Close();
+				orderItems = Payment.orderItems;
+                this.Close();
             }
 			else
 			{
@@ -136,11 +148,93 @@ namespace wishKiosk
 			this.Close();
 		}
 
-		private void CounterOrderButton_Click(object sender, EventArgs e)
+		private async Task CounterOrderButton_Click(object sender, EventArgs e)
 		{
-			MessageBox.Show("주문이 완료되었습니다.\n카운터에서 결제해 주세요.");
-			// TODO: 주문번호 프린트
-			this.Close();
+            await SendSelectedMenu();
+            printDoc.PrintPage += printDocument_PrintOrderNumPage;
+            printDoc.Print();
+            printDoc.PrintPage -= printDocument_PrintOrderNumPage;
+            this.Close();
 		}
-	}
+
+        /// <summary>
+        /// 결제 정보 보내고 주문 번호 받아오기
+        /// </summary>
+        /// <returns></returns>
+        private async Task SendSelectedMenu()
+        {
+            try
+            {
+                var body = new { amount = total };
+                var res = await http.PostAsJsonAsync(serverUrl + "/pay/counter", body);
+                res.EnsureSuccessStatusCode();
+
+                var json = await res.Content.ReadFromJsonAsync<JsonElement>();
+                var orderId = json.GetProperty("redirectId").GetString()!;
+
+                var orderNumRes = await http.PostAsJsonAsync(serverUrl + "/order/add/" + orderId, orderItems);
+                res.EnsureSuccessStatusCode();
+
+                var orderNumJson = await res.Content.ReadFromJsonAsync<JsonElement>();
+                orderNum = json.GetProperty("orderNumber").GetUInt32()!; // 주문 번호 받아오기
+            }
+            catch (HttpRequestException ex)
+            {
+                MessageBox.Show("실패: " + ex.Message);
+                DialogResult = DialogResult.Abort;
+                this.Close();
+            }
+            catch (JsonException ex)
+            {
+                MessageBox.Show("응답 처리 오류: " + ex.Message);
+                DialogResult = DialogResult.Abort;
+                this.Close();
+            }
+        }
+
+        /// <summary>
+        /// 주문번호만 출력
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void printDocument_PrintOrderNumPage(object sender, PrintPageEventArgs e)
+        {
+            float FontSize = 20f;
+			var g = e.Graphics;
+            float left = e.MarginBounds.Left;
+            float top = e.MarginBounds.Top;
+            float width = e.MarginBounds.Width;
+            float lineHeight = FontSize + 10;
+
+            // 타이틀
+            using (var titleFont = new Font("Arial", FontSize + 8, FontStyle.Bold))
+            {
+                string title = "WISH Kiosk";
+                SizeF titleSize = g.MeasureString(title, titleFont);
+                float x = left + (width - titleSize.Width) / 2;
+                g.DrawString(title, titleFont, Brushes.Black, x, top);
+            }
+
+            float y = top + lineHeight * 2;
+
+            using (var font = new Font("Arial", FontSize))
+            {
+                string dateLine = "[주 문] " + DateTime.Now.ToString("yyyy-MM-dd  HH:mm");
+                g.DrawString(dateLine, font, Brushes.Black, left, y);
+                y += lineHeight;
+
+                g.DrawLine(Pens.Black, left, y, left + width, y);
+                y += lineHeight * 3;
+
+                // 주문번호
+                using (var orderFont = new Font("Arial", FontSize + 4, FontStyle.Bold))
+                {
+                    string orderLine = "주문번호: " + (orderNum?.ToString() ?? "알 수 없음");
+                    SizeF orderSize = g.MeasureString(orderLine, orderFont);
+                    float xOrder = left + (width - orderSize.Width) / 2;
+                    g.DrawString(orderLine, orderFont, Brushes.Black, xOrder, y);
+                }
+            }
+        }
+    }
 }
