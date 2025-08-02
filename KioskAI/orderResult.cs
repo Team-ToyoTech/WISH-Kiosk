@@ -16,7 +16,8 @@ namespace wishKiosk
 		private readonly List<int> menuOrderCount;
 		private Dictionary<string, int> totalOrderResult = [];
 		private uint? orderNum = 0;
-		private readonly Dictionary<string, int> menuPrice = [];
+		private string? orderId;
+        private readonly Dictionary<string, int> menuPrice = [];
 		public PrintDocument printDoc = new();
 
 		private HttpClient http = new();
@@ -24,6 +25,7 @@ namespace wishKiosk
 
 		private List<OrderItem> orderItems = [];
         public record OrderItem(string Name, int Count);
+		private record OrderResult(int OrderNumber, string orderId);
 
         private int total = 0;
 
@@ -165,18 +167,13 @@ namespace wishKiosk
         {
             try
             {
-                var body = new { amount = total };
+                var body = new { orders = orderItems, amount = total };
                 var res = await http.PostAsJsonAsync(serverUrl + "/pay/counter", body);
                 res.EnsureSuccessStatusCode();
 
                 var json = await res.Content.ReadFromJsonAsync<JsonElement>();
-                var orderId = json.GetProperty("redirectId").GetString()!;
-
-                var orderNumRes = await http.PostAsJsonAsync(serverUrl + "/order/add/" + orderId, orderItems);
-                res.EnsureSuccessStatusCode();
-
-                var orderNumJson = await res.Content.ReadFromJsonAsync<JsonElement>();
                 orderNum = json.GetProperty("orderNumber").GetUInt32()!; // 주문 번호 받아오기
+				orderId = json.GetProperty("orderId").GetString()!; // 주문 ID 받아오기
             }
             catch (HttpRequestException ex)
             {
