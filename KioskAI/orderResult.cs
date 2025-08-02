@@ -106,7 +106,8 @@ namespace wishKiosk
 					orderResultDataGridView.Rows[e.RowIndex].Cells["Quantity"].Value = newQty;
 					decimal unitPrice = price[e.RowIndex];
 					orderResultDataGridView.Rows[e.RowIndex].Cells["Price"].Value = unitPrice * newQty;
-					UpdateTotalLabel();
+					totalOrderResult[orderResultDataGridView.Rows[e.RowIndex].Cells["MenuName"].Value.ToString()] = newQty;
+                    UpdateTotalLabel();
 				}
 			}
 		}
@@ -151,6 +152,7 @@ namespace wishKiosk
 
 		private void CounterOrderButton_Click(object sender, EventArgs e)
 		{
+			orderItems.Clear();
             foreach (var item in totalOrderResult)
             {
                 orderItems.Add(new orderResult.OrderItem(item.Key, item.Value));
@@ -171,7 +173,7 @@ namespace wishKiosk
         {
             try
             {
-                var body = new { orders = orderItems, amount = total };
+                var body = new { amount = total, orders = orderItems };
                 var res = await http.PostAsJsonAsync(serverUrl + "/pay/counter", body);
                 res.EnsureSuccessStatusCode();
 
