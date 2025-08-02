@@ -15,6 +15,8 @@ namespace wishKiosk
         private List<OrderItem> orderItems = [];
         private readonly HttpClient http = new();
 
+        string serverUrl = "http://localhost:4000"; // 실제 서버 주소로 변경 필요
+
         public PrintDocument printDoc = new();
 
         private record PaymentResponse(string status);
@@ -60,13 +62,13 @@ namespace wishKiosk
             try
             {
                 var body = new { amount = totalPrice };
-                var res = await http.PostAsJsonAsync("http://localhost:4000/pay", body); // 실제 서버 주소로 변경 필요
+                var res = await http.PostAsJsonAsync(serverUrl + "/pay", body);
                 res.EnsureSuccessStatusCode();
 
                 var json = await res.Content.ReadFromJsonAsync<JsonElement>();
                 orderId = json.GetProperty("redirectId").GetString()!;
 
-                paymentView.Source = new Uri("http://localhost:4000/checkout/" + orderId); // 실제 서버 주소로 변경 필요
+                paymentView.Source = new Uri(serverUrl + "/checkout/" + orderId);
             }
             catch (HttpRequestException ex)
             {
@@ -90,7 +92,7 @@ namespace wishKiosk
         {
             try
             {
-                var res = await http.PostAsJsonAsync("http://localhost:4000/order/add/" + orderId, orderItems);
+                var res = await http.PostAsJsonAsync(serverUrl + "/order/add/" + orderId, orderItems);
                 res.EnsureSuccessStatusCode();
 
                 var json = await res.Content.ReadFromJsonAsync<JsonElement>();
@@ -125,7 +127,7 @@ namespace wishKiosk
 			{
                 try
                 {
-                    var res = await http.GetFromJsonAsync<PaymentResponse>("http://localhost:4000/ispaying/" + orderId); // 실제 서버 주소로 변경 필요
+                    var res = await http.GetFromJsonAsync<PaymentResponse>(serverUrl + "/ispaying/" + orderId);
                     if (res?.status == "paid")
                     {
                         // MessageBox.Show("결제 완료"); // 디버깅용
