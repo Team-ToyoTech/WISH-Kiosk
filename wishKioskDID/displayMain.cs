@@ -16,12 +16,12 @@ namespace wishKioskDIDDisplay
             InitializeComponent();
         }
 
-        private async Task displayMain_Load(object sender, EventArgs e)
+        private void displayMain_Load(object sender, EventArgs e)
         {
             while (true)
             {
                 _ = FetchAndDisplayValueAsync();
-                await Task.Delay(500);
+                Task.Delay(500);
             }
         }
 

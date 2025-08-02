@@ -63,7 +63,7 @@
             Name = "displayMain";
             Text = "WISH DID";
             WindowState = FormWindowState.Maximized;
-            Load += this.displayMain_Load;
+            Load += displayMain_Load;
             ResumeLayout(false);
             PerformLayout();
         }
