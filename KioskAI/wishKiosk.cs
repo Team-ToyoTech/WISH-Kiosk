@@ -31,7 +31,7 @@ namespace wishKiosk
         public Dictionary<string, int> menuPrice = [];
 
 		private string[]? menu;
-		private int[] price;
+		private int[]? price;
 
 		public wishKiosk()
 		{
@@ -122,7 +122,7 @@ namespace wishKiosk
 			int linesPerPage = availableHeight / lineSpacing;
 			int printedCount = 0;
 
-			for (; currentMenuIndex < menu.Length; currentMenuIndex++)
+			for (; currentMenuIndex < menu?.Length; currentMenuIndex++)
 			{
 				if (printedCount >= linesPerPage)
 				{
@@ -201,7 +201,7 @@ namespace wishKiosk
 				printedCount++;
 			}
 
-			if (currentMenuIndex >= menu.Length)
+			if (currentMenuIndex >= menu?.Length)
 			{
 				e.HasMorePages = false;
 				currentMenuIndex = 0;
@@ -649,7 +649,7 @@ namespace wishKiosk
 			var xTable = new Dictionary<int, Dictionary<int, float>>(); // line -> digitLevel -> x
 			var yTable = new Dictionary<int, float>(); // line -> y
 			var menuMap = new Dictionary<int, string>();
-			for (int i = 1; i <= menu.Length; i++)
+			for (int i = 1; i <= menu?.Length; i++)
 			{
 				menuMap[i] = menu[i - 1] ?? "";
 			}
@@ -844,7 +844,6 @@ namespace wishKiosk
 			return results;
 		}
 
-		static int i = 0;
 		/// <summary>
 		/// ROI를 이미지 크기에 맞게 조정
 		/// </summary>
@@ -879,7 +878,6 @@ namespace wishKiosk
 			}
 		}
 
-		static int t = 0;
 		/// <summary>
 		/// 
 		/// </summary>
@@ -920,10 +918,10 @@ namespace wishKiosk
 					};
 
 					// 추론
-					using (var results = _session.Run(inputs))
+					using (var results = _session?.Run(inputs))
 					{
-						var output = results.First().AsEnumerable<float>().ToArray();
-						int predictedIndex = Array.IndexOf(output, output.Max());
+						var output = results?.First().AsEnumerable<float>().ToArray();
+						int predictedIndex = Array.IndexOf(output, output?.Max());
 						string label = _labels[predictedIndex];
 
 						return label == "NaN" ? "" : label;
