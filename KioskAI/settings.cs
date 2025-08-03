@@ -11,11 +11,12 @@ namespace wishKiosk
         public int digitCount;
         public string? menuPath;
         public wishKiosk? WishKiosk;
-        public string? passwordFilePath;
+        public readonly string passwordFilePath;
 
-        public settings()
+        public settings(string passwordFilePath)
         {
             InitializeComponent();
+            this.passwordFilePath = passwordFilePath;
         }
 
         private void printSettingsButton_Click(object sender, EventArgs e)
@@ -60,6 +61,16 @@ namespace wishKiosk
 
         private void passwordChangeButton_Click(object sender, EventArgs e)
         {
+            if (!File.Exists(passwordFilePath))
+            {
+                MessageBox.Show($"{passwordFilePath} 파일이 존재하지 않습니다.");
+                using (var writer = new StreamWriter(passwordFilePath, false, Encoding.UTF8))
+                {
+                    writer.WriteLine(wishKiosk.Sha256Hash("0000"));
+                }
+                return;
+            }
+
             string input = Interaction.InputBox("새 비밀번호를 입력하세요: ", "비밀번호 변경");
             if (string.IsNullOrEmpty(input))
             {

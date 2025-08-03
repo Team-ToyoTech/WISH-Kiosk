@@ -89,7 +89,16 @@ namespace wishKiosk
 
 			menu = menuList.ToArray();
 			price = priceList.ToArray();
-		}
+
+			// 비밀번호 파일 확인
+            if (!File.Exists(passwordFilePath))
+            {
+                using (var writer = new StreamWriter(passwordFilePath, false, Encoding.UTF8))
+                {
+                    writer.WriteLine(Sha256Hash("0000")); // 기본값 0000
+                }
+            }
+        }
 
 		private void printButton_Click(object sender, EventArgs e)
 		{
@@ -253,13 +262,13 @@ namespace wishKiosk
 				return;
             }
 
-            settings Settings = new()
+            settings Settings = new(passwordFilePath)
 			{
 				printDoc = printDoc,
 				digitCount = digitCount,
-				WishKiosk = this,
-				passwordFilePath = passwordFilePath
+				WishKiosk = this
             };
+
 			if (!File.Exists(menuFilePath))
 			{
 				MessageBox.Show($"{menuFilePath} 파일이 존재하지 않습니다.");
