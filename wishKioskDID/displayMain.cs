@@ -1,73 +1,49 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 
 namespace wishKioskDIDDisplay
 {
     public partial class displayMain : Form
     {
-        HttpClient httpClient = new();
+        private readonly HttpClient httpClient = new HttpClient();
+        private readonly string serverUrl = "http://localhost:4000"; // 실제 서버 주소로 변경
 
-        string serverUrl = "http://localhost:4000"; // 실제 서버 주소로 변경 필요
-
-        private int[]? incompleteOrderNums, completeOrderNums;
-        private int timeCheck = 0;
+        int[]? prevOrder, prevCompletedOrder;
 
         public displayMain()
         {
             InitializeComponent();
+            this.Load += ReceiveMain_Load;
         }
 
-        private void displayMain_Load(object sender, EventArgs e)
+        private void ReceiveMain_Load(object sender, EventArgs e)
         {
-            this.Invoke((Action)(() =>
-            {
-                incompleteOrderNums = null;
-                completeOrderNums = null;
-            }));
+            prevOrder = null;
+            prevCompletedOrder = null;
 
-            System.Windows.Forms.Timer orderTimer = new System.Windows.Forms.Timer
-            {
-                Interval = 500
-            };
-            orderTimer.Tick += async (s, ev) =>
-            {
-                await FetchAndDisplayValueAsync();
-                timeCheck = (timeCheck + 1) % 4;
-            };
+            var orderTimer = new System.Windows.Forms.Timer { Interval = 500 };
+            orderTimer.Tick += async (s, ev) => await GetOrders();
             orderTimer.Start();
-        }
-
-        private void Delay(int ms)
-        {
-            DateTime dateTimeNow = DateTime.Now;
-            TimeSpan duration = new TimeSpan(0, 0, 0, 0, ms);
-            DateTime dateTimeAdd = dateTimeNow.Add(duration);
-            while (dateTimeAdd >= dateTimeNow)
-            {
-                System.Windows.Forms.Application.DoEvents();
-                dateTimeNow = DateTime.Now;
-            }
-            return;
         }
 
         /// <summary>
         /// 배열 비교
         /// </summary>
-        /// <param name="arr1"></param>
-        /// <param name="arr2"></param>
+        /// <param name="ord1"></param>
+        /// <param name="ord2"></param>
         /// <returns></returns>
-        private bool ArrCmp(int[]? arr1, int[]? arr2)
+        private static bool ArrCmp(int[] ord1, int[] ord2)
         {
-            if (arr1 == null || arr2 == null)
+            if (ord1 == null || ord2 == null)
             {
                 return false;
             }
-            if (arr1.Length != arr2.Length)
+            if (ord1.Length != ord2.Length)
             {
                 return false;
             }
-            for (int i = 0; i < arr1.Length; i++)
+            for (int i = 0; i < ord1.Length; i++)
             {
-                if (arr1[i] != arr2[i])
+                if (ord1[i] != ord2[i])
                 {
                     return false;
                 }
@@ -75,11 +51,7 @@ namespace wishKioskDIDDisplay
             return true;
         }
 
-        /// <summary>
-        /// 준비중인 주문, 완료된 주문을 서버에서 가져와 표시
-        /// </summary>
-        /// <returns></returns>
-        private async Task FetchAndDisplayValueAsync()
+        private async Task GetOrders()
         {
             try
             {
@@ -89,77 +61,96 @@ namespace wishKioskDIDDisplay
                 var json = await resp.Content.ReadAsStringAsync();
                 var orders = JsonSerializer.Deserialize<int[]>(json);
 
-                if (orders != null)
-                {
-                    if (!ArrCmp(orders, incompleteOrderNums))
-                    {
-                        completeOrderNums = orders;
-                        orderCompleteLabel.Text = "";
-                        this.Invoke((Action)(() =>
-                        {
-                            if (orders.Length == 0)
-                            {
-                                orderIncompleteLabel.Text = "";
-                            }
-                            else
-                            {
-                                foreach (int orderNum in orders)
-                                {
-                                    orderCompleteLabel.Text += $"{orderNum}\n";
-                                }
-                            }
-                        }));
-                    }
-                }
-                else
-                {
-                    MessageBox.Show("서버 응답이 비어 있거나 형식이 올바르지 않습니다.", "파싱 오류", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
-
-                var compResp = await httpClient.GetAsync(serverUrl + "/order/complete/getid");
+                var completeResp = await httpClient.GetAsync(serverUrl + "/order/complete/getid");
                 resp.EnsureSuccessStatusCode();
 
-                var compJson = await compResp.Content.ReadAsStringAsync();
-                var compOrders = JsonSerializer.Deserialize<int[]>(compJson);
+                var completeJson = await completeResp.Content.ReadAsStringAsync();
+                var completeOrders = JsonSerializer.Deserialize<int[]>(completeJson);
 
-                if (compOrders != null)
+                if (orders != null && !ArrCmp(orders, prevOrder))
                 {
-                    if (!ArrCmp(compOrders, completeOrderNums))
-                    {
-                        completeOrderNums = compOrders;
-                        orderCompleteLabel.Text = "";
-                        this.Invoke((Action)(() =>
-                        {
-                            if (compOrders.Length == 0)
-                            {
-                                orderCompleteLabel.Text = "";
-                            }
-                            else
-                            {
-                                foreach (int orderNum in compOrders)
-                                {
-                                    orderCompleteLabel.Text += $"{orderNum}\n";
-                                }
-                            }
-                        }));
-                    }
+                    DisplayOrders(orders);
+                    prevOrder = orders;
                 }
-                else
+                if (completeOrders != null && !ArrCmp(completeOrders, prevCompletedOrder))
                 {
-                    MessageBox.Show("서버 응답이 비어 있거나 형식이 올바르지 않습니다.", "파싱 오류", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    DisplayCompletedOrders(completeOrders);
+                    prevCompletedOrder = completeOrders;
                 }
             }
-            catch (HttpRequestException hre)
+            catch
             {
-                MessageBox.Show($"서버 요청 오류: {hre.Message}", "HTTP 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("서버와 연결에 실패했습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                flowLayoutPanelOrders.Controls.Clear();
+                flowLayoutPanelCompletedOrders.Controls.Clear();
             }
-            catch (JsonException je)
+        }
+
+        /// <summary>
+        /// 주문 목록 표시
+        /// </summary>
+        private void DisplayOrders(int[] orders)
+        {
+            flowLayoutPanelOrders.Controls.Clear();
+            foreach (var order in orders)
             {
-                MessageBox.Show($"데이터 파싱 오류: {je.Message}", "JSON 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                var panel = new Panel
+                {
+                    AutoSize = true,
+                    AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                    Padding = new Padding(12),
+                    Margin = new Padding(8),
+                    BorderStyle = BorderStyle.FixedSingle,
+                    MaximumSize = new Size(flowLayoutPanelOrders.ClientSize.Width - 20, 0)
+                };
+
+                // 주문 번호
+                var numberLabel = new Label
+                {
+                    Text = order.ToString(),
+                    Font = new Font("Segoe UI", 36, FontStyle.Bold),
+                    AutoSize = true,
+                    Cursor = Cursors.Hand,
+                    Tag = order
+                };
+                numberLabel.BackColor = Color.Green;
+                panel.Controls.Add(numberLabel);
+
+                flowLayoutPanelOrders.Controls.Add(panel);
             }
-            catch (Exception ex)
+        }
+
+        /// <summary>
+        /// 주문 완료 목록 표시
+        /// </summary>
+        private void DisplayCompletedOrders(int[] orders)
+        {
+            flowLayoutPanelCompletedOrders.Controls.Clear();
+            foreach (var order in orders)
             {
-                MessageBox.Show($"알 수 없는 오류: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                var panel = new Panel
+                {
+                    AutoSize = true,
+                    AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                    Padding = new Padding(12),
+                    Margin = new Padding(8),
+                    BorderStyle = BorderStyle.FixedSingle,
+                    MaximumSize = new Size(flowLayoutPanelCompletedOrders.ClientSize.Width - 20, 0)
+                };
+
+                // 주문 번호
+                var numberLabel = new Label
+                {
+                    Text = order.ToString(),
+                    Font = new Font("Segoe UI", 36, FontStyle.Bold),
+                    AutoSize = true,
+                    Cursor = Cursors.Hand,
+                    Tag = order
+                };
+                numberLabel.BackColor = Color.Yellow;
+                panel.Controls.Add(numberLabel);
+
+                flowLayoutPanelCompletedOrders.Controls.Add(panel);
             }
         }
     }

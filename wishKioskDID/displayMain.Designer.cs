@@ -1,4 +1,8 @@
-﻿namespace wishKioskDIDDisplay
+﻿using System.Windows.Forms;
+using System.Xml.Linq;
+using static System.Net.Mime.MediaTypeNames;
+
+namespace wishKioskDIDDisplay
 {
     partial class displayMain
     {
@@ -28,77 +32,80 @@
         /// </summary>
         private void InitializeComponent()
         {
-            orderCompleteLabel = new Label();
-            orderIncompleteLabel = new Label();
-            completeLabel = new Label();
-            preparingLabel = new Label();
+            groupBoxCompleted = new GroupBox();
+            flowLayoutPanelCompletedOrders = new FlowLayoutPanel();
+            groupBoxPreparing = new GroupBox();
+            flowLayoutPanelOrders = new FlowLayoutPanel();
+            groupBoxCompleted.SuspendLayout();
+            groupBoxPreparing.SuspendLayout();
             SuspendLayout();
             // 
-            // orderCompleteLabel
+            // groupBoxCompleted
             // 
-            orderCompleteLabel.AutoSize = true;
-            orderCompleteLabel.BackColor = Color.Lime;
-            orderCompleteLabel.Font = new Font("맑은 고딕", 80F);
-            orderCompleteLabel.Location = new Point(12, 221);
-            orderCompleteLabel.Name = "orderCompleteLabel";
-            orderCompleteLabel.Size = new Size(157, 212);
-            orderCompleteLabel.TabIndex = 0;
-            orderCompleteLabel.Text = "_";
+            groupBoxCompleted.Controls.Add(flowLayoutPanelCompletedOrders);
+            groupBoxCompleted.Dock = DockStyle.Left;
+            groupBoxCompleted.Font = new System.Drawing.Font("맑은 고딕", 20F);
+            groupBoxCompleted.Location = new Point(0, 0);
+            groupBoxCompleted.Name = "groupBoxCompleted";
+            groupBoxCompleted.Size = new Size(250, 723);
+            groupBoxCompleted.TabIndex = 1;
+            groupBoxCompleted.TabStop = false;
+            groupBoxCompleted.Text = "완료";
             // 
-            // orderIncompleteLabel
+            // flowLayoutPanelCompletedOrders
             // 
-            orderIncompleteLabel.AutoSize = true;
-            orderIncompleteLabel.BackColor = Color.Yellow;
-            orderIncompleteLabel.Font = new Font("맑은 고딕", 80F);
-            orderIncompleteLabel.Location = new Point(636, 221);
-            orderIncompleteLabel.Name = "orderIncompleteLabel";
-            orderIncompleteLabel.Size = new Size(1961, 212);
-            orderIncompleteLabel.TabIndex = 1;
-            orderIncompleteLabel.Text = "준비중인 주문이 없습니다";
+            flowLayoutPanelCompletedOrders.AutoScroll = true;
+            flowLayoutPanelCompletedOrders.Dock = DockStyle.Fill;
+            flowLayoutPanelCompletedOrders.FlowDirection = FlowDirection.TopDown;
+            flowLayoutPanelCompletedOrders.Location = new Point(3, 57);
+            flowLayoutPanelCompletedOrders.Name = "flowLayoutPanelCompletedOrders";
+            flowLayoutPanelCompletedOrders.Size = new Size(244, 663);
+            flowLayoutPanelCompletedOrders.TabIndex = 0;
+            flowLayoutPanelCompletedOrders.WrapContents = false;
             // 
-            // completeLabel
+            // groupBoxPreparing
             // 
-            completeLabel.AutoSize = true;
-            completeLabel.Font = new Font("맑은 고딕", 80F);
-            completeLabel.Location = new Point(12, 9);
-            completeLabel.Name = "completeLabel";
-            completeLabel.Size = new Size(409, 212);
-            completeLabel.TabIndex = 2;
-            completeLabel.Text = "완료";
+            groupBoxPreparing.Controls.Add(flowLayoutPanelOrders);
+            groupBoxPreparing.Dock = DockStyle.Fill;
+            groupBoxPreparing.Font = new System.Drawing.Font("맑은 고딕", 20F);
+            groupBoxPreparing.Location = new Point(250, 0);
+            groupBoxPreparing.Name = "groupBoxPreparing";
+            groupBoxPreparing.Size = new Size(879, 723);
+            groupBoxPreparing.TabIndex = 2;
+            groupBoxPreparing.TabStop = false;
+            groupBoxPreparing.Text = "주문 준비중";
             // 
-            // preparingLabel
+            // flowLayoutPanelOrders
             // 
-            preparingLabel.AutoSize = true;
-            preparingLabel.Font = new Font("맑은 고딕", 80F);
-            preparingLabel.Location = new Point(636, 9);
-            preparingLabel.Name = "preparingLabel";
-            preparingLabel.Size = new Size(569, 212);
-            preparingLabel.TabIndex = 3;
-            preparingLabel.Text = "준비중";
+            flowLayoutPanelOrders.AutoScroll = true;
+            flowLayoutPanelOrders.Dock = DockStyle.Fill;
+            flowLayoutPanelOrders.FlowDirection = FlowDirection.TopDown;
+            flowLayoutPanelOrders.Location = new Point(3, 57);
+            flowLayoutPanelOrders.Name = "flowLayoutPanelOrders";
+            flowLayoutPanelOrders.Size = new Size(873, 663);
+            flowLayoutPanelOrders.TabIndex = 0;
+            flowLayoutPanelOrders.WrapContents = false;
             // 
             // displayMain
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1764, 788);
-            Controls.Add(preparingLabel);
-            Controls.Add(completeLabel);
-            Controls.Add(orderCompleteLabel);
-            Controls.Add(orderIncompleteLabel);
+            ClientSize = new Size(1129, 723);
+            Controls.Add(groupBoxPreparing);
+            Controls.Add(groupBoxCompleted);
             FormBorderStyle = FormBorderStyle.None;
             Name = "displayMain";
-            Text = "WISH DID";
+            Text = "WISH Order View";
             WindowState = FormWindowState.Maximized;
-            Load += displayMain_Load;
+            groupBoxCompleted.ResumeLayout(false);
+            groupBoxPreparing.ResumeLayout(false);
             ResumeLayout(false);
-            PerformLayout();
         }
 
         #endregion
-
-        private Label orderCompleteLabel;
-        private Label orderIncompleteLabel;
-        private Label completeLabel;
-        private Label preparingLabel;
+        private System.Windows.Forms.GroupBox groupBoxCompleted;
+        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanelCompletedOrders;
+        private System.Windows.Forms.GroupBox groupBoxPreparing;
+        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanelOrders;
     }
 }
