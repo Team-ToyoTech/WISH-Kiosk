@@ -820,29 +820,37 @@ namespace wishKiosk
 		/// <returns>QR code locations</returns>
 		public static List<(string text, PointF point, SizeF size)> ExtractQrCodesWithSize(Bitmap bitmap)
 		{
-			var results = new List<(string, PointF, SizeF)>();
-			var reader = new ZXing.BarcodeReaderGeneric();
-			var resultArray = reader.DecodeMultiple(bitmap);
-
-			if (resultArray != null)
+			try
 			{
-				foreach (var r in resultArray)
-				{
-					if (r.ResultPoints.Length >= 2)
-					{
-						var pt1 = r.ResultPoints[0];
-						var pt2 = r.ResultPoints[2];
-						float centerX = (pt1.X + pt2.X) / 2;
-						float centerY = (pt1.Y + pt2.Y) / 2;
-						float width = Math.Abs(pt1.X - pt2.X);
-						float height = Math.Abs(pt1.Y - pt2.Y);
+				var results = new List<(string, PointF, SizeF)>();
+				var reader = new ZXing.BarcodeReaderGeneric();
+				var resultArray = reader.DecodeMultiple(bitmap);
 
-						results.Add((r.Text.Trim(), new PointF(centerX, centerY), new SizeF(width, height)));
+				if (resultArray != null)
+				{
+					foreach (var r in resultArray)
+					{
+						if (r.ResultPoints.Length >= 2)
+						{
+							var pt1 = r.ResultPoints[0];
+							var pt2 = r.ResultPoints[2];
+							float centerX = (pt1.X + pt2.X) / 2;
+							float centerY = (pt1.Y + pt2.Y) / 2;
+							float width = Math.Abs(pt1.X - pt2.X);
+							float height = Math.Abs(pt1.Y - pt2.Y);
+
+							results.Add((r.Text.Trim(), new PointF(centerX, centerY), new SizeF(width, height)));
+						}
 					}
 				}
-			}
-			return results;
-		}
+				return results;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"QR 코드 추출 오류: {ex.Message}");
+                return [];
+            }
+        }
 
 		/// <summary>
 		/// ROI를 이미지 크기에 맞게 조정

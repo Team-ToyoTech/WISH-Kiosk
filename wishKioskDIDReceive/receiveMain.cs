@@ -381,7 +381,7 @@ namespace wishKioskDIDReceive
 		{
 			try
 			{
-				var json = await httpClient.GetFromJsonAsync<JsonElement>(serverUrl + "/order/complete/set/" + inputText);
+				var json = await httpClient.GetFromJsonAsync<JsonElement>(serverUrl + "/pay/complete/" + inputText);
 				var status = json.GetProperty("status").ToString();
 				if (status != "success")
 				{

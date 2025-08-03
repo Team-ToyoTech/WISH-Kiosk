@@ -83,35 +83,29 @@ namespace wishKioskDIDDisplay
         {
             try
             {
-                HttpResponseMessage response = await httpClient.GetAsync(serverUrl + "/order/getid");
-                response.EnsureSuccessStatusCode();
+                var resp = await httpClient.GetAsync(serverUrl + "/order/getid");
+                resp.EnsureSuccessStatusCode();
 
-                string incompleteJson = await response.Content.ReadAsStringAsync();
-                var incompleteResult = JsonSerializer.Deserialize<int[]>(incompleteJson);
+                var json = await resp.Content.ReadAsStringAsync();
+                var orders = JsonSerializer.Deserialize<int[]>(json);
 
-                if (incompleteResult != null)
+                if (orders != null)
                 {
-                    if (timeCheck == 0 || !ArrCmp(incompleteResult, incompleteOrderNums))
+                    if (!ArrCmp(orders, incompleteOrderNums))
                     {
-                        incompleteOrderNums = incompleteResult;
-                        orderIncompleteLabel.Text = "";
+                        completeOrderNums = orders;
+                        orderCompleteLabel.Text = "";
                         this.Invoke((Action)(() =>
                         {
-                            if (incompleteResult.Length == 0)
+                            if (orders.Length == 0)
                             {
-                                orderIncompleteLabel.Text = "준비중인 주문이 없습니다";
+                                orderIncompleteLabel.Text = "";
                             }
                             else
                             {
-                                int count = 0;
-                                foreach (int orderNum in incompleteResult)
+                                foreach (int orderNum in orders)
                                 {
-                                    count++;
-                                    orderIncompleteLabel.Text += $" {orderNum} ";
-                                    if (count % 5 == 0)
-                                    {
-                                        orderIncompleteLabel.Text += "\n";
-                                    }
+                                    orderCompleteLabel.Text += $"{orderNum}\n";
                                 }
                             }
                         }));
@@ -122,27 +116,27 @@ namespace wishKioskDIDDisplay
                     MessageBox.Show("서버 응답이 비어 있거나 형식이 올바르지 않습니다.", "파싱 오류", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
 
-                response = await httpClient.GetAsync(serverUrl + "/order/complete/getid");
-                response.EnsureSuccessStatusCode();
+                var compResp = await httpClient.GetAsync(serverUrl + "/order/complete/getid");
+                resp.EnsureSuccessStatusCode();
 
-                string completeJson = await response.Content.ReadAsStringAsync();
-                var completeResult = JsonSerializer.Deserialize<int[]>(completeJson);
+                var compJson = await compResp.Content.ReadAsStringAsync();
+                var compOrders = JsonSerializer.Deserialize<int[]>(compJson);
 
-                if (completeResult != null)
+                if (compOrders != null)
                 {
-                    if (timeCheck == 0 || !ArrCmp(completeResult, completeOrderNums))
+                    if (!ArrCmp(compOrders, completeOrderNums))
                     {
-                        completeOrderNums = completeResult;
+                        completeOrderNums = compOrders;
                         orderCompleteLabel.Text = "";
                         this.Invoke((Action)(() =>
                         {
-                            if (completeResult.Length == 0)
+                            if (compOrders.Length == 0)
                             {
                                 orderIncompleteLabel.Text = "";
                             }
                             else
                             {
-                                foreach (int orderNum in completeResult)
+                                foreach (int orderNum in compOrders)
                                 {
                                     orderCompleteLabel.Text += $"{orderNum}\n";
                                 }
