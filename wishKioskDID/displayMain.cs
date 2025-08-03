@@ -1,5 +1,4 @@
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace wishKioskDIDDisplay
 {
@@ -10,6 +9,7 @@ namespace wishKioskDIDDisplay
         string serverUrl = "http://localhost:4000"; // 실제 서버 주소로 변경 필요
 
         private int[]? incompleteOrderNums, completeOrderNums;
+        private int timeCheck = 0;
 
         public displayMain()
         {
@@ -18,11 +18,22 @@ namespace wishKioskDIDDisplay
 
         private void displayMain_Load(object sender, EventArgs e)
         {
-            while (true)
+            this.Invoke((Action)(() =>
             {
-                _ = FetchAndDisplayValueAsync();
-                Delay(500);
-            }
+                incompleteOrderNums = null;
+                completeOrderNums = null;
+            }));
+
+            System.Windows.Forms.Timer orderTimer = new System.Windows.Forms.Timer
+            {
+                Interval = 500
+            };
+            orderTimer.Tick += async (s, ev) =>
+            {
+                await FetchAndDisplayValueAsync();
+                timeCheck = (timeCheck + 1) % 6;
+            };
+            orderTimer.Start();
         }
 
         private void Delay(int ms)
@@ -38,6 +49,12 @@ namespace wishKioskDIDDisplay
             return;
         }
 
+        /// <summary>
+        /// 배열 비교
+        /// </summary>
+        /// <param name="arr1"></param>
+        /// <param name="arr2"></param>
+        /// <returns></returns>
         private bool ArrCmp(int[]? arr1, int[]? arr2)
         {
             if (arr1 == null || arr2 == null)
@@ -58,6 +75,10 @@ namespace wishKioskDIDDisplay
             return true;
         }
 
+        /// <summary>
+        /// 준비중인 주문, 완료된 주문을 서버에서 가져와 표시
+        /// </summary>
+        /// <returns></returns>
         private async Task FetchAndDisplayValueAsync()
         {
             try
@@ -70,7 +91,7 @@ namespace wishKioskDIDDisplay
 
                 if (incompleteResult != null)
                 {
-                    if (!ArrCmp(incompleteResult, incompleteOrderNums))
+                    if (timeCheck == 0 || !ArrCmp(incompleteResult, incompleteOrderNums))
                     {
                         incompleteOrderNums = incompleteResult;
                         orderIncompleteLabel.Text = "";
@@ -109,7 +130,7 @@ namespace wishKioskDIDDisplay
 
                 if (completeResult != null)
                 {
-                    if (!ArrCmp(completeResult, completeOrderNums))
+                    if (timeCheck == 0 || !ArrCmp(completeResult, completeOrderNums))
                     {
                         completeOrderNums = completeResult;
                         orderCompleteLabel.Text = "";

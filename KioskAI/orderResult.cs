@@ -151,9 +151,9 @@ namespace wishKiosk
 		private void CounterOrderButton_Click(object sender, EventArgs e)
 		{
             _ = SendSelectedMenu();
-            printDoc.PrintPage += printDocument_PrintOrderNumPage;
+            printDoc.PrintPage += printDocument_PrintReceiptPage;
             printDoc.Print();
-            printDoc.PrintPage -= printDocument_PrintOrderNumPage;
+            printDoc.PrintPage -= printDocument_PrintReceiptPage;
             this.Close();
 		}
 
@@ -194,14 +194,14 @@ namespace wishKiosk
         }
 
         /// <summary>
-        /// 주문번호만 출력
+        /// 영수증 출력
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void printDocument_PrintOrderNumPage(object sender, PrintPageEventArgs e)
+        private void printDocument_PrintReceiptPage(object sender, PrintPageEventArgs e)
         {
             float FontSize = 20f;
-			var g = e.Graphics;
+            var g = e.Graphics;
             float left = e.MarginBounds.Left;
             float top = e.MarginBounds.Top;
             float width = e.MarginBounds.Width;
@@ -220,22 +220,79 @@ namespace wishKiosk
 
             using (var font = new Font("Arial", FontSize))
             {
-                string dateLine = "[주 문] " + DateTime.Now.ToString("yyyy-MM-dd  HH:mm");
+                string dateLine = "[미 결 제  주 문] " + DateTime.Now.ToString("yyyy-MM-dd  HH:mm");
                 g.DrawString(dateLine, font, Brushes.Black, left, y);
                 y += lineHeight;
 
                 g.DrawLine(Pens.Black, left, y, left + width, y);
-                y += lineHeight * 3;
+                y += 4;
+
+                g.DrawString("상품명", font, Brushes.Black, left, y);
+                g.DrawString("단가", font, Brushes.Black, left + width * 0.5f, y);
+                g.DrawString("수량", font, Brushes.Black, left + width * 0.7f, y);
+                g.DrawString("금액", font, Brushes.Black, left + width * 0.85f, y);
+                y += lineHeight;
+
+                g.DrawLine(Pens.Black, left, y, left + width, y);
+                y += 4;
+
+                // 주문 항목
+                if (orderItems != null && orderItems.Count > 0)
+                {
+                    foreach (var item in orderItems)
+                    {
+                        g.DrawString(item.Name, font, Brushes.Black, left, y);
+                        g.DrawString(menuPrice[item.Name].ToString("#,0"), font, Brushes.Black, left + width * 0.5f, y);
+                        g.DrawString(item.Count.ToString(), font, Brushes.Black, left + width * 0.7f, y);
+                        int totalPrice = menuPrice[item.Name] * item.Count;
+                        g.DrawString(totalPrice.ToString("#,0"), font, Brushes.Black, left + width * 0.85f, y);
+                        y += lineHeight;
+                    }
+                }
+                else
+                {
+                    g.DrawString("합계", font, Brushes.Black, left, y);
+                    g.DrawString(total.ToString("#,0"), font, Brushes.Black, left + width * 0.85f, y);
+                    y += lineHeight;
+                }
+
+                y += lineHeight * orderItems.Count + 8;
+                g.DrawLine(Pens.Black, left, y, left + width, y);
+                y += lineHeight;
+
+                // 부가세, 합계
+                int tax = total / 11; // 부가세
+                DrawLabelValue(g, font, left, width, y, "부가세", (tax.ToString("#,0")));
+                y += lineHeight;
+                DrawLabelValue(g, font, left, width, y, "결제 예정 금액", (total.ToString("#,0")));
+                y += lineHeight;
 
                 // 주문번호
                 using (var orderFont = new Font("Arial", FontSize + 4, FontStyle.Bold))
                 {
-                    string orderLine = "주문번호: " + (orderNum?.ToString() ?? "알 수 없음");
+                    string orderLine = "주문번호: " + (orderNum.ToString() ?? "알 수 없음");
                     SizeF orderSize = g.MeasureString(orderLine, orderFont);
                     float xOrder = left + (width - orderSize.Width) / 2;
                     g.DrawString(orderLine, orderFont, Brushes.Black, xOrder, y);
                 }
             }
+        }
+
+        /// <summary>
+        /// 프린트 디자인 그리기
+        /// </summary>
+        /// <param name="g"></param>
+        /// <param name="font"></param>
+        /// <param name="left"></param>
+        /// <param name="width"></param>
+        /// <param name="y"></param>
+        /// <param name="label"></param>
+        /// <param name="value"></param>
+        private void DrawLabelValue(Graphics g, Font font, float left, float width, float y, string label, string value)
+        {
+            g.DrawString(label, font, Brushes.Black, left, y);
+            var valueSize = g.MeasureString(value, font);
+            g.DrawString(value, font, Brushes.Black, left + width - valueSize.Width, y);
         }
     }
 }

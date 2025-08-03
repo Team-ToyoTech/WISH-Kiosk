@@ -37,6 +37,7 @@
             // orderCompleteLabel
             // 
             orderCompleteLabel.AutoSize = true;
+            orderCompleteLabel.BackColor = Color.Lime;
             orderCompleteLabel.Font = new Font("맑은 고딕", 80F);
             orderCompleteLabel.Location = new Point(12, 221);
             orderCompleteLabel.Name = "orderCompleteLabel";
@@ -47,6 +48,7 @@
             // orderIncompleteLabel
             // 
             orderIncompleteLabel.AutoSize = true;
+            orderIncompleteLabel.BackColor = Color.Yellow;
             orderIncompleteLabel.Font = new Font("맑은 고딕", 80F);
             orderIncompleteLabel.Location = new Point(636, 221);
             orderIncompleteLabel.Name = "orderIncompleteLabel";
