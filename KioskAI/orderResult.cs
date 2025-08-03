@@ -115,6 +115,7 @@ namespace wishKiosk
 		/// </summary>
 		private void UpdateTotalLabel()
 		{
+            total = 0;
 			for (int i = 0; i < menuNum.Length; i++)
 			{
 				total += price[i] * menuOrderCount[i];
