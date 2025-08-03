@@ -205,42 +205,46 @@ namespace wishKioskDIDReceive
 			}
 		}
 
-		/// <summary>
-		/// 주문 완료 취소
-		/// </summary>
-		private async void cancelLabel_Click(object sender, EventArgs e)
-		{
-			if (sender is Label lbl && lbl.Tag is Order order)
-			{
-				string details = string.Join(
-					Environment.NewLine,
-					order.order.Select(i => $"{i.Name}: {i.Count}")
-				);
+        /// <summary>
+        /// 주문 완료 취소
+        /// </summary>
+        private async void cancelLabel_Click(object sender, EventArgs e)
+        {
+            if (sender is Label lbl && lbl.Tag is Order order)
+            {
+                string details = string.Join(
+                    Environment.NewLine,
+                    order.order.Select(i => $"{i.Name}: {i.Count}")
+                );
 
-				var detailForm = new Form
-				{
-					Text = $"주문 상세 정보 – {order.orderNumber}",
-					Size = new Size(450, 350),
-					FormBorderStyle = FormBorderStyle.FixedDialog,
-					StartPosition = FormStartPosition.CenterParent
-				};
+                var detailForm = new Form
+                {
+                    Text = $"주문 상세 정보 – {order.orderNumber}",
+                    AutoSize = true,
+                    AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                    FormBorderStyle = FormBorderStyle.FixedDialog,
+                    StartPosition = FormStartPosition.CenterParent
+                };
 
-				var detailLabel = new Label
-				{
-					Text = details,
-					Font = new Font("Segoe UI", 16),
-					AutoSize = false,
-					Size = new Size(410, 200),
-					Location = new Point(15, 15)
-				};
-				detailForm.Controls.Add(detailLabel);
+                var detailLabel = new Label
+                {
+                    Text = details,
+                    Font = new Font("Segoe UI", 16),
+                    AutoSize = true,
+                    MaximumSize = new Size(430, 0),
+                    Location = new Point(15, 15)
+                };
+                detailForm.Controls.Add(detailLabel);
+
+                int btnY = detailLabel.Bottom + 15;
+                int startX = 15;
 
                 var btnTake = new Button
                 {
                     Text = "주문 수령",
                     Font = new Font("Segoe UI", 14),
-                    Size = new Size(160, 40),
-                    Location = new Point(70, 240)
+                    Size = new Size(160, 50),
+                    Location = new Point(startX, btnY)
                 };
                 btnTake.Click += async (s, ev) =>
                 {
@@ -250,37 +254,37 @@ namespace wishKioskDIDReceive
                 detailForm.Controls.Add(btnTake);
 
                 var btnComplete = new Button
-				{
-					Text = "완료 취소",
-					Font = new Font("Segoe UI", 14),
-					Size = new Size(160, 40),
-					Location = new Point(70, 240)
-				};
-				btnComplete.Click += async (s, ev) =>
-				{
-					await CancelComplete(order.orderNumber.ToString());
-					detailForm.Close();
-				};
-				detailForm.Controls.Add(btnComplete);
+                {
+                    Text = "완료 취소",
+                    Font = new Font("Segoe UI", 14),
+                    Size = new Size(160, 50),
+                    Location = new Point(btnTake.Right + 10, btnY)
+                };
+                btnComplete.Click += async (s, ev) =>
+                {
+                    await CancelComplete(order.orderNumber.ToString());
+                    detailForm.Close();
+                };
+                detailForm.Controls.Add(btnComplete);
 
-				var btnClose = new Button
-				{
-					Text = "닫기",
-					Font = new Font("Segoe UI", 14),
-					Size = new Size(120, 40),
-					Location = new Point(250, 240)
-				};
-				btnClose.Click += (s, ev) => detailForm.Close();
-				detailForm.Controls.Add(btnClose);
+                var btnClose = new Button
+                {
+                    Text = "닫기",
+                    Font = new Font("Segoe UI", 14),
+                    Size = new Size(120, 50),
+                    Location = new Point(btnComplete.Right + 10, btnY)
+                };
+                btnClose.Click += (s, ev) => detailForm.Close();
+                detailForm.Controls.Add(btnClose);
 
-				detailForm.ShowDialog();
-			}
-		}
+                detailForm.ShowDialog();
+            }
+        }
 
-		/// <summary>
-		/// 주문 완료 취소 서버 호출
-		/// </summary>
-		private async Task CancelComplete(string inputText)
+        /// <summary>
+        /// 주문 완료 취소 서버 호출
+        /// </summary>
+        private async Task CancelComplete(string inputText)
 		{
 			try
 			{
@@ -348,7 +352,7 @@ namespace wishKioskDIDReceive
 				{
 					Text = "주문 완료",
 					Font = new Font("Segoe UI", 14),
-					Size = new Size(160, 40),
+					Size = new Size(160, 50),
 					Location = new Point(70, 240)
 				};
 				btnComplete.Click += async (s, ev) =>
@@ -362,7 +366,7 @@ namespace wishKioskDIDReceive
 				{
 					Text = "닫기",
 					Font = new Font("Segoe UI", 14),
-					Size = new Size(120, 40),
+					Size = new Size(120, 50),
 					Location = new Point(250, 240)
 				};
 				btnClose.Click += (s, ev) => detailForm.Close();
@@ -372,12 +376,34 @@ namespace wishKioskDIDReceive
 			}
 		}
 
-		/// <summary>
-		/// 주문 완료 처리
-		/// </summary>
-		/// <param name="inputText"></param>
-		/// <returns></returns>
-		private async Task CallComplete(string inputText)
+        /// <summary>
+        /// 주문 완료 처리
+        /// </summary>
+        /// <param name="inputText"></param>
+        /// <returns></returns>
+        private async Task CallComplete(string inputText)
+        {
+            try
+            {
+                var json = await httpClient.GetFromJsonAsync<JsonElement>(serverUrl + "/order/complete/set/" + inputText);
+                var status = json.GetProperty("status").ToString();
+                if (status != "success")
+                {
+                    MessageBox.Show("잘못된 주문 번호입니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"오류: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>
+        /// 카운터 주문 완료 처리
+        /// </summary>
+        /// <param name="inputText"></param>
+        /// <returns></returns>
+        private async Task CallCounterComplete(string inputText)
 		{
 			try
 			{
@@ -399,7 +425,7 @@ namespace wishKioskDIDReceive
 			string inputText = Interaction.InputBox("주문번호를 입력하세요:", "카운터 결제 확인");
 			if (!string.IsNullOrWhiteSpace(inputText))
 			{
-				_ = CallComplete(inputText);
+				_ = CallCounterComplete(inputText);
 			}
 		}
 	}

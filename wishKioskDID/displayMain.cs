@@ -31,7 +31,7 @@ namespace wishKioskDIDDisplay
             orderTimer.Tick += async (s, ev) =>
             {
                 await FetchAndDisplayValueAsync();
-                timeCheck = (timeCheck + 1) % 6;
+                timeCheck = (timeCheck + 1) % 4;
             };
             orderTimer.Start();
         }
@@ -132,7 +132,7 @@ namespace wishKioskDIDDisplay
                         {
                             if (compOrders.Length == 0)
                             {
-                                orderIncompleteLabel.Text = "";
+                                orderCompleteLabel.Text = "";
                             }
                             else
                             {
