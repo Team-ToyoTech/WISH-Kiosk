@@ -1,5 +1,6 @@
 ﻿using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
+using Microsoft.VisualBasic;
 using Newtonsoft.Json;
 using QRCoder;
 using System.Diagnostics;
@@ -7,7 +8,7 @@ using System.Drawing.Imaging;
 using System.Drawing.Printing;
 using System.IO;
 using System.Text;
-using System.Windows.Controls;
+using System.Security.Cryptography;
 using WIA;
 using ZXing;
 
@@ -26,7 +27,8 @@ namespace wishKiosk
 		public int digitCount = 3; // 숫자 칸 개수
 		public readonly string menuFilePath = "menu.csv";
 		public readonly string digitFilePath = "digit.dat";
-		public Dictionary<string, int> menuPrice = [];
+		private readonly string passwordFilePath = "password.dat";
+        public Dictionary<string, int> menuPrice = [];
 
 		private string[]? menu;
 		private int[] price;
@@ -77,7 +79,7 @@ namespace wishKiosk
 					menuList.Add(menuName);
 					priceList.Add(priceValue);
 					menuPrice[menuName] = priceValue;
-                }
+				}
 				catch
 				{
 					MessageBox.Show($"{i}행의 가격이 잘못된 형식입니다.");
@@ -93,8 +95,8 @@ namespace wishKiosk
 		{
 			printDoc.PrintPage += printDocument_PrintPage;
 			printDoc.Print();
-            printDoc.PrintPage -= printDocument_PrintPage;
-        }
+			printDoc.PrintPage -= printDocument_PrintPage;
+		}
 
 		/// <summary>
 		/// 프린트할 페이지 제작
@@ -212,14 +214,52 @@ namespace wishKiosk
 			return qrCode.GetGraphic(20);
 		}
 
-		private void settingsButton_Click(object sender, EventArgs e)
+        /// <summary>
+        /// 문자열을 SHA256 해싱하여 16진수 문자열 반환
+        /// </summary>
+        /// <param name="input">original str</param>
+        /// <returns>hash str</returns>
+        public static string Sha256Hash(string input)
+        {
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                byte[] data = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));
+
+                var sb = new StringBuilder();
+                foreach (byte b in data)
+                    sb.Append(b.ToString("x2"));
+
+                return sb.ToString();
+            }
+        }
+
+        private void settingsButton_Click(object sender, EventArgs e)
 		{
-			settings Settings = new()
+			if (!File.Exists(passwordFilePath))
+			{
+				MessageBox.Show($"{passwordFilePath} 파일이 존재하지 않습니다.");
+                using (var writer = new StreamWriter(passwordFilePath, false, Encoding.UTF8))
+                {
+                    writer.WriteLine(Sha256Hash("0000"));
+                }
+                return;
+            }
+
+			string? passwordHash = File.ReadAllText(passwordFilePath).Trim();
+            string input = Interaction.InputBox("비밀번호를 입력하세요: ", "비밀번호");
+			if (passwordHash != Sha256Hash(input))
+			{
+				MessageBox.Show("비밀번호가 일치하지 않습니다.");
+				return;
+            }
+
+            settings Settings = new()
 			{
 				printDoc = printDoc,
 				digitCount = digitCount,
-				WishKiosk = this
-			};
+				WishKiosk = this,
+				passwordFilePath = passwordFilePath
+            };
 			if (!File.Exists(menuFilePath))
 			{
 				MessageBox.Show($"{menuFilePath} 파일이 존재하지 않습니다.");
@@ -271,8 +311,8 @@ namespace wishKiosk
 					int priceValue = int.Parse(splt[1]);
 					menuList.Add(menuName);
 					priceList.Add(priceValue);
-                    menuPrice[menuName] = priceValue;
-                }
+					menuPrice[menuName] = priceValue;
+				}
 				catch
 				{
 					MessageBox.Show($"{i}행의 가격이 잘못된 형식입니다.");
@@ -759,7 +799,7 @@ namespace wishKiosk
 			int[] menuNums = yTable.Keys.ToArray();
 			orderResult orderRes = new(menuMap, menuNums, price, orderCnts, menuPrice);
 			orderRes.printDoc = printDoc;
-            orderRes.Show();
+			orderRes.Show();
 
 			bitmap.Dispose();
 		}
@@ -827,8 +867,8 @@ namespace wishKiosk
 			catch
 			{
 				MessageBox.Show("모델이 없습니다.");
-            }
-        }
+			}
+		}
 
 		static int t = 0;
 		/// <summary>

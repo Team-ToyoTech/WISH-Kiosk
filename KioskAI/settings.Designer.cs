@@ -30,6 +30,7 @@
         {
             printSettingsButton = new Button();
             menuButton = new Button();
+            passwordChangeButton = new Button();
             SuspendLayout();
             // 
             // printSettingsButton
@@ -52,11 +53,22 @@
             menuButton.UseVisualStyleBackColor = true;
             menuButton.Click += menuButton_Click;
             // 
+            // passwordChangeButton
+            // 
+            passwordChangeButton.Location = new Point(316, 12);
+            passwordChangeButton.Name = "passwordChangeButton";
+            passwordChangeButton.Size = new Size(146, 140);
+            passwordChangeButton.TabIndex = 2;
+            passwordChangeButton.Text = "비밀번호 변경";
+            passwordChangeButton.UseVisualStyleBackColor = true;
+            passwordChangeButton.Click += passwordChangeButton_Click;
+            // 
             // settings
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(323, 164);
+            ClientSize = new Size(473, 164);
+            Controls.Add(passwordChangeButton);
             Controls.Add(menuButton);
             Controls.Add(printSettingsButton);
             Name = "settings";
@@ -69,5 +81,6 @@
 
         private Button printSettingsButton;
         private Button menuButton;
+        private Button passwordChangeButton;
     }
 }

@@ -1,5 +1,7 @@
-﻿using System.Drawing.Printing;
+﻿using Microsoft.VisualBasic;
+using System.Drawing.Printing;
 using System.IO;
+using System.Text;
 
 namespace wishKiosk
 {
@@ -9,6 +11,7 @@ namespace wishKiosk
         public int digitCount;
         public string? menuPath;
         public wishKiosk? WishKiosk;
+        public string? passwordFilePath;
 
         public settings()
         {
@@ -53,6 +56,22 @@ namespace wishKiosk
                 throw new Exception("WishKiosk 인스턴스가 설정되지 않았습니다."); // MessageBox로 표시 고려, 사용자에게 노출?
             }
             WishKiosk.getData(this);
+        }
+
+        private void passwordChangeButton_Click(object sender, EventArgs e)
+        {
+            string input = Interaction.InputBox("새 비밀번호를 입력하세요: ", "비밀번호 변경");
+            if (string.IsNullOrEmpty(input))
+            {
+                MessageBox.Show("비밀번호는 비워둘 수 없습니다.");
+                return;
+            }
+
+            using (var writer = new StreamWriter(passwordFilePath, false, Encoding.UTF8))
+            {
+                writer.WriteLine(wishKiosk.Sha256Hash(input));
+            }
+            return;
         }
     }
 }
