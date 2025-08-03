@@ -300,8 +300,6 @@ namespace wishKiosk
                 DrawLabelValue(g, font, left, width, y, "부가세", (tax.ToString("#,0")));
                 y += lineHeight;
                 DrawLabelValue(g, font, left, width, y, "결제 금액", (totalPrice.ToString("#,0")));
-                y += lineHeight;
-                DrawLabelValue(g, font, left, width, y, "카카오페이", (totalPrice.ToString("#,0")));
                 y += lineHeight * 3;
 
                 // 주문번호
