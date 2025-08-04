@@ -70,7 +70,11 @@ namespace wishKioskDIDReceive
 			return true;
 		}
 
-		private async Task GetOrders()
+        /// <summary>
+        /// 주문 목록(준비중, 완료) 가져오기
+        /// </summary>
+        /// <returns></returns>
+        private async Task GetOrders()
 		{
 			try
 			{
@@ -105,10 +109,11 @@ namespace wishKioskDIDReceive
 			}
 		}
 
-		/// <summary>
-		/// 주문 목록 표시
-		/// </summary>
-		private void DisplayOrders(List<Order> orders)
+        /// <summary>
+        /// 주문 목록 표시
+        /// </summary>
+        /// <param name="orders"></param>
+        private void DisplayOrders(List<Order> orders)
 		{
 			flowLayoutPanelOrders.Controls.Clear();
 			foreach (var order in orders)
@@ -155,10 +160,11 @@ namespace wishKioskDIDReceive
 			}
 		}
 
-		/// <summary>
-		/// 주문 완료 목록 표시
-		/// </summary>
-		private void DisplayCompletedOrders(List<Order> orders)
+        /// <summary>
+        /// 주문 완료 목록 표시
+        /// </summary>
+        /// <param name="orders"></param>
+        private void DisplayCompletedOrders(List<Order> orders)
 		{
 			flowLayoutPanelCompletedOrders.Controls.Clear();
 			foreach (var order in orders)
@@ -205,9 +211,11 @@ namespace wishKioskDIDReceive
 			}
 		}
 
-        /// <summary>
-        /// 주문 완료 취소
-        /// </summary>
+		/// <summary>
+		/// 주문 완료 취소
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
         private async void cancelLabel_Click(object sender, EventArgs e)
         {
             if (sender is Label lbl && lbl.Tag is Order order)
@@ -282,8 +290,10 @@ namespace wishKioskDIDReceive
         }
 
         /// <summary>
-        /// 주문 완료 취소 서버 호출
-        /// </summary>
+		/// 주문 완료 취소 서버 호출
+		/// </summary>
+		/// <param name="inputText"></param>
+		/// <returns></returns>
         private async Task CancelComplete(string inputText)
 		{
 			try
@@ -301,10 +311,12 @@ namespace wishKioskDIDReceive
 			}
 		}
 
-		/// <summary>
-		/// 주문 완료 취소 서버 호출
-		/// </summary>
-		private async Task OrderTaken(string inputText)
+        /// <summary>
+        /// 주문 수령 서버 호출
+        /// </summary>
+        /// <param name="inputText"></param>
+        /// <returns></returns>
+        private async Task OrderTaken(string inputText)
 		{
 			try
 			{

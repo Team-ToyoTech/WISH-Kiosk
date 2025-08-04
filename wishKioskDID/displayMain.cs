@@ -4,7 +4,7 @@ namespace wishKioskDIDDisplay
 {
     public partial class displayMain : Form
     {
-        private readonly HttpClient httpClient = new HttpClient();
+        private readonly HttpClient httpClient = new();
         private readonly string serverUrl = "http://localhost:4000"; // 실제 서버 주소로 변경
 
         int[]? prevOrder, prevCompletedOrder;
@@ -51,6 +51,10 @@ namespace wishKioskDIDDisplay
             return true;
         }
 
+        /// <summary>
+        /// 주문 번호 목록(준비중, 완료) 가져오기
+        /// </summary>
+        /// <returns></returns>
         private async Task GetOrders()
         {
             try
@@ -89,6 +93,7 @@ namespace wishKioskDIDDisplay
         /// <summary>
         /// 주문 목록 표시
         /// </summary>
+        /// <param name="orders"></param>
         private void DisplayOrders(int[] orders)
         {
             flowLayoutPanelOrders.Controls.Clear();
@@ -123,6 +128,7 @@ namespace wishKioskDIDDisplay
         /// <summary>
         /// 주문 완료 목록 표시
         /// </summary>
+        /// <param name="orders"></param>
         private void DisplayCompletedOrders(int[] orders)
         {
             flowLayoutPanelCompletedOrders.Controls.Clear();

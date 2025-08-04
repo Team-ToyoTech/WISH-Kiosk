@@ -53,7 +53,7 @@
             // 
             groupBoxCompleted.Controls.Add(flowLayoutPanelCompletedOrders);
             groupBoxCompleted.Dock = DockStyle.Left;
-            groupBoxCompleted.Font = new Font("맑은 고딕", 20F);
+            groupBoxCompleted.Font = new Font("맑은 고딕", 30F);
             groupBoxCompleted.Location = new Point(0, 106);
             groupBoxCompleted.Name = "groupBoxCompleted";
             groupBoxCompleted.Size = new Size(250, 617);
@@ -66,9 +66,9 @@
             flowLayoutPanelCompletedOrders.AutoScroll = true;
             flowLayoutPanelCompletedOrders.Dock = DockStyle.Fill;
             flowLayoutPanelCompletedOrders.FlowDirection = FlowDirection.TopDown;
-            flowLayoutPanelCompletedOrders.Location = new Point(3, 57);
+            flowLayoutPanelCompletedOrders.Location = new Point(3, 83);
             flowLayoutPanelCompletedOrders.Name = "flowLayoutPanelCompletedOrders";
-            flowLayoutPanelCompletedOrders.Size = new Size(244, 557);
+            flowLayoutPanelCompletedOrders.Size = new Size(244, 531);
             flowLayoutPanelCompletedOrders.TabIndex = 0;
             flowLayoutPanelCompletedOrders.WrapContents = false;
             // 
@@ -76,7 +76,7 @@
             // 
             groupBoxPreparing.Controls.Add(flowLayoutPanelOrders);
             groupBoxPreparing.Dock = DockStyle.Fill;
-            groupBoxPreparing.Font = new Font("맑은 고딕", 20F);
+            groupBoxPreparing.Font = new Font("맑은 고딕", 30F);
             groupBoxPreparing.Location = new Point(250, 106);
             groupBoxPreparing.Name = "groupBoxPreparing";
             groupBoxPreparing.Size = new Size(879, 617);
@@ -89,9 +89,9 @@
             flowLayoutPanelOrders.AutoScroll = true;
             flowLayoutPanelOrders.Dock = DockStyle.Fill;
             flowLayoutPanelOrders.FlowDirection = FlowDirection.TopDown;
-            flowLayoutPanelOrders.Location = new Point(3, 57);
+            flowLayoutPanelOrders.Location = new Point(3, 83);
             flowLayoutPanelOrders.Name = "flowLayoutPanelOrders";
-            flowLayoutPanelOrders.Size = new Size(873, 557);
+            flowLayoutPanelOrders.Size = new Size(873, 531);
             flowLayoutPanelOrders.TabIndex = 0;
             flowLayoutPanelOrders.WrapContents = false;
             // 
