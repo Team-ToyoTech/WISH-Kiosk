@@ -149,12 +149,12 @@ namespace wishKioskDIDDisplay
 				var numberLabel = new Label
 				{
 					Text = order.ToString(),
-					Font = new Font("Segoe UI", 50, FontStyle.Bold),
+					Font = new Font("Segoe UI", 70, FontStyle.Bold),
 					AutoSize = true,
 					Cursor = Cursors.Hand,
 					Tag = order
 				};
-				numberLabel.BackColor = Color.Green;
+				numberLabel.BackColor = Color.Yellow;
 				panel.Controls.Add(numberLabel);
 
 				flowLayoutPanelOrders.Controls.Add(panel);
@@ -184,12 +184,12 @@ namespace wishKioskDIDDisplay
 				var numberLabel = new Label
 				{
 					Text = order.ToString(),
-					Font = new Font("Segoe UI", 50, FontStyle.Bold),
+					Font = new Font("Segoe UI", 70, FontStyle.Bold),
 					AutoSize = true,
 					Cursor = Cursors.Hand,
 					Tag = order
 				};
-				numberLabel.BackColor = Color.Yellow;
+				numberLabel.BackColor = Color.Lime;
 				panel.Controls.Add(numberLabel);
 
 				flowLayoutPanelCompletedOrders.Controls.Add(panel);

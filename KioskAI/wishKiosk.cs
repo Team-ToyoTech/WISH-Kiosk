@@ -28,6 +28,8 @@ namespace wishKiosk
 		public readonly string menuFilePath = "menu.csv";
 		public readonly string digitFilePath = "digit.dat";
 		private readonly string passwordFilePath = "password.dat";
+		private readonly static string modelFilePath = "onnx_model/tmnist_model_64.onnx";
+		private readonly static string labelsFilePath = "onnx_model/labels.json";
         public Dictionary<string, int> menuPrice = [];
 
 		private string[]? menu;
@@ -41,14 +43,21 @@ namespace wishKiosk
 
 		private void wishKiosk_Load(object sender, EventArgs e)
 		{
-			if (!File.Exists(digitFilePath))
+			if (!File.Exists(modelFilePath) || !File.Exists(labelsFilePath))
+			{
+				MessageBox.Show("파일이 존재하지 않습니다.\nonnx_model 폴더를 실행 경로로 복사하세요.");
+				this.Close();
+				return;
+            }
+
+            if (!File.Exists(digitFilePath))
 			{
 				File.WriteAllText(digitFilePath, digitCount.ToString());
 			}
 			else
 			{
 				string digitTxt = File.ReadAllText(digitFilePath);
-				if (isNumber(digitTxt))
+				if (IsNumber(digitTxt))
 				{
 					digitCount = int.Parse(digitTxt);
 				}
@@ -877,22 +886,22 @@ namespace wishKiosk
 		{
 			try
 			{
-				_session = new InferenceSession("tmnist_model_64.onnx");
-				_labels = JsonConvert.DeserializeObject<string[]>(File.ReadAllText("labels.json"));
+                _session = new InferenceSession(modelFilePath);
+				_labels = JsonConvert.DeserializeObject<string[]>(File.ReadAllText(labelsFilePath));
 			}
 			catch
 			{
-				MessageBox.Show("모델이 없습니다.");
-			}
+				MessageBox.Show("모델이 존재하지 않습니다.\nonnx_model 폴더를 실행 경로로 복사하세요.");
+            }
 		}
 
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="bitmap"></param>
-		/// <param name="roi"></param>
-		/// <returns></returns>
-		public static string OCRDigit(Bitmap bitmap, Rectangle roi)
+        /// <summary>
+        /// OCR로 숫자 인식
+        /// </summary>
+        /// <param name="bitmap"></param>
+        /// <param name="roi"></param>
+        /// <returns>label</returns>
+        public static string OCRDigit(Bitmap bitmap, Rectangle roi)
 		{
 			using (var memoryStream = new MemoryStream())
 			{
@@ -1034,7 +1043,13 @@ namespace wishKiosk
 			return null;
 		}
 
-		private static void SetWiaProperty(Item item, int id, object value)
+        /// <summary>
+        /// WIA 속성 설정
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="id"></param>
+        /// <param name="value"></param>
+        private static void SetWiaProperty(Item item, int id, object value)
 		{
 			foreach (Property prop in item.Properties)
 			{
@@ -1046,7 +1061,7 @@ namespace wishKiosk
 			}
 		}
 
-		private bool isNumber(string s)
+		private bool IsNumber(string s)
 		{
 			foreach (char c in s)
 			{

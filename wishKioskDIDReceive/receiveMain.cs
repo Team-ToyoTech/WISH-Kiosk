@@ -1,6 +1,7 @@
 using Microsoft.VisualBasic;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Media;
 
 namespace wishKioskDIDReceive
 {
@@ -14,7 +15,9 @@ namespace wishKioskDIDReceive
 
 		List<Order>? prevOrder, prevCompletedOrder;
 
-		public receiveMain()
+        private readonly string soundFilePath = "sound.wav";
+
+        public receiveMain()
 		{
 			InitializeComponent();
 			this.Load += ReceiveMain_Load;
@@ -93,7 +96,19 @@ namespace wishKioskDIDReceive
 				if (orders != null && !OrderCmp(orders, prevOrder))
 				{
 					DisplayOrders(orders);
-					prevOrder = orders;
+                    if (prevOrder != null)
+                    {
+                        foreach (var order in orders)
+                        {
+                            if (!prevOrder.Contains(order))
+                            {
+                                SoundPlayer player = new SoundPlayer(soundFilePath);
+                                player.Load();
+                                player.Play(); // async
+                            }
+                        }
+                    }
+                    prevOrder = orders;
 				}
 				if (completeOrders != null && !OrderCmp(completeOrders, prevCompletedOrder))
 				{
@@ -101,13 +116,25 @@ namespace wishKioskDIDReceive
 					prevCompletedOrder = completeOrders;
 				}
 			}
-			catch
+			catch (HttpRequestException ex)
 			{
-				MessageBox.Show("서버와 연결에 실패했습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				MessageBox.Show($"서버 연결 실패: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				flowLayoutPanelOrders.Controls.Clear();
 				flowLayoutPanelCompletedOrders.Controls.Clear();
 			}
-		}
+			catch (JsonException ex)
+			{
+				MessageBox.Show($"JSON 파싱 오류: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				flowLayoutPanelOrders.Controls.Clear();
+				flowLayoutPanelCompletedOrders.Controls.Clear();
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show($"알 수 없는 오류: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				flowLayoutPanelOrders.Controls.Clear();
+				flowLayoutPanelCompletedOrders.Controls.Clear();
+            }
+        }
 
         /// <summary>
         /// 주문 목록 표시
@@ -137,7 +164,7 @@ namespace wishKioskDIDReceive
 					Cursor = Cursors.Hand,
 					Tag = order
 				};
-				numberLabel.BackColor = Color.Green;
+				numberLabel.BackColor = Color.Yellow;
 				numberLabel.Click += numberLabel_Click;
 				panel.Controls.Add(numberLabel);
 
@@ -188,7 +215,7 @@ namespace wishKioskDIDReceive
 					Cursor = Cursors.Hand,
 					Tag = order
 				};
-				numberLabel.BackColor = Color.Yellow;
+				numberLabel.BackColor = Color.Lime;
 				numberLabel.Click += cancelLabel_Click;
 				panel.Controls.Add(numberLabel);
 

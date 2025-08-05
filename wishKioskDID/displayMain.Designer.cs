@@ -47,7 +47,7 @@ namespace wishKioskDIDDisplay
             groupBoxCompleted.Font = new System.Drawing.Font("맑은 고딕", 30F);
             groupBoxCompleted.Location = new Point(0, 0);
             groupBoxCompleted.Name = "groupBoxCompleted";
-            groupBoxCompleted.Size = new Size(250, 723);
+            groupBoxCompleted.Size = new Size(365, 723);
             groupBoxCompleted.TabIndex = 1;
             groupBoxCompleted.TabStop = false;
             groupBoxCompleted.Text = "완료";
@@ -59,7 +59,7 @@ namespace wishKioskDIDDisplay
             flowLayoutPanelCompletedOrders.FlowDirection = FlowDirection.TopDown;
             flowLayoutPanelCompletedOrders.Location = new Point(3, 83);
             flowLayoutPanelCompletedOrders.Name = "flowLayoutPanelCompletedOrders";
-            flowLayoutPanelCompletedOrders.Size = new Size(244, 637);
+            flowLayoutPanelCompletedOrders.Size = new Size(359, 637);
             flowLayoutPanelCompletedOrders.TabIndex = 0;
             flowLayoutPanelCompletedOrders.WrapContents = false;
             // 
@@ -68,9 +68,9 @@ namespace wishKioskDIDDisplay
             groupBoxPreparing.Controls.Add(flowLayoutPanelOrders);
             groupBoxPreparing.Dock = DockStyle.Fill;
             groupBoxPreparing.Font = new System.Drawing.Font("맑은 고딕", 30F);
-            groupBoxPreparing.Location = new Point(250, 0);
+            groupBoxPreparing.Location = new Point(365, 0);
             groupBoxPreparing.Name = "groupBoxPreparing";
-            groupBoxPreparing.Size = new Size(879, 723);
+            groupBoxPreparing.Size = new Size(764, 723);
             groupBoxPreparing.TabIndex = 2;
             groupBoxPreparing.TabStop = false;
             groupBoxPreparing.Text = "주문 준비중";
@@ -82,7 +82,7 @@ namespace wishKioskDIDDisplay
             flowLayoutPanelOrders.FlowDirection = FlowDirection.TopDown;
             flowLayoutPanelOrders.Location = new Point(3, 83);
             flowLayoutPanelOrders.Name = "flowLayoutPanelOrders";
-            flowLayoutPanelOrders.Size = new Size(873, 637);
+            flowLayoutPanelOrders.Size = new Size(758, 637);
             flowLayoutPanelOrders.TabIndex = 0;
             flowLayoutPanelOrders.WrapContents = false;
             // 
