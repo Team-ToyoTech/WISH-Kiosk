@@ -13,10 +13,9 @@ namespace wishKioskDIDDisplay
 		public displayMain()
 		{
 			InitializeComponent();
-			this.Load += ReceiveMain_Load;
 		}
 
-		private void ReceiveMain_Load(object sender, EventArgs e)
+		private void DisplayMain_Load(object sender, EventArgs e)
 		{
 			prevOrder = null;
 			prevCompletedOrder = null;

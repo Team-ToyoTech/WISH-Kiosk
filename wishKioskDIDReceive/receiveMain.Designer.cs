@@ -106,6 +106,7 @@
             FormBorderStyle = FormBorderStyle.None;
             Name = "receiveMain";
             Text = "WISH Order View";
+            Load += ReceiveMain_Load;
             WindowState = FormWindowState.Maximized;
             groupBoxCompleted.ResumeLayout(false);
             groupBoxPreparing.ResumeLayout(false);

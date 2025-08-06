@@ -20,7 +20,6 @@ namespace wishKioskDIDReceive
         public receiveMain()
 		{
 			InitializeComponent();
-			this.Load += ReceiveMain_Load;
 		}
 
 		private void ReceiveMain_Load(object sender, EventArgs e)
