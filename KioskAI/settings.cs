@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualBasic;
+using System.Diagnostics;
 using System.Drawing.Printing;
 using System.IO;
 using System.Text;
@@ -83,6 +84,122 @@ namespace wishKiosk
                 writer.WriteLine(wishKiosk.Sha256Hash(input));
             }
             return;
+        }
+
+        private void infoButton_Click(object sender, EventArgs e)
+        {
+            ShowMid(
+                "Project INFO\n\n" +
+                "Made By Team ToyoTech\n" +
+                "www.toyotech.dev\n\n" +
+                "WI:SH KIOSK\n" +
+                "Write It: Scan && Handle\n" +
+                "www.github.com/Team-ToyoTech/WISH-Kiosk\n", "WISH INFO");
+        }
+
+        /// <summary>
+        /// 가운데 정렬, 링크 포함된 MessageBox
+        /// </summary>
+        /// <param name="text">contents</param>
+        /// <param name="caption">title</param>
+        private static void ShowMid(string text, string caption = "")
+        {
+            using (Form dlg = new Form())
+            {
+                dlg.Text = caption;
+                dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
+                dlg.StartPosition = FormStartPosition.CenterParent;
+                dlg.MaximizeBox = dlg.MinimizeBox = false;
+                dlg.ShowInTaskbar = false;
+                dlg.AutoSize = true;
+                dlg.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+                dlg.Padding = new Padding(10);
+
+                dlg.Font = new Font(dlg.Font.FontFamily, 12f, FontStyle.Regular);
+
+                FlowLayoutPanel contentPanel = BuildContentPanel(text);
+                contentPanel.Anchor = AnchorStyles.None;
+
+                var layout = new TableLayoutPanel
+                {
+                    AutoSize = true,
+                    AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                    ColumnCount = 1,
+                    RowCount = 1,
+                    Dock = DockStyle.Fill
+                };
+                layout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+                layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+                layout.Controls.Add(contentPanel, 0, 0);
+
+                dlg.Controls.Add(layout);
+                dlg.ShowDialog();
+            }
+        }
+
+        /// <summary>
+        /// text to labels, links to linkLabels
+        /// </summary>
+        /// <param name="text">contents</param>
+        /// <returns></returns>
+        private static FlowLayoutPanel BuildContentPanel(string text)
+        {
+            var panel = new FlowLayoutPanel
+            {
+                FlowDirection = FlowDirection.TopDown,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                WrapContents = false,
+                Dock = DockStyle.None,
+                Margin = new Padding(0)
+            };
+
+            foreach (var raw in text.Split('\n'))
+            {
+                string line = raw.TrimEnd('\r');
+                if (string.IsNullOrWhiteSpace(line))
+                {
+                    panel.Controls.Add(new System.Windows.Forms.Label { AutoSize = true, Height = 6 });
+                    continue;
+                }
+
+                bool isUrl = line.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                    line.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ||
+                    line.StartsWith("www.", StringComparison.OrdinalIgnoreCase);
+
+                if (isUrl)
+                {
+                    string url = line.StartsWith("http", StringComparison.OrdinalIgnoreCase) ? line : $"https://{line}";
+
+                    var link = new LinkLabel
+                    {
+                        Text = line,
+                        AutoSize = true,
+                        TextAlign = ContentAlignment.MiddleCenter,
+                        LinkBehavior = LinkBehavior.AlwaysUnderline,
+                        Margin = new Padding(0, 2, 0, 2)
+                    };
+                    link.LinkClicked += (_, __) =>
+                    {
+                        Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+                    };
+                    link.Anchor = AnchorStyles.None;
+                    panel.Controls.Add(link);
+                }
+                else
+                {
+                    panel.Controls.Add(new System.Windows.Forms.Label
+                    {
+                        Text = line,
+                        AutoSize = true,
+                        TextAlign = ContentAlignment.MiddleCenter,
+                        MaximumSize = new Size(400, 0),
+                        Margin = new Padding(0, 2, 0, 2),
+                        Anchor = AnchorStyles.None
+                    });
+                }
+            }
+            return panel;
         }
     }
 }

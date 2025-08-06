@@ -1,16 +1,15 @@
-﻿namespace wishKiosk
+﻿using System.ComponentModel;
+
+namespace wishKiosk
 {
     partial class wishKiosk
     {
-        /// <summary>
-        ///  Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel;
+        private Button printButton;
+        private Button scanButton;
+        private Button settingsButton;
 
-        /// <summary>
-        ///  Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -22,90 +21,83 @@
 
         #region Windows Form Designer generated code
 
-        /// <summary>
-        ///  Required method for Designer support - do not modify
-        ///  the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(wishKiosk));
+            ComponentResourceManager resources = new ComponentResourceManager(typeof(wishKiosk));
+            tableLayoutPanel = new TableLayoutPanel();
             printButton = new Button();
-            settingsButton = new Button();
             scanButton = new Button();
-            infoButton = new Button();
+            settingsButton = new Button();
+            tableLayoutPanel.SuspendLayout();
             SuspendLayout();
+            // 
+            // tableLayoutPanel
+            // 
+            tableLayoutPanel.ColumnCount = 3;
+            tableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 49.8F));
+            tableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 49.8F));
+            tableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 0.4F));
+            tableLayoutPanel.Controls.Add(printButton, 0, 0);
+            tableLayoutPanel.Controls.Add(scanButton, 1, 0);
+            tableLayoutPanel.Controls.Add(settingsButton, 2, 0);
+            tableLayoutPanel.Dock = DockStyle.Fill;
+            tableLayoutPanel.Location = new Point(0, 0);
+            tableLayoutPanel.Name = "tableLayoutPanel";
+            tableLayoutPanel.RowCount = 1;
+            tableLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tableLayoutPanel.Size = new Size(1220, 792);
+            tableLayoutPanel.TabIndex = 0;
             // 
             // printButton
             // 
             printButton.BackgroundImage = (Image)resources.GetObject("printButton.BackgroundImage");
             printButton.BackgroundImageLayout = ImageLayout.Zoom;
-            printButton.Location = new Point(11, 74);
-            printButton.Margin = new Padding(2);
+            printButton.Dock = DockStyle.Fill;
+            printButton.Location = new Point(3, 3);
             printButton.Name = "printButton";
-            printButton.Size = new Size(295, 167);
+            printButton.Size = new Size(601, 786);
             printButton.TabIndex = 0;
             printButton.UseVisualStyleBackColor = true;
             printButton.Click += printButton_Click;
-            // 
-            // settingsButton
-            // 
-            settingsButton.BackColor = Color.Transparent;
-            settingsButton.BackgroundImage = (Image)resources.GetObject("settingsButton.BackgroundImage");
-            settingsButton.BackgroundImageLayout = ImageLayout.Zoom;
-            settingsButton.Location = new Point(11, 11);
-            settingsButton.Margin = new Padding(2);
-            settingsButton.Name = "settingsButton";
-            settingsButton.Size = new Size(57, 59);
-            settingsButton.TabIndex = 1;
-            settingsButton.UseVisualStyleBackColor = false;
-            settingsButton.Click += settingsButton_Click;
             // 
             // scanButton
             // 
             scanButton.BackgroundImage = (Image)resources.GetObject("scanButton.BackgroundImage");
             scanButton.BackgroundImageLayout = ImageLayout.Zoom;
-            scanButton.Location = new Point(310, 74);
-            scanButton.Margin = new Padding(2);
+            scanButton.Dock = DockStyle.Fill;
+            scanButton.Location = new Point(610, 3);
             scanButton.Name = "scanButton";
-            scanButton.Size = new Size(295, 167);
-            scanButton.TabIndex = 2;
+            scanButton.Size = new Size(601, 786);
+            scanButton.TabIndex = 1;
             scanButton.UseVisualStyleBackColor = true;
             scanButton.Click += scanButton_Click;
             // 
-            // infoButton
+            // settingsButton
             // 
-            infoButton.BackColor = Color.Transparent;
-            infoButton.BackgroundImage = (Image)resources.GetObject("infoButton.BackgroundImage");
-            infoButton.BackgroundImageLayout = ImageLayout.Zoom;
-            infoButton.Location = new Point(72, 11);
-            infoButton.Margin = new Padding(2);
-            infoButton.Name = "infoButton";
-            infoButton.Size = new Size(57, 59);
-            infoButton.TabIndex = 3;
-            infoButton.UseVisualStyleBackColor = false;
-            infoButton.Click += infoButton_Click;
+            settingsButton.BackgroundImageLayout = ImageLayout.Zoom;
+            settingsButton.Dock = DockStyle.Fill;
+            settingsButton.Location = new Point(1217, 3);
+            settingsButton.Name = "settingsButton";
+            settingsButton.Size = new Size(1, 786);
+            settingsButton.TabIndex = 2;
+            settingsButton.UseVisualStyleBackColor = true;
+            settingsButton.Click += settingsButton_Click;
             // 
             // wishKiosk
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(617, 255);
-            Controls.Add(infoButton);
-            Controls.Add(scanButton);
-            Controls.Add(settingsButton);
-            Controls.Add(printButton);
-            Margin = new Padding(2);
+            ClientSize = new Size(1220, 792);
+            Controls.Add(tableLayoutPanel);
+            FormBorderStyle = FormBorderStyle.None;
             Name = "wishKiosk";
             Text = "WISH Kiosk";
+            WindowState = FormWindowState.Maximized;
             Load += wishKiosk_Load;
+            tableLayoutPanel.ResumeLayout(false);
             ResumeLayout(false);
         }
 
         #endregion
-
-        private Button printButton;
-        private Button settingsButton;
-        private Button scanButton;
-        private Button infoButton;
     }
 }
