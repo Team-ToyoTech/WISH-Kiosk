@@ -70,7 +70,7 @@
             // 
             infoButton.BackgroundImage = (Image)resources.GetObject("infoButton.BackgroundImage");
             infoButton.BackgroundImageLayout = ImageLayout.Zoom;
-            infoButton.Location = new Point(316, 84);
+            infoButton.Location = new Point(391, 84);
             infoButton.Name = "infoButton";
             infoButton.Size = new Size(69, 68);
             infoButton.TabIndex = 3;
@@ -81,7 +81,7 @@
             // 
             serverResetButton.BackgroundImageLayout = ImageLayout.Zoom;
             serverResetButton.Font = new Font("맑은 고딕", 8F);
-            serverResetButton.Location = new Point(391, 84);
+            serverResetButton.Location = new Point(316, 84);
             serverResetButton.Name = "serverResetButton";
             serverResetButton.Size = new Size(69, 68);
             serverResetButton.TabIndex = 4;
