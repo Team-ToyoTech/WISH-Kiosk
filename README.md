@@ -19,7 +19,7 @@
 - **wishKioskDIDReceive**: 신규 주문 **효과음 알림**, **완료/수령/취소** 처리
 - **KioskAI**: ONNX 런타임 추론(숫자 모델)
 
-### 서버 (별도 저장소)
+### 서버
 - **[WISH-Server](https://github.com/Team-ToyoTech/WISH-Server)** 
 
 ---
@@ -41,7 +41,7 @@
 git clone https://github.com/Team-ToyoTech/WISH-Server.git
 cd WISH-Server
 npm install
-node Server.js   # 기본 포트: 4000
+node Server.js # 기본 포트: 4000
 
 # 2) 키오스크
 git clone https://github.com/Team-ToyoTech/WISH-Kiosk.git
