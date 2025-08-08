@@ -15,7 +15,7 @@ namespace wishKiosk
         public List<orderResult.OrderItem> orderItems = [];
         private readonly HttpClient http = new();
 
-        private readonly string serverUrl = "https://wish.toyotech.dev"; // 실제 서버 주소로 변경 필요
+        public string serverUrl = "https://wish.toyotech.dev"; // 실제 서버 주소로 변경 필요
 
         public PrintDocument printDoc = new();
 

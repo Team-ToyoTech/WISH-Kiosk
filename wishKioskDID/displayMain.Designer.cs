@@ -96,8 +96,9 @@ namespace wishKioskDIDDisplay
             FormBorderStyle = FormBorderStyle.None;
             Name = "displayMain";
             Text = "WISH Order View";
-            Load += DisplayMain_Load;
             WindowState = FormWindowState.Maximized;
+            Load += DisplayMain_Load;
+            KeyDown += displayMain_KeyDown;
             groupBoxCompleted.ResumeLayout(false);
             groupBoxPreparing.ResumeLayout(false);
             ResumeLayout(false);

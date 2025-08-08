@@ -19,7 +19,7 @@ namespace wishKiosk
 		public PrintDocument printDoc = new();
 
 		private HttpClient http = new();
-		private readonly string serverUrl = "https://wish.toyotech.dev"; // 실제 서버 주소로 변경 필요
+		public string serverUrl = "https://wish.toyotech.dev"; // 실제 서버 주소로 변경 필요
 
 		private List<OrderItem> orderItems = [];
         public record OrderItem(string Name, int Count);
@@ -125,8 +125,11 @@ namespace wishKiosk
 
 		private void OrderButton_Click(object sender, EventArgs e)
 		{
-			payment Payment = new(total, totalOrderResult, menuPrice);
-			Payment.printDoc = printDoc;
+            payment Payment = new(total, totalOrderResult, menuPrice)
+            {
+                printDoc = printDoc,
+                serverUrl = serverUrl
+            };
             var res = Payment.ShowDialog();
 			if (res == DialogResult.OK)
 			{

@@ -48,6 +48,7 @@
             completeButton.Text = "카운터 결제 확인";
             completeButton.UseVisualStyleBackColor = true;
             completeButton.Click += completeButton_Click;
+            completeButton.KeyDown += completeButton_KeyDown;
             // 
             // groupBoxCompleted
             // 
@@ -106,8 +107,9 @@
             FormBorderStyle = FormBorderStyle.None;
             Name = "receiveMain";
             Text = "WISH Order View";
-            Load += ReceiveMain_Load;
             WindowState = FormWindowState.Maximized;
+            Load += ReceiveMain_Load;
+            KeyDown += receiveMain_KeyDown;
             groupBoxCompleted.ResumeLayout(false);
             groupBoxPreparing.ResumeLayout(false);
             ResumeLayout(false);

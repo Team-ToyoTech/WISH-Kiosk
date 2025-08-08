@@ -16,6 +16,8 @@ namespace wishKiosk
         public string? menuPath;
         public wishKiosk? WishKiosk;
         public readonly string passwordFilePath;
+        public string serverUrl = "https://wish.toyotech.dev"; // 실제 서버 주소로 변경\
+        public string serverUrlPath;
 
         public settings(string passwordFilePath)
         {
@@ -216,7 +218,6 @@ namespace wishKiosk
         /// <returns></returns>
         private async Task ServerReset()
         {
-            var serverUrl = "https://wish.toyotech.dev"; // 실제 서버 주소로 변경
             var httpClient = new HttpClient();
             try
             {
@@ -230,6 +231,19 @@ namespace wishKiosk
             catch (Exception ex)
             {
                 MessageBox.Show($"오류: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void serverSetting_Click(object sender, EventArgs e)
+        {
+            string input = Interaction.InputBox("서버 주소를 입력하세요:", "서버 설정", serverUrl);
+            if (!string.IsNullOrEmpty(input))
+            {
+                input = input.Trim().TrimEnd('/');
+                using (var writer = new StreamWriter(serverUrlPath, false, Encoding.UTF8))
+                {
+                    writer.WriteLine(input);
+                }
             }
         }
     }

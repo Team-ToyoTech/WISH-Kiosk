@@ -34,6 +34,7 @@
             passwordChangeButton = new Button();
             infoButton = new Button();
             serverResetButton = new Button();
+            serverSetting = new Button();
             SuspendLayout();
             // 
             // printSettingsButton
@@ -58,11 +59,12 @@
             // 
             // passwordChangeButton
             // 
-            passwordChangeButton.Location = new Point(316, 12);
+            passwordChangeButton.Font = new Font("맑은 고딕", 7.5F);
+            passwordChangeButton.Location = new Point(316, 86);
             passwordChangeButton.Name = "passwordChangeButton";
-            passwordChangeButton.Size = new Size(146, 66);
+            passwordChangeButton.Size = new Size(79, 66);
             passwordChangeButton.TabIndex = 2;
-            passwordChangeButton.Text = "비밀번호 변경";
+            passwordChangeButton.Text = "비밀번호변경";
             passwordChangeButton.UseVisualStyleBackColor = true;
             passwordChangeButton.Click += passwordChangeButton_Click;
             // 
@@ -70,9 +72,9 @@
             // 
             infoButton.BackgroundImage = (Image)resources.GetObject("infoButton.BackgroundImage");
             infoButton.BackgroundImageLayout = ImageLayout.Zoom;
-            infoButton.Location = new Point(391, 84);
+            infoButton.Location = new Point(401, 86);
             infoButton.Name = "infoButton";
-            infoButton.Size = new Size(69, 68);
+            infoButton.Size = new Size(59, 66);
             infoButton.TabIndex = 3;
             infoButton.UseVisualStyleBackColor = true;
             infoButton.Click += infoButton_Click;
@@ -80,20 +82,33 @@
             // serverResetButton
             // 
             serverResetButton.BackgroundImageLayout = ImageLayout.Zoom;
-            serverResetButton.Font = new Font("맑은 고딕", 8F);
-            serverResetButton.Location = new Point(316, 84);
+            serverResetButton.Font = new Font("맑은 고딕", 9F);
+            serverResetButton.Location = new Point(316, 12);
             serverResetButton.Name = "serverResetButton";
-            serverResetButton.Size = new Size(69, 68);
+            serverResetButton.Size = new Size(79, 68);
             serverResetButton.TabIndex = 4;
             serverResetButton.Text = "서버 초기화";
             serverResetButton.UseVisualStyleBackColor = true;
             serverResetButton.Click += serverResetButton_Click;
+            // 
+            // serverSetting
+            // 
+            serverSetting.BackgroundImageLayout = ImageLayout.Zoom;
+            serverSetting.Font = new Font("맑은 고딕", 9F);
+            serverSetting.Location = new Point(401, 12);
+            serverSetting.Name = "serverSetting";
+            serverSetting.Size = new Size(59, 68);
+            serverSetting.TabIndex = 5;
+            serverSetting.Text = "서버 설정";
+            serverSetting.UseVisualStyleBackColor = true;
+            serverSetting.Click += serverSetting_Click;
             // 
             // settings
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(473, 164);
+            Controls.Add(serverSetting);
             Controls.Add(serverResetButton);
             Controls.Add(infoButton);
             Controls.Add(passwordChangeButton);
@@ -112,5 +127,6 @@
         private Button passwordChangeButton;
         private Button infoButton;
         private Button serverResetButton;
+        private Button serverSetting;
     }
 }

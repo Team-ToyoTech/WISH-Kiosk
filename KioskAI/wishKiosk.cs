@@ -30,6 +30,8 @@ namespace wishKiosk
 		private readonly string passwordFilePath = "password.dat";
 		private readonly static string modelFilePath = "onnx_model/tmnist_model_64.onnx";
 		private readonly static string labelsFilePath = "onnx_model/labels.json";
+		private readonly static string serverURLPath = "serverURL.dat";
+		private static string serverURL = "https://wish.toyotech.dev"; // 기본 서버 URL
         public Dictionary<string, int> menuPrice = [];
 
 		private string[]? menu;
@@ -110,6 +112,15 @@ namespace wishKiosk
                     writer.WriteLine(Sha256Hash("0000")); // 기본값 0000
                 }
             }
+
+			if (!File.Exists(serverURLPath))
+			{
+				using (var writer = new StreamWriter(serverURLPath, false, Encoding.UTF8))
+				{
+					writer.WriteLine("https://wish.toyotech.dev"); // 기본 서버 URL
+                }
+            }
+			serverURL = File.ReadAllText(serverURLPath).Trim();
         }
 
 		private void printButton_Click(object sender, EventArgs e)
@@ -274,6 +285,7 @@ namespace wishKiosk
             if (passwordHash != Sha256Hash(input))
 			{
 				MessageBox.Show("비밀번호가 일치하지 않습니다.");
+				settingsButton.PerformClick();
 				return;
             }
 
@@ -281,7 +293,9 @@ namespace wishKiosk
 			{
 				printDoc = printDoc,
 				digitCount = digitCount,
-				WishKiosk = this
+				WishKiosk = this,
+				serverUrl = serverURL,
+				serverUrlPath = serverURLPath
             };
 
 			if (!File.Exists(menuFilePath))
@@ -831,10 +845,11 @@ namespace wishKiosk
 			}
 
 			int[] menuNums = yTable.Keys.ToArray();
-            orderResult orderRes = new(menuMap, menuNums, price, orderCnts, menuPrice)
-            {
-                printDoc = printDoc
-            };
+			orderResult orderRes = new(menuMap, menuNums, price, orderCnts, menuPrice)
+			{
+				printDoc = printDoc,
+				serverUrl = serverURL
+			};
             orderRes.Show();
 
 			bitmap.Dispose();
