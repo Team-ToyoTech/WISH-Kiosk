@@ -1,17 +1,48 @@
-# WI:SH Kiosk - Write It: Scan & Handle
+# WI:SH Kiosk — Write It: Scan & Handle
 
-> Kiosk for the Elderly and People with Disabilities
+> **종이에 쓴 숫자를 스캔해서 주문으로 바꾸는 키오스크**  
+> 고령자, 디지털 약자를 위한 “아날로그 필기 + 디지털 처리” 키오스크
 
-### 2025 오픈소스 개발자대회 출품작
+- Using **[QRCoder](https://github.com/codebude/QRCoder)**, **[ZXing](https://github.com/zxing/zxing)** and **WIA**
+- Trained AI model using **[PyTorch](https://github.com/pytorch/pytorch)**
+- 실행 전 `copy_these_files` 폴더의 파일을 **실행 폴더**로 복사해야 합니다:
+  - `onnx_model 폴더` → `KioskAI/bin/Debug/net8.0-windows/`
+  - `sound.wav`   → `wishKioskDIDReceive/bin/Debug/net8.0-windows/`
 
--   using [QRCoder](https://github.com/codebude/QRCoder), [ZXing](https://github.com/zxing/zxing) and WIA
--   trained AI model using [PyTorch](https://github.com/pytorch/pytorch)
+---
 
-**[Server Code](https://github.com/Team-ToyoTech/WISH-Server)**
+## 📦 구성 개요
 
-**[Image Data Preprocess Code](https://github.com/Team-ToyoTech/WISH-ImagePreprocess)**
+### 모듈
+- **wishKiosk**: 주문지 *출력 → 스캔(WIA) → QR 위치 복원(ZXing) → 숫자 OCR(ONNXRuntime) → 주문 요약/수정 → 결제(TossPayments) → 영수증/주문번호 출력*
+- **wishKioskDIDDisplay**: 대기/완료 **주문번호 DID 표시** (완료 시 음성 안내)
+- **wishKioskDIDReceive**: 신규 주문 **효과음 알림**, **완료/수령/취소** 처리
+- **KioskAI**: ONNX 런타임 추론(숫자 모델)
 
-Files in folder 'copy_these_files' need to be copied to where the executable is located:
+### 서버 (별도 저장소)
+- **[WISH-Server](https://github.com/Team-ToyoTech/WISH-Server)** 
 
--   Copy 'onnx_model' folder to '\KioskAI\bin\Debug\net8.0-windows\' folder
--   Copy 'sound.wav' file to '\wishKioskDIDReceive\bin\Debug\net8.0-windows\' folder
+---
+
+## 🧰 개발 환경
+
+- OS: **Windows 11**
+- SDK/IDE: **.NET 8**, **Visual Studio 2022**
+- 런타임: **WebView2 Runtime**
+- 장비: **EPSON ES-50**(스캐너), **PeriPage P40**(프린터)
+- 서버: **[WISH-Server](https://github.com/Team-ToyoTech/WISH-Server)**
+
+---
+
+## 🚀 빠른 시작
+
+```bash
+# 1) 서버
+git clone https://github.com/Team-ToyoTech/WISH-Server.git
+cd WISH-Server
+npm install
+node Server.js   # 기본 포트: 4000
+
+# 2) 키오스크
+git clone https://github.com/Team-ToyoTech/WISH-Kiosk.git
+# Visual Studio 2022에서 솔루션 열기 → 빌드
