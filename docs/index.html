@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>WI:SH Kiosk — Project Overview</title>
+        <meta
+            name="description"
+            content="WISH Kiosk (Write It: Scan & Handle) — 키오스크 접근성 개선 프로젝트 소개 페이지"
+        />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" href="styles.css" />
+        <script
+            src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"
+            defer
+        ></script>
+    </head>
+    <body>
+        <header>
+            <div class="container">
+                <nav>
+                    <div style="display: flex; align-items: center; gap: 10px">
+                        <div class="pill">WI:SH Kiosk</div>
+                        <span class="small">Write It: Scan & Handle</span>
+                    </div>
+                    <div class="nav-links">
+                        <a href="#overview">소개</a>
+                        <a href="#features">특징</a>
+                        <a href="#install">설치</a>
+                        <a href="#usage">사용 방법</a>
+                        <a href="#demo">시연</a>
+                        <a href="#readme">README</a>
+                        <a href="#credits">자료/라이선스</a>
+                    </div>
+                </nav>
+            </div>
+        </header>
+
+        <section class="hero" id="overview">
+            <div class="container">
+                <span class="badge">2025 오픈소스 개발자대회 출품작</span>
+                <h1 class="h1">WI:SH Kiosk — 키오스크 접근성 개선 프로젝트</h1>
+                <p class="lead">
+                    어르신과 장애인의 주문 경험을 개선하기 위해 손글씨
+                    입력(Write It), 스캔(Scan), 처리(Handle)를 통합한 키오스크
+                    시스템입니다. 스캐너(WIA) 기반 입력, QR/바코드 인식(ZXing,
+                    QRCoder), 그리고 학습된 AI 모델(PyTorch/ONNX)을 통해 필기
+                    인식을 지원합니다.
+                </p>
+                <div class="cta-row">
+                    <a
+                        class="btn primary"
+                        href="https://github.com/Team-ToyoTech/WISH-Kiosk"
+                        target="_blank"
+                        rel="noopener"
+                        >GitHub 저장소 열기</a
+                    >
+                    <a class="btn secondary" href="#install">빠른 시작</a>
+                </div>
+
+                <div class="grid features">
+                    <div class="card">
+                        <h3 class="h3">핵심 목표</h3>
+                        <ul>
+                            <li>손글씨 기반 주문 입력과 접근성 강화</li>
+                            <li>스캔-인식-처리 전체 흐름의 자동화</li>
+                            <li>현장 배치에 필요한 운영 구성 제공</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3 class="h3">기술 스택</h3>
+                        <div class="tag">C# (.NET 8.0-windows)</div>
+                        <div class="tag">WIA (스캐너)</div>
+                        <div class="tag">ZXing</div>
+                        <div class="tag">QRCoder</div>
+                        <div class="tag">PyTorch → ONNX</div>
+                    </div>
+                    <div class="card">
+                        <h3 class="h3">저장소 구조 (요약)</h3>
+                        <ul class="mono">
+                            <li>KioskAI/ — ONNX 모델 로드/추론</li>
+                            <li>wishKioskDID/ — DID 관련 모듈</li>
+                            <li>wishKioskDIDReceive/ — 수신/알림 모듈</li>
+                            <li>copy_these_files/ — 실행 폴더로 복사할 파일</li>
+                            <li>trainModel.py — 모델 학습/변환 스크립트</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="features" class="alt">
+            <div class="container two-col">
+                <div>
+                    <h2 class="h2">주요 기능</h2>
+                    <ul>
+                        <li>
+                            스캐너(WIA)로 입력된 용지를 자동 감지 및 이미지
+                            전처리
+                        </li>
+                        <li>ZXing을 통한 바코드/QR 인식, QRCoder로 QR 생성</li>
+                        <li>
+                            ONNX 런타임 기반 손글씨 분류/인식(모델은 PyTorch로
+                            학습)
+                        </li>
+                        <li>주문 수신/알림을 위한 보조 실행 모듈 구성</li>
+                    </ul>
+                    <div class="note small">
+                        상세 기능은 저장소 커밋/README 기준이며, 변경될 수
+                        있습니다.
+                    </div>
+                </div>
+                <div>
+                    <h2 class="h2">시스템 구성</h2>
+                    <div class="card">
+                        <ol class="small" style="margin: 0">
+                            <li>사용자 필기 → 스캐너(WIA)로 이미지 획득</li>
+                            <li>이미지 전처리 → 바코드/QR 인식</li>
+                            <li>모델 추론(ONNX)로 필기 내용 판별</li>
+                            <li>주문 처리 및 DID 수신 모듈로 전달</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="install">
+            <div class="container">
+                <h2 class="h2">설치 및 준비</h2>
+                <div class="grid">
+                    <div class="card">
+                        <h3 class="h3">사전 요구사항</h3>
+                        <ul>
+                            <li>Windows 10/11</li>
+                            <li>Visual Studio 2022 (최신 .NET 워크로드)</li>
+                            <li>
+                                .NET SDK 타깃:
+                                <span class="mono">net8.0-windows</span>
+                            </li>
+                            <li>WIA 호환 스캐너 드라이버</li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3 class="h3">다운로드</h3>
+                        <p class="small">
+                            Git을 사용하거나 ZIP으로 내려받을 수 있습니다.
+                        </p>
+                        <pre><code class="mono">git clone https://github.com/Team-ToyoTech/WISH-Kiosk.git
+cd WISH-Kiosk
+</code></pre>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 18px">
+                    <h3 class="h3">Visual Studio에서 열기</h3>
+                    <ol>
+                        <li>
+                            <span class="mono">wishKiosk.sln</span> 솔루션을
+                            엽니다.
+                        </li>
+                        <li>
+                            NuGet 패키지를 복원합니다(<span class="kbd"
+                                >우클릭 → Restore</span
+                            >).
+                        </li>
+                        <li>
+                            솔루션 빌드(<span class="kbd">Ctrl</span>+<span
+                                class="kbd"
+                                >Shift</span
+                            >+<span class="kbd">B</span>).
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="card" style="margin-top: 18px">
+                    <h3 class="h3">실행 전 파일 복사</h3>
+                    <p class="small">
+                        저장소의 <span class="mono">copy_these_files</span> 폴더
+                        내용을 실행 파일 위치로 복사합니다.
+                    </p>
+                    <ul class="mono">
+                        <li>
+                            onnx_model →
+                            <span>\KioskAI\bin\Debug\net8.0-windows</span>
+                        </li>
+                        <li>
+                            sound.wav →
+                            <span
+                                >\wishKioskDIDReceive\bin\Debug\net8.0-windows</span
+                            >
+                        </li>
+                    </ul>
+                    <div class="note small">
+                        위 경로는 README의 안내에 기반합니다. 실제 배포/릴리스
+                        구성 시 폴더가 달라질 수 있습니다.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="usage" class="alt">
+            <div class="container">
+                <h2 class="h2">사용 방법</h2>
+                <div class="tabs" role="tablist">
+                    <button class="active" data-tab="run">실행</button>
+                    <button data-tab="flow">흐름</button>
+                    <button data-tab="troubleshoot">문제 해결</button>
+                </div>
+                <div id="tab-run" class="tabpanel active">
+                    <ol>
+                        <li>
+                            필요 모듈(예: <span class="mono">KioskAI</span>,
+                            <span class="mono">wishKioskDIDReceive</span>)을
+                            시작합니다.
+                        </li>
+                        <li>스캐너가 WIA 드라이버로 인식되는지 확인합니다.</li>
+                        <li>
+                            주요 창에서 스캔을 수행하고 결과가 표시되는지
+                            확인합니다.
+                        </li>
+                    </ol>
+                    <div class="warn small">
+                        정확한 실행 순서/옵션은 저장소 문서를 참조하십시오. 현재
+                        공개된 정보로는 일부 단계가 불명확합니다.
+                    </div>
+                </div>
+                <div id="tab-flow" class="tabpanel">
+                    <ol>
+                        <li>스캔 버튼 → 문서 스캔</li>
+                        <li>바코드/QR 감지 → 주문 식별</li>
+                        <li>모델 추론 → 분류/인식 결과</li>
+                        <li>주문 처리 → DID 수신/알림</li>
+                    </ol>
+                </div>
+                <div id="tab-troubleshoot" class="tabpanel">
+                    <ul>
+                        <li>
+                            스캐너 인식 실패: WIA 드라이버 확인, 다른 USB 포트
+                            사용
+                        </li>
+                        <li>패키지 오류: NuGet 패키지 복원/재설치</li>
+                        <li>
+                            모델 로드 실패:
+                            <span class="mono">onnx_model</span> 경로 재확인
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="demo">
+            <div class="container two-col">
+                <div>
+                    <h2 class="h2">시연</h2>
+                    <p class="small">
+                        아래에 데모 영상을 연결하거나 스크린샷을 배치하십시오.
+                    </p>
+                    <div
+                        class="card"
+                        style="
+                            aspect-ratio: 16/9;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                        "
+                    >
+                        <span class="muted"
+                            >YouTube 링크 또는 MP4 소스 삽입 영역</span
+                        >
+                    </div>
+                </div>
+                <div>
+                    <h2 class="h2">스크린샷</h2>
+                    <div
+                        class="grid"
+                        style="grid-template-columns: repeat(2, 1fr)"
+                    >
+                        <div class="card" style="aspect-ratio: 4/3"></div>
+                        <div class="card" style="aspect-ratio: 4/3"></div>
+                        <div class="card" style="aspect-ratio: 4/3"></div>
+                        <div class="card" style="aspect-ratio: 4/3"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="readme" class="alt">
+            <div class="container">
+                <h2 class="h2">README (자동 로드)</h2>
+                <p class="small">
+                    저장소의 최신 <span class="mono">README.md</span>를
+                    실시간으로 불러와 렌더링합니다. 네트워크 또는 CORS 정책에
+                    따라 불러오지 못할 수 있습니다.
+                </p>
+                <div id="readmeBox" class="card">
+                    <div id="readmeContent" class="small">불러오는 중…</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="credits">
+            <div class="container">
+                <h2 class="h2">자료 및 라이선스</h2>
+                <div class="grid">
+                    <div class="card">
+                        <h3 class="h3">출처</h3>
+                        <ul class="small">
+                            <li>
+                                저장소:
+                                https://github.com/Team-ToyoTech/WISH-Kiosk
+                            </li>
+                            <li>
+                                README:
+                                https://github.com/Team-ToyoTech/WISH-Kiosk/blob/master/README.md
+                            </li>
+                            <li>
+                                라이선스: Apache-2.0 (저장소 LICENSE.txt 참조)
+                            </li>
+                            <li>
+                                사용 라이브러리(README 표기): QRCoder, ZXing,
+                                WIA, PyTorch
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card">
+                        <h3 class="h3">저작권</h3>
+                        <p class="small">
+                            © 2025 Team-ToyoTech. 라이선스 조건을 준수하여
+                            사용하십시오.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <div class="container small">
+                <div>WI:SH Kiosk — Write It: Scan & Handle</div>
+                <div>
+                    이 페이지는 프로젝트 소개/배포용 단일 HTML 파일입니다.
+                </div>
+            </div>
+        </footer>
+
+        <script src="script.js"></script>
+    </body>
+</html>
