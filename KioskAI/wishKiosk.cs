@@ -652,6 +652,10 @@ namespace wishKiosk
 			for (int i = 0; i < 5; i++)
 			{
 				var qrResult = ExtractQrCodesWithSize(bitmap);
+				if (QRCodeError)
+				{
+					return;
+				}
 				foreach (var qr in qrResult)
 				{
 					if (!seenTexts.Contains(qr.text))
@@ -771,7 +775,8 @@ namespace wishKiosk
 
 			List<int> orderCnts = new();
 
-			foreach (var menuEntry in yTable)
+            OCRError = false; // OCR 오류 초기화
+            foreach (var menuEntry in yTable)
 			{
 				int menuNum = menuEntry.Key;
 				float y = menuEntry.Value;
@@ -784,7 +789,6 @@ namespace wishKiosk
 				string orderCount = "";
 				if (xTable.ContainsKey(menuNum))
 				{
-					OCRError = false; // OCR 오류 초기화
                     foreach (int level in leveling)
 					{
 						if (xTable[menuNum].ContainsKey(level))
@@ -801,8 +805,12 @@ namespace wishKiosk
 							);
 
 							string digit = OCRDigit(bitmap, roi);
-							// MessageBox.Show($"OCR result at ({x}, {y}) = '{digit}'"); // 디버깅용
-							orderCount += digit;
+							if (OCRError)
+							{
+								return;
+                            }
+                            // MessageBox.Show($"OCR result at ({x}, {y}) = '{digit}'"); // 디버깅용
+                            orderCount += digit;
 						}
 					}
 				}
