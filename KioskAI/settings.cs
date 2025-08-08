@@ -2,7 +2,10 @@
 using System.Diagnostics;
 using System.Drawing.Printing;
 using System.IO;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text;
+using System.Text.Json;
 
 namespace wishKiosk
 {
@@ -200,6 +203,34 @@ namespace wishKiosk
                 }
             }
             return panel;
+        }
+
+        private void serverResetButton_Click(object sender, EventArgs e)
+        {
+            _ = ServerReset();
+        }
+
+        /// <summary>
+        /// 서버 초기화
+        /// </summary>
+        /// <returns></returns>
+        private async Task ServerReset()
+        {
+            var serverUrl = "https://wish.toyotech.dev"; // 실제 서버 주소로 변경
+            var httpClient = new HttpClient();
+            try
+            {
+                var json = await httpClient.GetFromJsonAsync<JsonElement>(serverUrl + "/reset");
+                var status = json.GetProperty("status").GetString();
+                if (status != "Success")
+                {
+                    MessageBox.Show("초기화에 실패했습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"오류: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }

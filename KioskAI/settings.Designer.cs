@@ -33,6 +33,7 @@
             menuButton = new Button();
             passwordChangeButton = new Button();
             infoButton = new Button();
+            serverResetButton = new Button();
             SuspendLayout();
             // 
             // printSettingsButton
@@ -71,16 +72,29 @@
             infoButton.BackgroundImageLayout = ImageLayout.Zoom;
             infoButton.Location = new Point(316, 84);
             infoButton.Name = "infoButton";
-            infoButton.Size = new Size(146, 68);
+            infoButton.Size = new Size(69, 68);
             infoButton.TabIndex = 3;
             infoButton.UseVisualStyleBackColor = true;
             infoButton.Click += infoButton_Click;
+            // 
+            // serverResetButton
+            // 
+            serverResetButton.BackgroundImageLayout = ImageLayout.Zoom;
+            serverResetButton.Font = new Font("맑은 고딕", 8F);
+            serverResetButton.Location = new Point(391, 84);
+            serverResetButton.Name = "serverResetButton";
+            serverResetButton.Size = new Size(69, 68);
+            serverResetButton.TabIndex = 4;
+            serverResetButton.Text = "서버 초기화";
+            serverResetButton.UseVisualStyleBackColor = true;
+            serverResetButton.Click += serverResetButton_Click;
             // 
             // settings
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(473, 164);
+            Controls.Add(serverResetButton);
             Controls.Add(infoButton);
             Controls.Add(passwordChangeButton);
             Controls.Add(menuButton);
@@ -97,5 +111,6 @@
         private Button menuButton;
         private Button passwordChangeButton;
         private Button infoButton;
+        private Button serverResetButton;
     }
 }
