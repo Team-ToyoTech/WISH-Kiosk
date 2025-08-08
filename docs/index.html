@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>WI:SH Suite — Kiosk & Server</title>
+        <title>WI:SH KIOSK</title>
         <meta
             name="description"
             content="WISH Kiosk & WISH Server — 접근성 키오스크와 연동 서버 소개 페이지"
@@ -25,8 +25,8 @@
             <div class="container">
                 <nav>
                     <div style="display: flex; align-items: center; gap: 10px">
-                        <div class="pill">WI:SH Suite</div>
-                        <span class="small">Kiosk + Server</span>
+                        <div class="pill">WI:SH</div>
+                        <span class="small">Kiosk & Server</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 20px">
                         <!-- Kiosk-only nav -->
@@ -43,7 +43,7 @@
                             <a href="#server-features">서버 특징</a>
                             <a href="#server-install">서버 설치</a>
                             <a href="#server-usage">서버 사용</a>
-                            <a href="#server-readme">서버 README</a>
+                            <a href="#server-readme">README</a>
                         </div>
                     </div>
                 </nav>
@@ -63,14 +63,14 @@
                     aria-controls="pane-kiosk"
                     aria-selected="true"
                 >
-                    키오스크
+                    Kiosk
                 </button>
                 <button
                     data-pane="server"
                     aria-controls="pane-server"
                     aria-selected="false"
                 >
-                    서버
+                    Server
                 </button>
             </div>
         </div>
@@ -85,16 +85,17 @@
             <!-- KIOSK: OVERVIEW -->
             <section class="hero" id="overview">
                 <div class="container">
-                    <span class="badge">2025 오픈소스 개발자대회 출품작</span>
-                    <h1 class="h1">
-                        WI:SH Kiosk — 키오스크 접근성 개선 프로젝트
-                    </h1>
+                    <span class="badge">WI:SH Kiosk</span>
+                    <h1 class="h1">WI:SH Kiosk</h1>
+                    <h2 class="h2">
+                        Write It: Scan & Handle — 키오스크 접근성 개선 프로젝트
+                    </h2>
                     <p class="lead">
-                        어르신과 장애인의 주문 경험을 개선하기 위해 손글씨
-                        입력(Write It), 스캔(Scan), 처리(Handle)를 통합한
-                        키오스크 시스템입니다. 스캐너(WIA) 기반 입력, QR/바코드
-                        인식(ZXing, QRCoder), 학습된 AI 모델(PyTorch/ONNX)을
-                        통해 필기 인식을 지원합니다.
+                        노인분들의 주문 경험을 개선하기 위해 손글씨 입력(Write
+                        It), 스캔(Scan), 처리(Handle)를 통합한 키오스크
+                        시스템입니다.<br />스캐너 기반 입력, QR코드 인식(ZXing,
+                        QRCoder), 학습된 AI 모델(PyTorch/ONNX)을 통해 필기
+                        인식을 지원합니다.
                     </p>
                     <div class="cta-row">
                         <a
@@ -125,15 +126,12 @@
                             <div class="tag">PyTorch → ONNX</div>
                         </div>
                         <div class="card">
-                            <h3 class="h3">저장소 구조 (요약)</h3>
+                            <h3 class="h3">저장소 구조</h3>
                             <ul class="mono">
-                                <li>KioskAI/ — ONNX 모델 로드/추론</li>
-                                <li>wishKioskDID/ — DID 관련 모듈</li>
-                                <li>wishKioskDIDReceive/ — 수신/알림 모듈</li>
-                                <li>
-                                    copy_these_files/ — 실행 폴더로 복사할 파일
-                                </li>
-                                <li>trainModel.py — 모델 학습/변환 스크립트</li>
+                                <li>KioskAI — 프린트, 스캔, 인식</li>
+                                <li>wishKioskDID — DID</li>
+                                <li>wishKioskDIDReceive — 수신/알림</li>
+                                <li>trainModel.py — 모델 학습</li>
                             </ul>
                         </div>
                     </div>
@@ -374,7 +372,7 @@ cd WISH-Kiosk
             <!-- SERVER: OVERVIEW -->
             <section class="hero" id="server-overview">
                 <div class="container">
-                    <span class="badge">WISH Server</span>
+                    <span class="badge">WI:SH Server</span>
                     <h2 class="h1">WI:SH Server — 백엔드/연동 서버</h2>
                     <p class="lead">
                         WI:SH Kiosk와 연동되는 서버 구성입니다. 주문 접수/상태
