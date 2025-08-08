@@ -8,9 +8,9 @@
 - 실행 전 `copy_these_files` 폴더의 파일을 **실행 폴더**로 복사해야 합니다:
   - `onnx_model 폴더` → `KioskAI/bin/Debug/net8.0-windows/`
   - `sound.wav`   → `wishKioskDIDReceive/bin/Debug/net8.0-windows/`
-- wishKiosk의 설정창은 스캔버튼 오른쪽에 작게 마련되어 있습니다.
-- wishKiosk의 설정창 초기 비밀번호는 `0000` 입니다.
-- wishKioskDIDDisplay와 wishKioskDIDReceive의 설정창 진입 키는 `T`입니다.
+- **wishKiosk**의 설정 버튼은 스캔 버튼 오른쪽에 얇게 마련되어 있습니다.
+- **wishKiosk**의 설정창 초기 비밀번호는 `0000` 입니다.
+- **wishKioskDIDDisplay**와 **wishKioskDIDReceive**의 설정창 진입 키는 `T`입니다.
 
 ---
 
