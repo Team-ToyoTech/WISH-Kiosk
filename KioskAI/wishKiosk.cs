@@ -255,12 +255,11 @@ namespace wishKiosk
 		{
 			if (!File.Exists(passwordFilePath))
 			{
-				MessageBox.Show($"{passwordFilePath} 파일이 존재하지 않습니다.");
+				MessageBox.Show($"{passwordFilePath} 파일이 없습니다.");
                 using (var writer = new StreamWriter(passwordFilePath, false, Encoding.UTF8))
                 {
                     writer.WriteLine(Sha256Hash("0000"));
                 }
-                return;
             }
 
 			string? passwordHash = File.ReadAllText(passwordFilePath).Trim();
