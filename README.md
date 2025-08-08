@@ -33,7 +33,7 @@
 - OS: **Windows 11**
 - SDK/IDE: **.NET 8**, **Visual Studio 2022**
 - 장비: **EPSON ES-50**(스캐너), **PeriPage P40**(프린터)
-- 서버: **[WISH-Server](https://github.com/Team-ToyoTech/WISH-Server)**
+- 서버: **Node.js**, **AWS**
 
 ---
 
