@@ -8,6 +8,7 @@
 - 실행 전 `copy_these_files` 폴더의 파일을 **실행 폴더**로 복사해야 합니다:
   - `onnx_model 폴더` → `KioskAI/bin/Debug/net8.0-windows/`
   - `sound.wav`   → `wishKioskDIDReceive/bin/Debug/net8.0-windows/`
+- 설정창 초기 비밀번호는 `0000` 입니다.
 
 ---
 
@@ -20,7 +21,8 @@
 - **KioskAI**: ONNX 런타임 추론(숫자 모델)
 
 ### 서버
-- **[WISH-Server](https://github.com/Team-ToyoTech/WISH-Server)** 
+- **[WISH-Server](https://github.com/Team-ToyoTech/WISH-Server)**
+- 서버 리셋을 위해서는 `settings` → `서버 초기화`
 
 ---
 
