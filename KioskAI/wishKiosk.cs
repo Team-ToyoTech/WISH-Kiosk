@@ -35,7 +35,10 @@ namespace wishKiosk
 		private string[]? menu;
 		private int[]? price;
 
-		public wishKiosk()
+		private static bool OCRError = false;
+		private static bool QRCodeError = false;
+
+        public wishKiosk()
 		{
 			InitializeComponent();
 			InitOCR();
@@ -644,7 +647,8 @@ namespace wishKiosk
 
 			var qrData = new HashSet<(string text, PointF point, SizeF size)>();
 			var seenTexts = new HashSet<string>(); // 중복 텍스트 제거
-			
+
+			QRCodeError = false;
 			for (int i = 0; i < 5; i++)
 			{
 				var qrResult = ExtractQrCodesWithSize(bitmap);
@@ -780,7 +784,8 @@ namespace wishKiosk
 				string orderCount = "";
 				if (xTable.ContainsKey(menuNum))
 				{
-					foreach (int level in leveling)
+					OCRError = false; // OCR 오류 초기화
+                    foreach (int level in leveling)
 					{
 						if (xTable[menuNum].ContainsKey(level))
 						{
@@ -861,7 +866,11 @@ namespace wishKiosk
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"QR 코드 추출 오류: {ex.Message}");
+				if (!QRCodeError)
+				{
+					QRCodeError = true;
+                    MessageBox.Show($"QR 코드 추출 오류: {ex.Message}");
+				}
                 return [];
             }
         }
@@ -951,7 +960,11 @@ namespace wishKiosk
 				}
 				catch (Exception ex)
 				{
-					MessageBox.Show($"OCR Error: {ex.Message}");
+					if (!OCRError)
+					{
+						OCRError = true;
+						MessageBox.Show($"OCR Error: {ex.Message}");
+					}
 					return "";
 				}
 			}
