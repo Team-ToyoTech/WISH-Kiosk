@@ -151,12 +151,26 @@ namespace wishKiosk
 
 		private void CounterOrderButton_Click(object sender, EventArgs e)
 		{
-            _ = SendSelectedMenu();
-            printDoc.PrintPage += printDocument_PrintReceiptPage;
-            printDoc.Print();
-            printDoc.PrintPage -= printDocument_PrintReceiptPage;
-            this.Close();
-		}
+            SendSelectedMenu().ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                {
+                    return;
+                }
+
+                printDoc.PrintPage += printDocument_PrintReceiptPage;
+                try
+                {
+                    printDoc.Print();
+                }
+                finally
+                {
+                    printDoc.PrintPage -= printDocument_PrintReceiptPage;
+                }
+
+                this.Close();
+            }, TaskScheduler.FromCurrentSynchronizationContext());
+        }
 
         /// <summary>
         /// 결제 정보 보내고 주문 번호 받아오기
