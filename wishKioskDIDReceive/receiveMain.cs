@@ -8,7 +8,7 @@ namespace wishKioskDIDReceive
 	public partial class receiveMain : Form
 	{
 		private readonly HttpClient httpClient = new HttpClient();
-		private readonly string serverUrl = "http://localhost:4000"; // 실제 서버 주소로 변경
+		private readonly string serverUrl = "https://wish.toyotech.dev"; // 실제 서버 주소로 변경
 
 		private record Order(List<OrderItem> order, int orderNumber, string paid);
 		private record OrderItem(string Name, int Count);

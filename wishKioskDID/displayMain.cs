@@ -6,7 +6,7 @@ namespace wishKioskDIDDisplay
 	public partial class displayMain : Form
 	{
 		private readonly HttpClient httpClient = new();
-		private readonly string serverUrl = "http://localhost:4000"; // 실제 서버 주소로 변경
+		private readonly string serverUrl = "https://wish.toyotech.dev"; // 실제 서버 주소로 변경
 
 		int[]? prevOrder, prevCompletedOrder;
 
