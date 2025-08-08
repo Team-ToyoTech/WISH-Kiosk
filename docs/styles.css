@@ -266,3 +266,14 @@ footer {
     background: #1a1212;
     border-radius: 8px;
 }
+
+
+/* --- top-level product tabs --- */
+.top-tabs { display:flex; gap:8px; margin: 16px 0 0; border-bottom:1px solid var(--border); }
+.top-tabs button { background:none; border:1px solid var(--border); border-bottom:none; color:var(--muted); padding:10px 14px; border-radius:10px 10px 0 0; cursor:pointer; font-weight:600; }
+.top-tabs button.active { color:var(--text); background: var(--card); }
+.pane { display:none; }
+.pane.active { display:block; }
+.sep { opacity:.5; margin: 0 8px; }
+
+.hidden{display:none !important;}
