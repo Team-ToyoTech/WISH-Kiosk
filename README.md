@@ -9,6 +9,7 @@
 
 - Using **[QRCoder](https://github.com/codebude/QRCoder)**, **[ZXing](https://github.com/zxing/zxing)** and **WIA**
 - Trained AI model using **[PyTorch](https://github.com/pytorch/pytorch)**, [DataSet Preprocess](https://github.com/Team-ToyoTech/WISH-ImagePreprocess)
+
 - 실행 전 `copy_these_files` 폴더의 파일을 **실행 폴더**로 복사해야 합니다:
   - `onnx_model 폴더` → `KioskAI/bin/Debug/net8.0-windows/`
   - `sound.wav`   → `wishKioskDIDReceive/bin/Debug/net8.0-windows/`
