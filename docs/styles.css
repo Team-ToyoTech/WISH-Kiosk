@@ -315,3 +315,10 @@ footer {
 .hidden {
     display: none !important;
 }
+
+footer .container.small img {
+    height: 3.5em;
+    width: auto;
+    margin-right: 8px;
+    vertical-align: -0.15em;
+}
