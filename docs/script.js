@@ -109,6 +109,14 @@ function detectInitialPaneFromHash() {
     return "kiosk";
 }
 
+function initTopButton() {
+    const btn = document.getElementById("btnTop");
+    if (!btn) return;
+    btn.addEventListener("click", () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+}
+
 window.addEventListener("DOMContentLoaded", () => {
     initScopedTabs();
     initTopTabs();
@@ -118,6 +126,6 @@ window.addEventListener("DOMContentLoaded", () => {
     const initial = detectInitialPaneFromHash();
     activatePane(initial);
 
-    // README 원문을 그대로 주입하던 로직은 제거(요구사항: “내용에 녹여서”)
-    // 이전 버전: loadReadme("readmeContentKiosk", kioskRaw); loadReadme("readmeContentServer", serverRaw);
+    // Top button
+    initTopButton();
 });

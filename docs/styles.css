@@ -322,3 +322,35 @@ footer .container.small img {
     margin-right: 8px;
     vertical-align: -0.15em;
 }
+
+/* Bottom-right top button */
+#btnTop {
+    position: fixed;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    right: calc(16px + env(safe-area-inset-right, 0px));
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: color-mix(in srgb, var(--card) 70%, transparent);
+    backdrop-filter: blur(6px);
+    cursor: pointer;
+    z-index: 60;
+}
+#btnTop:hover {
+    border-color: var(--link);
+}
+#btnTop svg {
+    display: block;
+}
+
+@media (max-width: 600px) {
+    #btnTop {
+        bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+        right: calc(12px + env(safe-area-inset-right, 0px));
+        width: 40px;
+        height: 40px;
+    }
+}
