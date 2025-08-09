@@ -114,7 +114,9 @@
             Controls.Add(passwordChangeButton);
             Controls.Add(menuButton);
             Controls.Add(printSettingsButton);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "settings";
+            ShowInTaskbar = false;
             Text = "WISH Settings";
             FormClosing += settings_FormClosing;
             ResumeLayout(false);

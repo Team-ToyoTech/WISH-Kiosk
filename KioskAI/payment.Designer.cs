@@ -6,6 +6,7 @@
 
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(payment));
             paymentView = new Microsoft.Web.WebView2.WinForms.WebView2();
             ((System.ComponentModel.ISupportInitialize)paymentView).BeginInit();
             SuspendLayout();
@@ -28,7 +29,10 @@
             AutoScaleMode = AutoScaleMode.None;
             ClientSize = new Size(1608, 1138);
             Controls.Add(paymentView);
+            FormBorderStyle = FormBorderStyle.None;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "payment";
+            ShowInTaskbar = false;
             Text = "결제";
             WindowState = FormWindowState.Maximized;
             Load += payment_Load;

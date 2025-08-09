@@ -10,12 +10,13 @@
 
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(orderResult));
             panelMain = new Panel();
+            CounterOrderButton = new Button();
             orderResultDataGridView = new DataGridView();
             totalLabel = new Label();
             OrderButton = new Button();
             CancelButton_ = new Button();
-            CounterOrderButton = new Button();
             panelMain.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)orderResultDataGridView).BeginInit();
             SuspendLayout();
@@ -30,10 +31,20 @@
             panelMain.Controls.Add(CancelButton_);
             panelMain.Dock = DockStyle.Fill;
             panelMain.Location = new Point(0, 0);
-            panelMain.Margin = new Padding(4, 4, 4, 4);
             panelMain.Name = "panelMain";
-            panelMain.Size = new Size(812, 905);
+            panelMain.Size = new Size(625, 707);
             panelMain.TabIndex = 0;
+            // 
+            // CounterOrderButton
+            // 
+            CounterOrderButton.Location = new Point(220, 656);
+            CounterOrderButton.Margin = new Padding(2);
+            CounterOrderButton.Name = "CounterOrderButton";
+            CounterOrderButton.Size = new Size(192, 36);
+            CounterOrderButton.TabIndex = 4;
+            CounterOrderButton.Text = "카운터에서 결제하기";
+            CounterOrderButton.UseVisualStyleBackColor = true;
+            CounterOrderButton.Click += CounterOrderButton_Click;
             // 
             // orderResultDataGridView
             // 
@@ -41,32 +52,29 @@
             orderResultDataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
             orderResultDataGridView.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.DisplayedCells;
             orderResultDataGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            orderResultDataGridView.Location = new Point(16, 15);
-            orderResultDataGridView.Margin = new Padding(4, 4, 4, 4);
+            orderResultDataGridView.Location = new Point(12, 12);
             orderResultDataGridView.Name = "orderResultDataGridView";
             orderResultDataGridView.RowHeadersWidth = 62;
             orderResultDataGridView.SelectionMode = DataGridViewSelectionMode.CellSelect;
-            orderResultDataGridView.Size = new Size(780, 719);
+            orderResultDataGridView.Size = new Size(600, 562);
             orderResultDataGridView.TabIndex = 0;
             // 
             // totalLabel
             // 
             totalLabel.AutoSize = true;
             totalLabel.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
-            totalLabel.Location = new Point(16, 753);
-            totalLabel.Margin = new Padding(4, 0, 4, 0);
+            totalLabel.Location = new Point(12, 588);
             totalLabel.Name = "totalLabel";
-            totalLabel.Size = new Size(128, 37);
+            totalLabel.Size = new Size(95, 28);
             totalLabel.TabIndex = 1;
             totalLabel.Text = "총액: 0원";
             // 
             // OrderButton
             // 
             OrderButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            OrderButton.Location = new Point(542, 840);
-            OrderButton.Margin = new Padding(4, 4, 4, 4);
+            OrderButton.Location = new Point(417, 656);
             OrderButton.Name = "OrderButton";
-            OrderButton.Size = new Size(122, 49);
+            OrderButton.Size = new Size(94, 38);
             OrderButton.TabIndex = 2;
             OrderButton.Text = "결제하기";
             OrderButton.Click += OrderButton_Click;
@@ -74,34 +82,24 @@
             // CancelButton_
             // 
             CancelButton_.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            CancelButton_.Location = new Point(673, 840);
-            CancelButton_.Margin = new Padding(4, 4, 4, 4);
+            CancelButton_.Location = new Point(518, 656);
             CancelButton_.Name = "CancelButton_";
-            CancelButton_.Size = new Size(122, 49);
+            CancelButton_.Size = new Size(94, 38);
             CancelButton_.TabIndex = 3;
             CancelButton_.Text = "취소";
             CancelButton_.Click += CancelButton_Click;
             // 
-            // CounterOrderButton
-            // 
-            CounterOrderButton.Location = new Point(286, 840);
-            CounterOrderButton.Name = "CounterOrderButton";
-            CounterOrderButton.Size = new Size(249, 46);
-            CounterOrderButton.TabIndex = 4;
-            CounterOrderButton.Text = "카운터에서 결제하기";
-            CounterOrderButton.UseVisualStyleBackColor = true;
-            CounterOrderButton.Click += CounterOrderButton_Click;
-            // 
             // orderResult
             // 
-            AutoScaleDimensions = new SizeF(13F, 32F);
+            AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(812, 905);
+            ClientSize = new Size(625, 707);
             Controls.Add(panelMain);
             FormBorderStyle = FormBorderStyle.FixedDialog;
-            Margin = new Padding(4, 4, 4, 4);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             MaximizeBox = false;
             Name = "orderResult";
+            ShowInTaskbar = false;
             Text = "WISH Order";
             panelMain.ResumeLayout(false);
             panelMain.PerformLayout();

@@ -32,6 +32,7 @@ namespace wishKioskDIDDisplay
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(displayMain));
             groupBoxCompleted = new GroupBox();
             flowLayoutPanelCompletedOrders = new FlowLayoutPanel();
             groupBoxPreparing = new GroupBox();
@@ -94,6 +95,7 @@ namespace wishKioskDIDDisplay
             Controls.Add(groupBoxPreparing);
             Controls.Add(groupBoxCompleted);
             FormBorderStyle = FormBorderStyle.None;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "displayMain";
             Text = "WISH Order View";
             WindowState = FormWindowState.Maximized;

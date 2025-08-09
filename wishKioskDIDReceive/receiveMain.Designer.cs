@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(receiveMain));
             completeButton = new Button();
             groupBoxCompleted = new GroupBox();
             flowLayoutPanelCompletedOrders = new FlowLayoutPanel();
@@ -105,6 +106,7 @@
             Controls.Add(groupBoxCompleted);
             Controls.Add(completeButton);
             FormBorderStyle = FormBorderStyle.None;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "receiveMain";
             Text = "WISH Order View";
             WindowState = FormWindowState.Maximized;

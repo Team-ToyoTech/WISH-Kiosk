@@ -90,6 +90,7 @@ namespace wishKiosk
             ClientSize = new Size(1220, 792);
             Controls.Add(tableLayoutPanel);
             FormBorderStyle = FormBorderStyle.None;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "wishKiosk";
             Text = "WISH Kiosk";
             WindowState = FormWindowState.Maximized;

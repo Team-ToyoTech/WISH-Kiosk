@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(menuSettings));
             menuDataGridView = new DataGridView();
             cancelButton = new Button();
             okButton = new Button();
@@ -107,7 +108,9 @@
             Controls.Add(okButton);
             Controls.Add(cancelButton);
             Controls.Add(menuDataGridView);
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "menuSettings";
+            ShowInTaskbar = false;
             Text = "WISH Menu Settings";
             FormClosing += menuSettings_FormClosing;
             Load += menuSettings_Load;
