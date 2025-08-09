@@ -35,6 +35,13 @@ namespace wishKioskDIDReceive
             }
             serverUrl = File.ReadAllText(serverUrlPath).Trim();
 
+            if (!File.Exists(soundFilePath))
+            {
+                MessageBox.Show("사운드 파일이 없습니다. 'sound.wav' 파일을 프로그램 폴더에 넣어주세요.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.Close();
+                return;
+            }
+
             prevOrder = null;
             prevCompletedOrder = null;
 
