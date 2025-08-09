@@ -3,6 +3,8 @@
 > **종이에 쓴 숫자를 스캔해서 주문으로 바꾸는 키오스크**  
 > 고령자, 디지털 약자를 위한 “아날로그 필기 + 디지털 처리” 키오스크
 
+자세한 내용은 [`wish.docs.toyotech.dev`](https://wish.docs.toyotech.dev/)를 참고해 주세요.
+
 - Using **[QRCoder](https://github.com/codebude/QRCoder)**, **[ZXing](https://github.com/zxing/zxing)** and **WIA**
 - Trained AI model using **[PyTorch](https://github.com/pytorch/pytorch)**, [DataSet Preprocess](https://github.com/Team-ToyoTech/WISH-ImagePreprocess)
 - 실행 전 `copy_these_files` 폴더의 파일을 **실행 폴더**로 복사해야 합니다:
