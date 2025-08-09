@@ -3,10 +3,10 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>WI:SH KIOSK</title>
+        <title>WI:SH KIOSK & SERVER</title>
         <meta
             name="description"
-            content="WISH Kiosk & WISH Server — 접근성 키오스크와 연동 서버 소개 페이지"
+            content="WISH Kiosk & WISH Server — 접근성 키오스크와 연동 서버 소개/가이드"
         />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -35,15 +35,14 @@
                             <a href="#features">특징</a>
                             <a href="#install">설치</a>
                             <a href="#usage">사용</a>
-                            <a href="#readme">README</a>
                         </div>
                         <!-- Server-only nav -->
                         <div class="nav-links server-only hidden">
                             <a href="#server-overview">서버 소개</a>
                             <a href="#server-features">서버 특징</a>
                             <a href="#server-install">서버 설치</a>
+                            <a href="#server-api">API</a>
                             <a href="#server-usage">서버 사용</a>
-                            <a href="#server-readme">README</a>
                         </div>
                     </div>
                 </nav>
@@ -91,11 +90,10 @@
                         Write It: Scan & Handle — 키오스크 접근성 개선 프로젝트
                     </h2>
                     <p class="lead">
-                        노인분들의 주문 경험을 개선하기 위해 손글씨 입력(Write
-                        It), 스캔(Scan), 처리(Handle)를 통합한 키오스크
-                        시스템입니다.<br />스캐너 기반 입력, QR코드 인식(ZXing,
-                        QRCoder), 학습된 AI 모델(PyTorch/ONNX)을 통해 필기
-                        인식을 지원합니다.
+                        종이에 쓴 숫자를 스캔/인식해 주문을 넣는 키오스크입니다.
+                        스캐너(WIA), 바코드/QR(ZXing·QRCoder), ONNX
+                        런타임(모델은 PyTorch로 학습)으로 노년층도 쉽게 주문할
+                        수 있도록 설계했습니다.
                     </p>
                     <div class="cta-row">
                         <a
@@ -103,7 +101,7 @@
                             href="https://github.com/Team-ToyoTech/WISH-Kiosk"
                             target="_blank"
                             rel="noopener"
-                            >GitHub 저장소 열기</a
+                            >GitHub 저장소</a
                         >
                         <a class="btn secondary" href="#install">빠른 시작</a>
                     </div>
@@ -113,7 +111,7 @@
                             <h3 class="h3">핵심 목표</h3>
                             <ul>
                                 <li>손글씨 기반 주문 입력과 접근성 강화</li>
-                                <li>스캔-인식-처리 전체 흐름의 자동화</li>
+                                <li>스캔→인식→처리 전체 흐름 자동화</li>
                                 <li>현장 배치에 필요한 운영 구성 제공</li>
                             </ul>
                         </div>
@@ -126,12 +124,12 @@
                             <div class="tag">PyTorch → ONNX</div>
                         </div>
                         <div class="card">
-                            <h3 class="h3">저장소 구조</h3>
+                            <h3 class="h3">저장소 구조 하이라이트</h3>
                             <ul class="mono">
-                                <li>KioskAI — 프린트, 스캔, 인식</li>
-                                <li>wishKioskDID — DID</li>
-                                <li>wishKioskDIDReceive — 수신/알림</li>
-                                <li>trainModel.py — 모델 학습</li>
+                                <li>KioskAI — 프린트·스캔·인식</li>
+                                <li>wishKioskDID / DIDReceive — 표출/수신</li>
+                                <li>trainModel.py — 모델 학습 스크립트</li>
+                                <li>copy_these_files — 실행 전 복사 파일</li>
                             </ul>
                         </div>
                     </div>
@@ -145,31 +143,23 @@
                         <h2 class="h2">주요 기능</h2>
                         <ul>
                             <li>
-                                스캐너(WIA)로 입력된 용지 자동 감지 및 이미지
-                                전처리
+                                스캐너(WIA)로 입력된 용지 자동 감지 및 전처리
                             </li>
+                            <li>ZXing으로 바코드/QR 인식, QRCoder로 QR 생성</li>
                             <li>
-                                ZXing을 통한 바코드/QR 인식, QRCoder로 QR 생성
+                                ONNX 런타임 기반 손글씨 분류/인식 (PyTorch 학습)
                             </li>
-                            <li>
-                                ONNX 런타임 기반 손글씨 분류/인식(모델은
-                                PyTorch로 학습)
-                            </li>
-                            <li>주문 수신/알림을 위한 보조 실행 모듈 구성</li>
+                            <li>DID 수신/표출 보조 모듈 연동</li>
                         </ul>
-                        <div class="note small">
-                            상세 기능은 저장소 커밋/README 기준이며, 변경될 수
-                            있습니다.
-                        </div>
                     </div>
                     <div>
-                        <h2 class="h2">시스템 구성</h2>
+                        <h2 class="h2">동작 흐름</h2>
                         <div class="card">
                             <ol class="small" style="margin: 0">
-                                <li>사용자 필기 → 스캐너(WIA)로 이미지 획득</li>
+                                <li>사용자 필기 → 스캐너(WIA) 이미지 획득</li>
                                 <li>이미지 전처리 → 바코드/QR 인식</li>
-                                <li>모델 추론(ONNX)로 필기 내용 판별</li>
-                                <li>주문 처리 및 DID 수신 모듈로 전달</li>
+                                <li>ONNX 모델 추론으로 숫자 판별</li>
+                                <li>주문 처리 및 DID 연동</li>
                             </ol>
                         </div>
                     </div>
@@ -184,8 +174,7 @@
                         <div class="card">
                             <h3 class="h3">사전 요구사항</h3>
                             <ul>
-                                <li>Windows 10/11</li>
-                                <li>Visual Studio 2022 (최신 .NET 워크로드)</li>
+                                <li>Windows 10/11, Visual Studio 2022</li>
                                 <li>
                                     .NET SDK 타깃:
                                     <span class="mono">net8.0-windows</span>
@@ -195,9 +184,7 @@
                         </div>
                         <div class="card">
                             <h3 class="h3">다운로드</h3>
-                            <p class="small">
-                                Git을 사용하거나 ZIP으로 내려받을 수 있습니다.
-                            </p>
+                            <p class="small">Git 사용 또는 ZIP 다운로드</p>
                             <pre><code class="mono">git clone https://github.com/Team-ToyoTech/WISH-Kiosk.git
 cd WISH-Kiosk
 </code></pre>
@@ -208,19 +195,14 @@ cd WISH-Kiosk
                         <h3 class="h3">Visual Studio에서 열기</h3>
                         <ol>
                             <li>
-                                <span class="mono">wishKiosk.sln</span> 솔루션을
-                                엽니다.
+                                <span class="mono">wishKiosk.sln</span> 열기 →
+                                NuGet 복원
                             </li>
                             <li>
-                                NuGet 패키지를 복원합니다(<span class="kbd"
-                                    >우클릭 → Restore</span
-                                >).
-                            </li>
-                            <li>
-                                솔루션 빌드(<span class="kbd">Ctrl</span>+<span
+                                솔루션 빌드 (<span class="kbd">Ctrl</span>+<span
                                     class="kbd"
                                     >Shift</span
-                                >+<span class="kbd">B</span>).
+                                >+<span class="kbd">B</span>)
                             </li>
                         </ol>
                     </div>
@@ -228,26 +210,19 @@ cd WISH-Kiosk
                     <div class="card" style="margin-top: 18px">
                         <h3 class="h3">실행 전 파일 복사</h3>
                         <p class="small">
-                            저장소의
-                            <span class="mono">copy_these_files</span> 폴더
-                            내용을 실행 파일 위치로 복사합니다.
+                            저장소
+                            <span class="mono">copy_these_files</span> 내용을
+                            실행 폴더로 복사
                         </p>
                         <ul class="mono">
                             <li>
-                                onnx_model →
-                                <span>\KioskAI\bin\Debug\net8.0-windows</span>
+                                onnx_model → \KioskAI\bin\Debug\net8.0-windows\
                             </li>
                             <li>
                                 sound.wav →
-                                <span
-                                    >\wishKioskDIDReceive\bin\Debug\net8.0-windows</span
-                                >
+                                \wishKioskDIDReceive\bin\Debug\net8.0-windows\
                             </li>
                         </ul>
-                        <div class="note small">
-                            위 경로는 README의 안내에 기반합니다. 실제
-                            배포/릴리스 구성 시 폴더가 달라질 수 있습니다.
-                        </div>
                     </div>
                 </div>
             </section>
@@ -264,38 +239,28 @@ cd WISH-Kiosk
                     <div id="tab-run" class="tabpanel active">
                         <ol>
                             <li>
-                                필요 모듈(예: <span class="mono">KioskAI</span>,
-                                <span class="mono">wishKioskDIDReceive</span>)을
-                                시작합니다.
+                                <span class="mono">KioskAI</span>,
+                                <span class="mono">wishKioskDIDReceive</span>
+                                실행
                             </li>
-                            <li>
-                                스캐너가 WIA 드라이버로 인식되는지 확인합니다.
-                            </li>
-                            <li>
-                                주요 창에서 스캔을 수행하고 결과가 표시되는지
-                                확인합니다.
-                            </li>
+                            <li>스캐너가 WIA로 정상 인식되는지 확인</li>
+                            <li>스캔 → 인식 결과 확인</li>
                         </ol>
-                        <div class="warn small">
-                            정확한 실행 순서/옵션은 저장소 문서를 참조하십시오.
-                            현재 공개된 정보로는 일부 단계가 불명확합니다.
-                        </div>
                     </div>
                     <div id="tab-flow" class="tabpanel">
                         <ol>
                             <li>스캔 버튼 → 문서 스캔</li>
                             <li>바코드/QR 감지 → 주문 식별</li>
-                            <li>모델 추론 → 분류/인식 결과</li>
+                            <li>모델 추론 → 숫자 인식</li>
                             <li>주문 처리 → DID 수신/알림</li>
                         </ol>
                     </div>
                     <div id="tab-troubleshoot" class="tabpanel">
                         <ul>
                             <li>
-                                스캐너 인식 실패: WIA 드라이버 확인, 다른 USB
-                                포트 사용
+                                스캐너 인식 실패: WIA 드라이버/USB 포트 확인
                             </li>
-                            <li>패키지 오류: NuGet 패키지 복원/재설치</li>
+                            <li>패키지 오류: NuGet 복원/재설치</li>
                             <li>
                                 모델 로드 실패:
                                 <span class="mono">onnx_model</span> 경로 재확인
@@ -305,15 +270,11 @@ cd WISH-Kiosk
                 </div>
             </section>
 
-            <!-- DEMO (shared) -->
+            <!-- DEMO -->
             <section id="demo">
                 <div class="container two-col">
                     <div>
                         <h2 class="h2">시연</h2>
-                        <p class="small">
-                            아래에 데모 영상을 연결하거나 스크린샷을
-                            배치하십시오.
-                        </p>
                         <div
                             class="card"
                             style="
@@ -323,9 +284,7 @@ cd WISH-Kiosk
                                 justify-content: center;
                             "
                         >
-                            <span class="muted"
-                                >YouTube 링크 또는 MP4 소스 삽입 영역</span
-                            >
+                            <span class="muted">YouTube 또는 MP4 삽입</span>
                         </div>
                     </div>
                     <div>
@@ -338,23 +297,6 @@ cd WISH-Kiosk
                             <div class="card" style="aspect-ratio: 4/3"></div>
                             <div class="card" style="aspect-ratio: 4/3"></div>
                             <div class="card" style="aspect-ratio: 4/3"></div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- KIOSK: README -->
-            <section id="readme" class="alt">
-                <div class="container">
-                    <h2 class="h2">키오스크 README (자동 로드)</h2>
-                    <p class="small">
-                        저장소의 최신 <span class="mono">README.md</span>를
-                        실시간으로 불러와 렌더링합니다. 네트워크 또는 CORS
-                        정책에 따라 불러오지 못할 수 있습니다.
-                    </p>
-                    <div id="readmeBoxKiosk" class="card">
-                        <div id="readmeContentKiosk" class="small">
-                            불러오는 중…
                         </div>
                     </div>
                 </div>
@@ -373,12 +315,11 @@ cd WISH-Kiosk
             <section class="hero" id="server-overview">
                 <div class="container">
                     <span class="badge">WI:SH Server</span>
-                    <h2 class="h1">WI:SH Server — 백엔드/연동 서버</h2>
+                    <h2 class="h1">WI:SH Server</h2>
                     <p class="lead">
                         WI:SH Kiosk와 연동되는 서버 구성입니다. 주문 접수/상태
-                        관리, 외부 시스템 연동, 데이터 저장 등 백엔드 역할을
-                        담당합니다. 세부 동작, API 스펙, 배포 방법 등은 저장소의
-                        README를 기준으로 합니다.
+                        관리, 외부 결제 연동, 큐 표출 등 백엔드 역할을
+                        담당합니다. (Toss Payments 기반 결제)
                     </p>
                     <div class="cta-row">
                         <a
@@ -386,7 +327,7 @@ cd WISH-Kiosk
                             href="https://github.com/Team-ToyoTech/WISH-Server"
                             target="_blank"
                             rel="noopener"
-                            >GitHub 저장소 열기</a
+                            >GitHub 저장소</a
                         >
                         <a class="btn secondary" href="#server-install"
                             >서버 빠른 시작</a
@@ -401,17 +342,15 @@ cd WISH-Kiosk
                     <div>
                         <h2 class="h2">서버 주요 기능</h2>
                         <ul>
-                            <li>키오스크와의 통신 및 주문 데이터 처리</li>
+                            <li>키오스크 ↔ 서버 주문/결제 플로우</li>
+                            <li>주문 대기/완료 큐 관리 및 조회</li>
                             <li>
-                                상태 모니터링 및 알림(구현 여부는 README 기준)
-                            </li>
-                            <li>
-                                환경 변수 기반 설정(포트, DB, 인증 등 — README
-                                참조)
+                                Toss Payments 결제 승인/브랜드페이/빌링 샘플
+                                엔드포인트
                             </li>
                         </ul>
                         <div class="note small">
-                            구체 기능/구성은 저장소 README를 확인하십시오.
+                            결제 키는 실제 상용/테스트 키로 교체해야 합니다.
                         </div>
                     </div>
                     <div>
@@ -419,11 +358,19 @@ cd WISH-Kiosk
                         <div class="card small">
                             <ol style="margin: 0">
                                 <li>
-                                    키오스크 클라이언트 → 서버 API/엔드포인트
-                                    호출
+                                    키오스크 → <span class="mono">/pay</span> 로
+                                    결제 세션 생성
                                 </li>
-                                <li>서버에서 주문/상태를 저장 및 가공</li>
-                                <li>필요 시 외부 알림/표출 시스템과 연동</li>
+                                <li>
+                                    브라우저(또는 WebView)에서 결제 → 서버에서
+                                    승인 처리
+                                </li>
+                                <li>
+                                    결제 완료 시 주문 등록(<span class="mono"
+                                        >/order/add/:id</span
+                                    >
+                                    또는 카운터 결제 플로우)
+                                </li>
                             </ol>
                         </div>
                     </div>
@@ -433,63 +380,141 @@ cd WISH-Kiosk
             <!-- SERVER: INSTALL -->
             <section id="server-install">
                 <div class="container">
-                    <h2 class="h2">서버 설치 및 준비</h2>
+                    <h2 class="h2">서버 설치 및 실행</h2>
                     <div class="grid">
                         <div class="card">
                             <h3 class="h3">다운로드</h3>
-                            <p class="small">
-                                Git을 사용하거나 ZIP으로 내려받을 수 있습니다.
-                            </p>
                             <pre><code class="mono">git clone https://github.com/Team-ToyoTech/WISH-Server.git
 cd WISH-Server
+npm install express body-parser
+node Server.js
 </code></pre>
-                        </div>
-                        <div class="card">
-                            <h3 class="h3">사전 요구사항</h3>
                             <p class="small">
-                                정확한 의존성(.NET/Node/DB 등)은
-                                <span class="mono">WISH-Server</span> 저장소의
-                                README를 확인하십시오.
+                                기본 포트 <span class="mono">4000</span>으로
+                                기동됩니다.
                             </p>
-                            <ul>
-                                <li>
-                                    환경 변수/설정 파일: 예)
-                                    <span class="mono">.env</span> 또는
-                                    <span class="mono">appsettings.json</span>
-                                    등
-                                </li>
-                                <li>
-                                    포트/방화벽, DB 연결 정보 등 배포 환경 구성
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="card" style="margin-top: 18px">
-                        <h3 class="h3">실행</h3>
-                        <ol>
-                            <li>
-                                의존성 설치 및 빌드(README에 명시된 명령 사용)
-                            </li>
-                            <li>환경 변수/설정 파일 구성</li>
-                            <li>
-                                서버 시작 후 Health 체크 엔드포인트로 확인(예:
-                                <span class="mono">/health</span> 또는 README
-                                표기)
-                            </li>
-                        </ol>
-                        <div class="warn small">
-                            구체적인 프레임워크/명령은 README를 기준으로 하며,
-                            여기서는 일반적인 절차만 안내합니다.
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- SERVER: USAGE -->
-            <section id="server-usage" class="alt">
+            <!-- SERVER: API -->
+            <section id="server-api" class="alt">
                 <div class="container">
-                    <h2 class="h2">서버 사용 방법</h2>
+                    <h2 class="h2">API 사용 방법</h2>
+                    <p class="small">
+                        기본 URL:
+                        <span class="mono">http://localhost:4000</span>
+                    </p>
+                    <p class="small">
+                        AWS 서버 URL:
+                        <span class="mono">https://wish.toyotech.dev</span>
+                    </p>
+                    <p class="small">
+                        <span class="mono">:id</span>: 랜덤으로 발급 받은 결제
+                        번호
+                    </p>
+                    <p class="small">
+                        <span class="mono">orderN</span>: 주문 번호
+                    </p>
+                    <div class="grid">
+                        <div class="card">
+                            <h3 class="h3">결제 플로우</h3>
+                            <details open>
+                                <summary class="mono">
+                                    POST /pay — 결제 세션 생성
+                                </summary>
+                                <pre><code class="mono">req  : { "amount": 12000 }
+resp : { "redirectId": "&lt;paymentId&gt;" }</code></pre>
+                            </details>
+                            <details>
+                                <summary class="mono">
+                                    GET /checkout/:id — 결제창 페이지 (내부용)
+                                </summary>
+                                <p class="small">
+                                    브라우저에서 Toss 결제 위젯 로드 후
+                                    성공/실패로 리다이렉트.
+                                </p>
+                            </details>
+                            <details>
+                                <summary class="mono">
+                                    GET /ispaying/:id — 결제 상태 폴링
+                                </summary>
+                                <pre><code class="mono">resp : { "status": "pending" | "paid" | "failed" }</code></pre>
+                            </details>
+                            <details>
+                                <summary class="mono">
+                                    POST /order/add/:id — 결제완료 주문 등록
+                                </summary>
+                                <pre><code class="mono">req  : [ { "Name": "라면", "Count": 2 }, ... ]
+resp : { "orderNumber": 123 }</code></pre>
+                            </details>
+                            <details>
+                                <summary class="mono">
+                                    POST /pay/counter — 카운터 결제(선주문) 생성
+                                </summary>
+                                <pre><code class="mono">req  : { "amount": 10000, "orders": [ { "Name":"라면","Count":2 } ] }
+resp : { "orderNumber": 101, "orderId": "XXXXX" }</code></pre>
+                            </details>
+                            <details>
+                                <summary class="mono">
+                                    GET /pay/complete/:orderN — 카운터 결제 완료
+                                    처리
+                                </summary>
+                                <pre><code class="mono">resp : { "status": "success" | "fail" }</code></pre>
+                            </details>
+                        </div>
+
+                        <div class="card">
+                            <h3 class="h3">주문 큐 / DID</h3>
+                            <summary class="mono">
+                                GET /order/get — 대기 중 주문 목록
+                            </summary>
+                            <summary class="mono">
+                                GET /order/getid — 대기 중 주문 번호 목록
+                            </summary>
+                            <summary class="mono">
+                                GET /order/complete/set/:orderN — 준비완료 처리
+                            </summary>
+                            <summary class="mono">
+                                GET /order/complete/get — 완료된 주문 목록
+                            </summary>
+                            <summary class="mono">
+                                GET /order/complete/getid — 완료된 주문 번호
+                                목록
+                            </summary>
+                            <summary class="mono">
+                                GET /order/complete/cancel/:orderN — 완료 취소
+                            </summary>
+                            <summary class="mono">
+                                DELETE /order/del/:orderN — 수령 처리(완료
+                                목록에서 제거)
+                            </summary>
+                        </div>
+                    </div>
+
+                    <div class="card" style="margin-top: 18px">
+                        <h3 class="h3">cURL 예시</h3>
+                        <pre><code class="mono"># 세션 생성 → redirectId 확인
+curl -X POST http://localhost:4000/pay \
+  -H "Content-Type: application/json" \
+  -d '{ "amount": 12000 }'
+
+# 결제 상태 폴링
+curl http://localhost:4000/ispaying/&lt;redirectId&gt;
+
+# 결제완료 후 주문 등록
+curl -X POST http://localhost:4000/order/add/&lt;redirectId&gt; \
+  -H "Content-Type: application/json" \
+  -d '[{ "Name": "라면", "Count": 2 }]'</code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SERVER: USAGE -->
+            <section id="server-usage">
+                <div class="container">
+                    <h2 class="h2">서버 사용 팁</h2>
                     <div class="tabs" role="tablist">
                         <button class="active" data-tab="srv-run">실행</button>
                         <button data-tab="srv-flow">흐름</button>
@@ -497,99 +522,48 @@ cd WISH-Server
                     </div>
                     <div id="tab-srv-run" class="tabpanel active">
                         <ol>
-                            <li>서버를 로컬 또는 배포 환경에서 실행</li>
                             <li>
-                                API 기본 URL 확인(예:
-                                <span class="mono">http://localhost:포트</span>)
+                                로컬에서 서버 기동 후
+                                <span class="mono">http://localhost:4000</span>
+                                확인
                             </li>
-                            <li>
-                                키오스크 클라이언트 설정에서 서버 URL을 지정
-                            </li>
+                            <li>키오스크 클라이언트에 서버 URL 설정</li>
                         </ol>
                     </div>
                     <div id="tab-srv-flow" class="tabpanel">
                         <ol>
-                            <li>키오스크 → 서버: 주문/상태 요청 전송</li>
-                            <li>서버 → 저장/가공 → 응답</li>
-                            <li>필요 시 알림/표출 시스템과 후속 연동</li>
+                            <li>
+                                키오스크: <span class="mono">/pay</span> → 웹
+                                결제
+                            </li>
+                            <li>
+                                서버: <span class="mono">/success</span> 승인
+                                처리
+                            </li>
+                            <li>
+                                키오스크:
+                                <span class="mono">/order/add/:id</span> 등록
+                            </li>
                         </ol>
                     </div>
                     <div id="tab-srv-troubleshoot" class="tabpanel">
                         <ul>
-                            <li>
-                                포트 충돌: 실행 포트 변경 또는 점유 프로세스
-                                종료
-                            </li>
-                            <li>인증/토큰 오류: 환경 변수/키 값 확인</li>
-                            <li>DB 연결 실패: 연결 문자열/방화벽/권한 점검</li>
+                            <li>포트 충돌 → 포트 변경/점유 해제</li>
+                            <li>키 교체 누락 → Toss 키 값 점검</li>
+                            <li>프록시/방화벽 → 로컬 접근 허용</li>
                         </ul>
-                    </div>
-                </div>
-            </section>
-
-            <!-- SERVER: README -->
-            <section id="server-readme">
-                <div class="container">
-                    <h2 class="h2">서버 README (자동 로드)</h2>
-                    <p class="small">
-                        저장소의 최신 <span class="mono">README.md</span>를
-                        실시간으로 불러와 렌더링합니다. 네트워크 또는 CORS
-                        정책에 따라 불러오지 못할 수 있습니다.
-                    </p>
-                    <div id="readmeBoxServer" class="card">
-                        <div id="readmeContentServer" class="small">
-                            불러오는 중…
-                        </div>
                     </div>
                 </div>
             </section>
         </div>
         <!-- ===================== /SERVER PANE ===================== -->
 
-        <!-- CREDITS (common) -->
-        <section id="credits">
-            <div class="container">
-                <h2 class="h2">자료 및 라이선스</h2>
-                <div class="grid">
-                    <div class="card">
-                        <h3 class="h3">출처</h3>
-                        <ul class="small">
-                            <li>
-                                키오스크 저장소:
-                                https://github.com/Team-ToyoTech/WISH-Kiosk
-                            </li>
-                            <li>
-                                키오스크 README:
-                                https://github.com/Team-ToyoTech/WISH-Kiosk/blob/master/README.md
-                            </li>
-                            <li>
-                                서버 저장소:
-                                https://github.com/Team-ToyoTech/WISH-Server
-                            </li>
-                            <li>
-                                서버 README:
-                                https://github.com/Team-ToyoTech/WISH-Server/blob/master/README.md
-                            </li>
-                            <li>각 저장소의 LICENSE 파일을 확인하십시오.</li>
-                        </ul>
-                    </div>
-                    <div class="card">
-                        <h3 class="h3">저작권</h3>
-                        <p class="small">
-                            © 2025 Team-ToyoTech. 각 저장소의 라이선스 조건을
-                            준수하여 사용하십시오.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
         <footer>
-            <div class="container small">
-                <div>WI:SH Suite — Kiosk & Server</div>
-                <div>
-                    이 페이지는 프로젝트 소개/배포용 단일 HTML 파일입니다.
-                </div>
+            <div class="container small">WI:SH — Kiosk & Server</div>
+
+            <div class="container">
+                &copy; <span id="yearNow"></span> Team ToyoTech. All rights
+                reserved.
             </div>
         </footer>
 

@@ -1,12 +1,12 @@
 :root {
-    --bg: #0b0f14; /* page background */
-    --card: #121922; /* card/backdrop */
-    --card-2: #0f141b; /* alt sections */
-    --text: #cdd6e3; /* primary text */
-    --muted: #91a1b9; /* secondary */
-    --brand: #5aa5ff; /* accent */
-    --brand-2: #7df9c9; /* accent secondary */
-    --border: #1f2a37; /* hairlines */
+    --bg: #0b0f14;
+    --card: #121922;
+    --card-2: #0f141b;
+    --text: #cdd6e3;
+    --muted: #91a1b9;
+    --brand: #5aa5ff;
+    --brand-2: #7df9c9;
+    --border: #1f2a37;
     --link: #9ac7ff;
     --danger: #ff6b6b;
 }
@@ -21,6 +21,18 @@ body {
     color: var(--text);
     font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto,
         "Noto Sans KR", Arial, sans-serif;
+    line-height: 1.85; /* 전체 줄간격 ↑ */
+}
+p {
+    line-height: 1.9;
+    margin: 0 0 14px;
+}
+li {
+    margin: 6px 0;
+}
+ul,
+ol {
+    padding-left: 1.25rem;
 }
 a {
     color: var(--link);
@@ -29,6 +41,7 @@ a {
 a:hover {
     text-decoration: underline;
 }
+
 .container {
     max-width: 1120px;
     margin: 0 auto;
@@ -94,23 +107,24 @@ nav {
 }
 .h2 {
     font-size: 24px;
-    margin: 0 0 10px;
+    margin: 0 0 12px;
 }
 .h3 {
     font-size: 18px;
-    margin: 18px 0 8px;
+    margin: 18px 0 10px;
     color: var(--muted);
     font-weight: 600;
 }
 .lead {
     color: var(--muted);
     max-width: 900px;
-    line-height: 1.6;
-}
+    line-height: 1.8;
+} /* 리드 문단 간격 ↑ */
+
 .cta-row {
     display: flex;
     gap: 12px;
-    margin-top: 20px;
+    margin-top: 22px;
 }
 .btn {
     display: inline-flex;
@@ -146,7 +160,7 @@ nav {
 .card {
     background: var(--card);
     border: 1px solid var(--border);
-    padding: 18px;
+    padding: 20px;
     border-radius: 16px;
 }
 .card h3 {
@@ -160,7 +174,7 @@ nav {
 }
 
 section {
-    padding: 44px 0;
+    padding: 48px 0;
     border-bottom: 1px solid var(--border);
 }
 section.alt {
@@ -227,7 +241,7 @@ footer {
     font-size: 12px;
 }
 
-/* simple tabs */
+/* tabs */
 .tabs {
     display: flex;
     gap: 8px;
@@ -267,13 +281,37 @@ footer {
     border-radius: 8px;
 }
 
-
-/* --- top-level product tabs --- */
-.top-tabs { display:flex; gap:8px; margin: 16px 0 0; border-bottom:1px solid var(--border); }
-.top-tabs button { background:none; border:1px solid var(--border); border-bottom:none; color:var(--muted); padding:10px 14px; border-radius:10px 10px 0 0; cursor:pointer; font-weight:600; }
-.top-tabs button.active { color:var(--text); background: var(--card); }
-.pane { display:none; }
-.pane.active { display:block; }
-.sep { opacity:.5; margin: 0 8px; }
-
-.hidden{display:none !important;}
+/* top-level product tabs */
+.top-tabs {
+    display: flex;
+    gap: 8px;
+    margin: 16px 0 0;
+    border-bottom: 1px solid var(--border);
+}
+.top-tabs button {
+    background: none;
+    border: 1px solid var(--border);
+    border-bottom: none;
+    color: var(--muted);
+    padding: 10px 14px;
+    border-radius: 10px 10px 0 0;
+    cursor: pointer;
+    font-weight: 600;
+}
+.top-tabs button.active {
+    color: var(--text);
+    background: var(--card);
+}
+.pane {
+    display: none;
+}
+.pane.active {
+    display: block;
+}
+.sep {
+    opacity: 0.5;
+    margin: 0 8px;
+}
+.hidden {
+    display: none !important;
+}
