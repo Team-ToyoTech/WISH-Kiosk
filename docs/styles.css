@@ -21,7 +21,7 @@ body {
     color: var(--text);
     font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto,
         "Noto Sans KR", Arial, sans-serif;
-    line-height: 1.85; /* 전체 줄간격 ↑ */
+    line-height: 1.85;
     -webkit-text-size-adjust: 100%;
 }
 p {
@@ -120,7 +120,7 @@ nav {
     color: var(--muted);
     max-width: 900px;
     line-height: 1.8;
-} /* 리드 문단 간격 ↑ */
+}
 
 .cta-row {
     display: flex;
@@ -209,8 +209,15 @@ code {
 pre {
     padding: 16px;
     border-radius: 12px;
-    overflow: auto;
     border: 1px solid var(--border);
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: auto;
+    white-space: pre;
+}
+pre > code {
+    display: block;
+    min-width: 0;
 }
 
 footer {
@@ -242,7 +249,6 @@ footer {
     font-size: 12px;
 }
 
-/* tabs */
 .tabs {
     display: flex;
     gap: 8px;
@@ -282,7 +288,6 @@ footer {
     border-radius: 8px;
 }
 
-/* top-level product tabs */
 .top-tabs {
     display: flex;
     gap: 8px;
@@ -324,7 +329,6 @@ footer .container.small img {
     vertical-align: -0.15em;
 }
 
-/* Bottom-right top button */
 #btnTop {
     position: fixed;
     bottom: calc(16px + env(safe-area-inset-bottom, 0px));
@@ -356,18 +360,12 @@ footer .container.small img {
     }
 }
 
-/* ------------------------ */
-/* ✅ Mobile enhancements   */
-/* ------------------------ */
-
-/* 앵커 스크롤 시 헤더에 가리지 않도록 */
 section,
 .hero,
 #server-overview {
     scroll-margin-top: 80px;
 }
 
-/* 이미지/비디오가 부모폭 넘치지 않게 */
 img,
 video,
 svg {
@@ -375,7 +373,6 @@ svg {
     height: auto;
 }
 
-/* 820px ↓ : 헤더 내비 가로 스크롤 & 자동 높이 */
 @media (max-width: 820px) {
     nav {
         height: auto;
@@ -401,7 +398,6 @@ svg {
     }
 }
 
-/* 720px ↓ : 타이포/패딩 클램프, 탭 가로 스크롤, 데모 그리드 1열 */
 @media (max-width: 720px) {
     .hero {
         padding: 56px 0 36px;
@@ -424,7 +420,6 @@ svg {
         padding: 18px;
     }
 
-    /* 탭/상단 탭이 넘칠 때 가로 스크롤 */
     .tabs,
     .top-tabs {
         overflow-x: auto;
@@ -441,13 +436,11 @@ svg {
         flex: 0 0 auto;
     }
 
-    /* 데모 스크린샷 그리드: 1열 강제 (index.html의 inline style을 모바일에서만 덮어쓰기) */
     #demo .grid {
         grid-template-columns: 1fr !important;
     }
 }
 
-/* 600px ↓ : 코드/컨테이너/소형 텍스트 조정 */
 @media (max-width: 600px) {
     .container {
         padding: 0 16px;
@@ -463,9 +456,31 @@ svg {
     }
 }
 
-/* 480px ↓ : 카드 패딩 살짝 축소 */
 @media (max-width: 480px) {
     .card {
         padding: 16px;
+    }
+}
+
+details > summary.mono {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+}
+
+.mono {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+pre .mono,
+pre code {
+    overflow-wrap: normal;
+    word-break: normal;
+}
+@media (max-width: 820px) {
+    header .pill,
+    header .small {
+        display: none;
     }
 }
