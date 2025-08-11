@@ -30,6 +30,7 @@
 ### 서버
 - **[WISH-Server](https://github.com/Team-ToyoTech/WISH-Server)**
 - 서버 리셋을 위해서는 `settings` → `서버 초기화`
+- 로컬 서버를 사용하고 싶다면 `wishKiosk`, `wishKioskDIDDisplay`, `wishKioskDIDReceive` 각각 설정창에서 서버 설정 변경
 
 ---
 
@@ -54,3 +55,8 @@ node Server.js # 기본 포트: 4000
 # 2) 키오스크
 git clone https://github.com/Team-ToyoTech/WISH-Kiosk.git
 # Visual Studio 2022에서 솔루션 열기 → 빌드
+```
+
+## 로고
+
+<img width="128" height="128" alt="logo" src="https://github.com/user-attachments/assets/5763fa6b-c943-4710-8e5b-b0fc36910024" />
