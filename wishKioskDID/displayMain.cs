@@ -161,7 +161,7 @@ namespace wishKioskDIDDisplay
                 var numberLabel = new Label
                 {
                     Text = order.ToString(),
-                    Font = new Font("Segoe UI", 70, FontStyle.Bold),
+                    Font = new Font("Segoe UI", 80, FontStyle.Bold),
                     AutoSize = true,
                     Cursor = Cursors.Hand,
                     Tag = order
@@ -196,7 +196,7 @@ namespace wishKioskDIDDisplay
                 var numberLabel = new Label
                 {
                     Text = order.ToString(),
-                    Font = new Font("Segoe UI", 70, FontStyle.Bold),
+                    Font = new Font("Segoe UI", 80, FontStyle.Bold),
                     AutoSize = true,
                     Cursor = Cursors.Hand,
                     Tag = order
@@ -215,6 +215,12 @@ namespace wishKioskDIDDisplay
                 string input = Interaction.InputBox("서버 주소를 입력하세요:", "서버 주소 설정", serverUrl);
                 if (!string.IsNullOrWhiteSpace(input))
                 {
+                    if (!input.StartsWith("http"))
+                    {
+                        MessageBox.Show("유효하지 않은 서버 주소입니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        displayMain_KeyDown(sender, e);
+                        return;
+                    }
                     serverUrl = input.Trim().TrimEnd('/');
                     File.WriteAllText(serverUrlPath, serverUrl);
                 }

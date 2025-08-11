@@ -177,7 +177,7 @@ namespace wishKioskDIDReceive
                 var numberLabel = new Label
                 {
                     Text = order.orderNumber.ToString(),
-                    Font = new Font("Segoe UI", 36, FontStyle.Bold),
+                    Font = new Font("Segoe UI", 40, FontStyle.Bold),
                     AutoSize = true,
                     Cursor = Cursors.Hand,
                     Tag = order
@@ -188,11 +188,28 @@ namespace wishKioskDIDReceive
 
                 // 주문 항목
                 int offsetY = numberLabel.Bottom + 8;
+                int orderCnt = 0;
                 foreach (var item in order.order)
                 {
+                    orderCnt++;
+                    if (orderCnt > 4)
+                    {
+                        var lbl = new Label
+                        {
+                            Text = "더보기",
+                            Font = new Font("Segoe UI", 18),
+                            ForeColor = Color.Gray,
+                            Location = new Point(0, offsetY),
+                            AutoSize = true
+                        };
+                        panel.Controls.Add(lbl);
+                        offsetY += lbl.Height + 4;
+                        break;
+                    }
+
                     var lblItem = new Label
                     {
-                        Text = $"{item.Name}  {item.Count}",
+                        Text = (item.Name.Length > 6 ? $"{item.Name[..6]}... " : $"{item.Name} ") + item.Count,
                         Font = new Font("Segoe UI", 18),
                         Location = new Point(0, offsetY),
                         AutoSize = true
@@ -239,11 +256,28 @@ namespace wishKioskDIDReceive
 
                 // 주문 항목
                 int offsetY = numberLabel.Bottom + 8;
+                int orderCnt = 0;
                 foreach (var item in order.order)
                 {
+                    orderCnt++;
+                    if (orderCnt > 4)
+                    {
+                        var lbl = new Label
+                        {
+                            Text = "더보기",
+                            Font = new Font("Segoe UI", 18),
+                            ForeColor = Color.Gray,
+                            Location = new Point(0, offsetY),
+                            AutoSize = true
+                        };
+                        panel.Controls.Add(lbl);
+                        offsetY += lbl.Height + 4;
+                        break;
+                    }
+
                     var lblItem = new Label
                     {
-                        Text = $"{item.Name}  {item.Count}",
+                        Text = (item.Name.Length > 6 ? $"{item.Name[..6]}... " : $"{item.Name} ") + item.Count,
                         Font = new Font("Segoe UI", 18),
                         Location = new Point(0, offsetY),
                         AutoSize = true
@@ -493,6 +527,12 @@ namespace wishKioskDIDReceive
                 string input = Interaction.InputBox("서버 주소를 입력하세요:", "서버 주소 설정", serverUrl);
                 if (!string.IsNullOrWhiteSpace(input))
                 {
+                    if (!input.StartsWith("http"))
+                    {
+                        MessageBox.Show("유효하지 않은 서버 주소입니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        receiveMain_KeyDown(sender, e);
+                        return;
+                    }
                     serverUrl = input.Trim().TrimEnd('/');
                     File.WriteAllText(serverUrlPath, serverUrl);
                 }
