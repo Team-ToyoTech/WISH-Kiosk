@@ -297,9 +297,11 @@ namespace wishKiosk
 
                 // 부가세, 합계
                 int tax = totalPrice / 11; // 부가세
-                DrawLabelValue(g, font, left, width, y, "부가세", (tax.ToString("#,0")));
+                DrawLabelValue(g, font, left, width, y, "금액:", ((totalPrice - tax).ToString("#,0")));
                 y += lineHeight;
-                DrawLabelValue(g, font, left, width, y, "결제 금액", (totalPrice.ToString("#,0")));
+                DrawLabelValue(g, font, left, width, y, "부가세:", (tax.ToString("#,0")));
+                y += lineHeight;
+                DrawLabelValue(g, font, left, width, y, "합계:", (totalPrice.ToString("#,0")));
                 y += lineHeight * 3;
 
                 // 주문번호
