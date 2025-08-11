@@ -36,14 +36,16 @@
                             <a href="#features">특징</a>
                             <a href="#install">설치</a>
                             <a href="#usage">사용</a>
+                            <a href="#ai">AI</a>
+                            <a href="#demo">시연</a>
                         </div>
                         <!-- Server-only nav -->
                         <div class="nav-links server-only hidden">
-                            <a href="#server-overview">서버 소개</a>
-                            <a href="#server-features">서버 특징</a>
-                            <a href="#server-install">서버 설치</a>
+                            <a href="#server-overview">소개</a>
+                            <a href="#server-features">특징</a>
+                            <a href="#server-install">설치</a>
                             <a href="#server-api">API</a>
-                            <a href="#server-usage">서버 사용</a>
+                            <a href="#server-usage">사용</a>
                         </div>
                     </div>
                 </nav>
@@ -91,10 +93,10 @@
                         Write It: Scan & Handle — 키오스크 접근성 개선 프로젝트
                     </h2>
                     <p class="lead">
-                        종이에 쓴 숫자를 스캔/인식해 주문을 넣는 키오스크입니다.
-                        스캐너(WIA), 바코드/QR(ZXing·QRCoder), ONNX
-                        런타임(모델은 PyTorch로 학습)으로 노년층도 쉽게 주문할
-                        수 있도록 설계했습니다.
+                        종이에 쓴 숫자를 스캔, 인식해 주문을 넣는
+                        키오스크입니다. 스캐너(WIA), QR 코드(ZXing · QRCoder),
+                        ONNX 런타임(모델은 PyTorch로 학습)으로 노년층도 쉽게
+                        주문할 수 있도록 설계했습니다.
                     </p>
                     <div class="cta-row">
                         <a
@@ -112,14 +114,15 @@
                             <h3 class="h3">핵심 목표</h3>
                             <ul>
                                 <li>손글씨 기반 주문 입력과 접근성 강화</li>
-                                <li>스캔→인식→처리 전체 흐름 자동화</li>
+                                <li>스캔 → 인식 → 처리 전체 흐름 자동화</li>
                                 <li>현장 배치에 필요한 운영 구성 제공</li>
                             </ul>
                         </div>
                         <div class="card">
                             <h3 class="h3">기술 스택</h3>
-                            <div class="tag">C# (.NET 8.0-windows)</div>
-                            <div class="tag">WIA (스캐너)</div>
+                            <div class="tag">C# (.NET 8.0, Windows)</div>
+                            <div class="tag">EPSON ES-50(스캐너)</div>
+                            <div class="tag">PeriPage P40(프린터)</div>
                             <div class="tag">ZXing</div>
                             <div class="tag">QRCoder</div>
                             <div class="tag">PyTorch → ONNX</div>
@@ -127,8 +130,8 @@
                         <div class="card">
                             <h3 class="h3">저장소 구조 하이라이트</h3>
                             <ul class="mono">
-                                <li>KioskAI — 프린트·스캔·인식</li>
-                                <li>wishKioskDID / DIDReceive — 표출/수신</li>
+                                <li>KioskAI — 프린트 · 스캔 · 인식</li>
+                                <li>wishKioskDID/DIDReceive — DID System</li>
                                 <li>trainModel.py — 모델 학습 스크립트</li>
                                 <li>copy_these_files — 실행 전 복사 파일</li>
                             </ul>
@@ -144,22 +147,23 @@
                         <h2 class="h2">주요 기능</h2>
                         <ul>
                             <li>
-                                스캐너(WIA)로 입력된 용지 자동 감지 및 전처리
+                                스캐너(EPSON ES-50)로 입력된 용지 자동 감지 및
+                                전처리
                             </li>
-                            <li>ZXing으로 바코드/QR 인식, QRCoder로 QR 생성</li>
+                            <li>ZXing으로 QR 코드 인식, QRCoder로 QR 생성</li>
                             <li>
                                 ONNX 런타임 기반 손글씨 분류/인식 (PyTorch 학습)
                             </li>
-                            <li>DID 수신/표출 보조 모듈 연동</li>
+                            <li>DID 시스템 보조 모듈 연동</li>
                         </ul>
                     </div>
                     <div>
                         <h2 class="h2">동작 흐름</h2>
                         <div class="card">
                             <ol class="small" style="margin: 0">
-                                <li>사용자 필기 → 스캐너(WIA) 이미지 획득</li>
-                                <li>이미지 전처리 → 바코드/QR 인식</li>
-                                <li>ONNX 모델 추론으로 숫자 판별</li>
+                                <li>사용자 필기 → 스캔 이미지 획득</li>
+                                <li>이미지 전처리 → QR 코드 인식</li>
+                                <li>ONNX 모델로 숫자 판별</li>
                                 <li>주문 처리 및 DID 연동</li>
                             </ol>
                         </div>
@@ -175,12 +179,18 @@
                         <div class="card">
                             <h3 class="h3">사전 요구사항</h3>
                             <ul>
-                                <li>Windows 10/11, Visual Studio 2022</li>
+                                <li>
+                                    Windows 10/11, Visual Studio 2022 (or .NET
+                                    8.0)
+                                </li>
                                 <li>
                                     .NET SDK 타깃:
                                     <span class="mono">net8.0-windows</span>
                                 </li>
-                                <li>WIA 호환 스캐너 드라이버</li>
+                                <li>
+                                    WIA 호환 스캐너 드라이버 (EPSON ES-50
+                                    스캐너)
+                                </li>
                             </ul>
                         </div>
                         <div class="card">
@@ -218,11 +228,12 @@ cd WISH-Kiosk
                         <ul class="mono">
                             <li>
                                 onnx_model 폴더 →
-                                KioskAI\bin\Debug\net8.0-windows\
+                                KioskAI\bin\Debug\net8.0-windows\ 로 복사
                             </li>
                             <li>
-                                sound.wav 파일 →
-                                wishKioskDIDReceive\bin\Debug\net8.0-windows\
+                                sound.wav 파일 (주문 알림 소리) →
+                                wishKioskDIDReceive\bin\Debug\net8.0-windows\ 로
+                                복사
                             </li>
                         </ul>
                     </div>
@@ -272,22 +283,92 @@ cd WISH-Kiosk
                 </div>
             </section>
 
+            <!-- KIOSK: AI -->
+            <section id="ai">
+                <div class="container">
+                    <h2 class="h2">AI 모델</h2>
+                    <div class="tabs" role="tablist">
+                        <button class="active" data-tab="dataPreprocess">
+                            데이터 전처리
+                        </button>
+                        <button data-tab="modelTrain">모델 학습</button>
+                    </div>
+                    <div id="tab-dataPreprocess" class="tabpanel active">
+                        <ul>
+                            <li>
+                                <span class="mono"
+                                    >handWritingPreprocess.py</span
+                                >
+                                : 직접 작성한 이미지에 대해 ±0.5°부터 ±5.0°까지
+                                0.5° 간격으로 회전본 생성
+                            </li>
+                            <li>
+                                <span class="mono">invert.py</span> : MNIST
+                                데이터셋의 이미지 색상 반전
+                            </li>
+                            <li>
+                                <span class="mono">make.py</span> : MNIST
+                                데이터셋의 투명 처리된 숫자 이미지를 기본 배경
+                                위에 [2.0, 2.5, 3.0] 배로 확대 후 중앙, 랜덤
+                                위치에 합성
+                            </li>
+                            <li>
+                                <span class="mono">makeNaN.py</span> : 이미지
+                                테두리에 랜덤 짧은 선을 1 - 3개 그려 다양한
+                                노이즈(NaN) 샘플 생성
+                            </li>
+                            <li>
+                                <span class="mono">SelectImg.py</span> : 폴더 내
+                                이미지 일정 비율을 무작위 추출, 복사
+                            </li>
+                            <li>
+                                <span class="mono">copyFile.py</span> : 지정
+                                파일을 번호 증가 형태({startIndex}.{ext})로 N개
+                                복제
+                            </li>
+                            <li>
+                                <span class="mono">randName.py</span> : 폴더 내
+                                파일 이름을 충돌 없이 6자리 랜덤 번호로 일괄
+                                변경
+                            </li>
+                        </ul>
+                        <a
+                            class="btn small"
+                            href="https://github.com/Team-ToyoTech/WISH-ImagePreprocess"
+                            target="_blank"
+                            rel="noopener"
+                            >GitHub 저장소
+                        </a>
+                    </div>
+                    <div id="tab-modelTrain" class="tabpanel">
+                        <ol>
+                            <li>
+                                이미지를 64 × 64 로 조정 (학습 효과 극대화 위해
+                                이미지 해상도 낮춤)
+                            </li>
+                            <li>PyTorch 이용한 모델 학습</li>
+                            <li>ONNX로 모델 내보내기</li>
+                        </ol>
+                        <a
+                            class="btn small"
+                            href="https://github.com/Team-ToyoTech/WISH-Kiosk/blob/master/trainModel.py"
+                            target="_blank"
+                            rel="noopener"
+                            ><span class="mono">trainModel.py</span> 코드
+                        </a>
+                    </div>
+                </div>
+            </section>
+
             <!-- DEMO -->
-            <section id="demo">
-                <div class="container two-col">
+            <section id="demo" class="alt">
+                <div class="container">
                     <div>
                         <h2 class="h2">시연</h2>
-                        <div
-                            class="card"
-                            style="
-                                aspect-ratio: 16/9;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                            "
-                        >
-                            <span class="muted">YouTube 또는 MP4 삽입</span>
-                        </div>
+                        <a
+                            class="youtube-url"
+                            href="https://www.youtube.com/watch?v=LmGofzJ8d3k"
+                        ></a>
                     </div>
                     <div>
                         <h2 class="h2">스크린샷</h2>
@@ -295,10 +376,17 @@ cd WISH-Kiosk
                             class="grid"
                             style="grid-template-columns: repeat(2, 1fr)"
                         >
-                            <div class="card" style="aspect-ratio: 4/3"></div>
-                            <div class="card" style="aspect-ratio: 4/3"></div>
-                            <div class="card" style="aspect-ratio: 4/3"></div>
-                            <div class="card" style="aspect-ratio: 4/3"></div>
+                            <div class="card media-card ratio-16x9">
+                                <img src="/img/wishKiosk.png" />
+                                <h3>fasd</h3>
+                            </div>
+                            <div class="card media-card ratio-16x9">
+                                <img src="/img/wishKioskDIDDisplay.png" />
+                            </div>
+                            <div class="card media-card ratio-16x9">
+                                <img src="/img/wishKioskDIDReceive.png" />
+                            </div>
+                            <div class="card media-card ratio-16x9"></div>
                         </div>
                     </div>
                 </div>
@@ -332,7 +420,7 @@ cd WISH-Kiosk
                             >GitHub 저장소</a
                         >
                         <a class="btn secondary" href="#server-install"
-                            >서버 빠른 시작</a
+                            >빠른 시작</a
                         >
                     </div>
                 </div>
@@ -559,8 +647,9 @@ curl -X POST http://localhost:4000/order/add/&lt;redirectId&gt; \
 
         <footer>
             <div class="container small">
-                <img src="/img/logo.png" alt="WI:SH logo" />WI:SH — Kiosk &
-                Server
+                <a href="/img/logo.png"
+                    ><img src="/img/logo.png" alt="WI:SH logo" /></a
+                >WI:SH — Kiosk & Server
             </div>
 
             <div class="container">
@@ -572,7 +661,6 @@ curl -X POST http://localhost:4000/order/add/&lt;redirectId&gt; \
         <!-- Top button -->
         <button id="btnTop" type="button" aria-label="맨 위로" title="맨 위로">
             <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
-                <!-- 세로선 없이 꺾쇄(chevron)만 흰색 선 -->
                 <polyline
                     points="5,15 12,8 19,15"
                     fill="none"
