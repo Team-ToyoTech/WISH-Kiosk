@@ -26,7 +26,7 @@
             <div class="container">
                 <nav>
                     <div style="display: flex; align-items: center; gap: 10px">
-                        <div class="pill">WI:SH</div>
+                        <a href="./"><div class="pill">WI:SH</div></a>
                         <span class="small">Kiosk & Server</span>
                     </div>
                     <div style="display: flex; align-items: center; gap: 20px">
@@ -119,15 +119,6 @@
                             </ul>
                         </div>
                         <div class="card">
-                            <h3 class="h3">기술 스택</h3>
-                            <div class="tag">C# (.NET 8.0, Windows)</div>
-                            <div class="tag">EPSON ES-50(스캐너)</div>
-                            <div class="tag">PeriPage P40(프린터)</div>
-                            <div class="tag">ZXing</div>
-                            <div class="tag">QRCoder</div>
-                            <div class="tag">PyTorch → ONNX</div>
-                        </div>
-                        <div class="card">
                             <h3 class="h3">저장소 구조 하이라이트</h3>
                             <ul class="mono">
                                 <li>KioskAI — 프린트 · 스캔 · 인식</li>
@@ -135,6 +126,11 @@
                                 <li>trainModel.py — 모델 학습 스크립트</li>
                                 <li>copy_these_files — 실행 전 복사 파일</li>
                             </ul>
+                        </div>
+                        <div class="card">
+                            <a href="/logo/logo.html">
+                                <img src="/img/logo.png" alt="WI:SH logo" />
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -187,10 +183,8 @@
                                     .NET SDK 타깃:
                                     <span class="mono">net8.0-windows</span>
                                 </li>
-                                <li>
-                                    WIA 호환 스캐너 드라이버 (EPSON ES-50
-                                    스캐너)
-                                </li>
+                                <li>WIA 호환 스캐너 (EPSON ES-50 스캐너)</li>
+                                <li>프린터 (PeriPage P40 프린터)</li>
                             </ul>
                         </div>
                         <div class="card">
@@ -647,7 +641,7 @@ curl -X POST http://localhost:4000/order/add/&lt;redirectId&gt; \
 
         <footer>
             <div class="container small">
-                <a href="/img/logo.png"
+                <a href="/logo/logo.html"
                     ><img src="/img/logo.png" alt="WI:SH logo" /></a
                 >WI:SH — Kiosk & Server
             </div>

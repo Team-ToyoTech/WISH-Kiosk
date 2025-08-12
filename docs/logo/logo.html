@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ko">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#000000" />
+        <title>SVG Outline — forward & reverse simultaneously</title>
+        <style>
+            html,
+            body {
+                height: 100%;
+                margin: 0;
+                background: #000;
+            } /* 검정 배경 */
+            .viewport {
+                min-height: 100vh;
+                display: grid;
+                place-items: center;
+            }
+            .stage {
+                position: relative;
+                width: 100%;
+                height: 100%;
+                max-width: 92vw;
+                max-height: 92vh;
+                overflow: visible;
+            }
+
+            /* 두 레이어를 정확히 겹치기 */
+            #traceLayer,
+            #originalSvgHost {
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                height: 100%;
+                display: block;
+                opacity: 1;
+                pointer-events: none;
+            }
+            #traceLayer {
+                z-index: 2;
+            } /* 테두리 위 */
+            #originalSvgHost {
+                z-index: 1;
+                opacity: 0;
+            } /* 마지막에 페이드인 */
+
+            .trace-stroke {
+                fill: none;
+                vector-effect: non-scaling-stroke;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+                shape-rendering: geometricPrecision;
+                will-change: stroke-dashoffset, stroke-opacity;
+            }
+            .tracer {
+                opacity: 0.6;
+            } /* 동시 실행 시 두께감 완화 */
+        </style>
+    </head>
+    <body style="background: #000; margin: 0">
+        <div class="viewport">
+            <div class="stage" id="stage">
+                <div id="traceLayer"></div>
+                <div id="originalSvgHost" aria-hidden="true"></div>
+            </div>
+        </div>
+
+        <script>
+            "use strict";
+
+            /* 파라미터 */
+            const SVG_SRC = "/logo/logo.svg"; // 원본 SVG
+            const PX_PER_SEC = 600; // 테두리 그리기 속도(↑ 더 빠름)
+            const CROSSFADE_MS = 800; // 테두리 사라짐 ↔ 원본 등장 교차 페이드
+            const STROKE_COLOR = "#3b82f6"; // 파란 선
+            const STROKE_WIDTH = 2;
+            const END_GAP_PX = 10; // 마지막에 남길 미완 간격(px, 경로 길이 기준)
+
+            /* 실루엣(외곽선) 추출 품질 */
+            const RASTER_BASE = 1024;
+            const ALPHA_THR = 16;
+
+            const stageEl = document.getElementById("stage");
+            const traceHost = document.getElementById("traceLayer");
+            const originalSvgHost = document.getElementById("originalSvgHost");
+
+            (async function init() {
+                const svgText = await fetchText(SVG_SRC);
+                if (!svgText) {
+                    return;
+                }
+
+                // 원본 SVG 파싱 및 viewBox 확보
+                const parsed = new DOMParser().parseFromString(
+                    svgText,
+                    "image/svg+xml"
+                );
+                const sourceSvg = parsed.documentElement;
+                ensureViewBox(sourceSvg);
+                const [vbX, vbY, vbW, vbH] = (
+                    sourceSvg.getAttribute("viewBox") || "0 0 1024 1024"
+                )
+                    .split(/\s+/)
+                    .map(parseFloat);
+                const aspect = vbW / vbH;
+
+                // 중앙 배치(원본과 동일 비율로 박스 크기 지정)
+                function fit() {
+                    const vw = Math.min(
+                        window.innerWidth * 0.92,
+                        window.innerWidth
+                    );
+                    const vh = Math.min(
+                        window.innerHeight * 0.92,
+                        window.innerHeight
+                    );
+                    const byW = { w: vw, h: vw / aspect };
+                    const byH = { w: vh * aspect, h: vh };
+                    const final = byW.h <= vh ? byW : byH;
+                    stageEl.style.width = final.w + "px";
+                    stageEl.style.height = final.h + "px";
+                }
+                fit();
+                window.addEventListener("resize", fit);
+
+                // 원본 SVG(마지막에 교차페이드로 등장)
+                const originalStatic = sourceSvg.cloneNode(true);
+                originalStatic.setAttribute(
+                    "viewBox",
+                    `${vbX} ${vbY} ${vbW} ${vbH}`
+                );
+                originalStatic.setAttribute(
+                    "preserveAspectRatio",
+                    "xMidYMid meet"
+                );
+                originalStatic.style.width = "100%";
+                originalStatic.style.height = "100%";
+                originalSvgHost.appendChild(originalStatic);
+
+                // 트레이스용 SVG(원본과 동일한 viewBox/비율)
+                const traceSvg = document.createElementNS(
+                    "http://www.w3.org/2000/svg",
+                    "svg"
+                );
+                traceSvg.setAttribute("viewBox", `${vbX} ${vbY} ${vbW} ${vbH}`);
+                traceSvg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+                traceSvg.style.width = "100%";
+                traceSvg.style.height = "100%";
+                traceHost.appendChild(traceSvg);
+
+                // --------- 외곽(실루엣) 하나의 path로 추출 ---------
+                const raster = await rasterizeSvgToCanvas(svgText, aspect);
+                if (!raster) {
+                    return;
+                }
+                const { canvas, ctx } = raster;
+                const { width: CW, height: CH } = canvas;
+                const data = ctx.getImageData(0, 0, CW, CH).data;
+                const bin = new Uint8Array(CW * CH);
+                for (let i = 0, p = 0; i < data.length; i += 4, p++) {
+                    bin[p] = data[i + 3] > ALPHA_THR ? 1 : 0;
+                }
+                const segments = marchingSquares(bin, CW, CH);
+                const loops = linkSegmentsToLoops(segments);
+                if (loops.length === 0) {
+                    return;
+                }
+                const outer = pickLargestLoop(loops);
+                const simplified = rdp(outer, Math.max(CW, CH) * 0.0015);
+                const d = polylineToPathD(
+                    simplified,
+                    vbX,
+                    vbY,
+                    vbW,
+                    vbH,
+                    CW,
+                    CH
+                );
+
+                // ① 누적(영구) 테두리 — 정방향(끝에 간격 남김) + 페이드인
+                const outline = document.createElementNS(
+                    "http://www.w3.org/2000/svg",
+                    "path"
+                );
+                outline.setAttribute("d", d);
+                outline.classList.add("trace-stroke");
+                outline.setAttribute("stroke", STROKE_COLOR);
+                outline.setAttribute("stroke-width", String(STROKE_WIDTH));
+                outline.setAttribute("fill", "none");
+                outline.style.strokeOpacity = "0"; // 검정에서 점점 나타남
+                traceSvg.appendChild(outline);
+
+                // ② 동시 실행용 역방향 트레이서
+                const tracer = document.createElementNS(
+                    "http://www.w3.org/2000/svg",
+                    "path"
+                );
+                tracer.setAttribute("d", d);
+                tracer.classList.add("trace-stroke", "tracer");
+                tracer.setAttribute("stroke", STROKE_COLOR);
+                tracer.setAttribute("stroke-width", String(STROKE_WIDTH));
+                tracer.setAttribute("fill", "none");
+                tracer.style.strokeOpacity = "0";
+                traceSvg.appendChild(tracer);
+
+                // 길이/시간/남길 간격
+                let L = 0;
+                try {
+                    L = outline.getTotalLength();
+                } catch {
+                    L = 1200;
+                }
+                const endOffset = Math.max(END_GAP_PX, 1); // 마지막에 남길 미완 간격
+                const dur = Math.max(250, (L / PX_PER_SEC) * 1000);
+
+                // --- 정방향(앞으로) & 역방향(거꾸로) 동시 실행 ---
+                outline.style.strokeDasharray = String(L);
+                outline.style.strokeDashoffset = String(L); // 숨긴 상태에서 시작(정방향: L → endOffset)
+                tracer.style.strokeDasharray = String(L);
+                tracer.style.strokeDashoffset = String(endOffset); // 역방향: endOffset → L
+
+                const forward = outline.animate(
+                    [
+                        { strokeDashoffset: L, strokeOpacity: 0 },
+                        { strokeDashoffset: endOffset, strokeOpacity: 1 },
+                    ],
+                    { duration: dur, easing: "linear", fill: "forwards" }
+                );
+
+                const reverse = tracer.animate(
+                    [
+                        { strokeDashoffset: endOffset, strokeOpacity: 0 },
+                        { strokeDashoffset: L, strokeOpacity: 1 },
+                    ],
+                    { duration: dur, easing: "linear", fill: "forwards" }
+                );
+
+                await Promise.all([forward.finished, reverse.finished]);
+
+                // 최종 상태 정리: 정방향 선은 미완 간격 상태로 고정, 역방향 트레이서는 숨김
+                outline.style.strokeDashoffset = String(endOffset);
+                outline.style.strokeOpacity = "1";
+                outline.style.strokeDasharray = String(L);
+                tracer.style.opacity = "0";
+
+                // 즉시 교차 페이드
+                const fadeOut = traceHost.animate(
+                    [{ opacity: 1 }, { opacity: 0 }],
+                    { duration: CROSSFADE_MS, easing: "ease", fill: "forwards" }
+                );
+                const fadeIn = originalSvgHost.animate(
+                    [{ opacity: 0 }, { opacity: 1 }],
+                    { duration: CROSSFADE_MS, easing: "ease", fill: "forwards" }
+                );
+                await Promise.all([fadeOut.finished, fadeIn.finished]);
+
+                // ----- 유틸 -----
+                function polylineToPathD(points, vx, vy, vw, vh, cw, ch) {
+                    if (!points.length) return "";
+                    const sx = vw / cw,
+                        sy = vh / ch;
+                    let s = `M ${vx + points[0][0] * sx} ${
+                        vy + points[0][1] * sy
+                    }`;
+                    for (let i = 1; i < points.length; i++) {
+                        s += ` L ${vx + points[i][0] * sx} ${
+                            vy + points[i][1] * sy
+                        }`;
+                    }
+                    s += " Z";
+                    return s;
+                }
+
+                async function rasterizeSvgToCanvas(svgString, aspect) {
+                    try {
+                        const h = RASTER_BASE,
+                            w = Math.max(2, Math.round(h * aspect));
+                        const blob = new Blob([svgString], {
+                            type: "image/svg+xml;charset=utf-8",
+                        });
+                        const url = URL.createObjectURL(blob);
+                        const img = new Image();
+                        img.decoding = "async";
+                        img.src = url;
+                        await img.decode();
+                        const canvas = document.createElement("canvas");
+                        canvas.width = w;
+                        canvas.height = h;
+                        const ctx = canvas.getContext("2d", {
+                            willReadFrequently: true,
+                        });
+                        ctx.clearRect(0, 0, w, h);
+                        ctx.drawImage(img, 0, 0, w, h);
+                        URL.revokeObjectURL(url);
+                        return { canvas, ctx };
+                    } catch {
+                        return null;
+                    }
+                }
+
+                function marchingSquares(bin, W, H) {
+                    const segs = [];
+                    for (let y = 0; y < H - 1; y++)
+                        for (let x = 0; x < W - 1; x++) {
+                            const i00 = y * W + x,
+                                i10 = y * W + x + 1,
+                                i11 = (y + 1) * W + x + 1,
+                                i01 = (y + 1) * W + x;
+                            const v0 = +!!bin[i00],
+                                v1 = +!!bin[i10],
+                                v2 = +!!bin[i11],
+                                v3 = +!!bin[i01];
+                            const code = (v0 << 3) | (v1 << 2) | (v2 << 1) | v3;
+                            const pTop = [x + 0.5, y],
+                                pRight = [x + 1, y + 0.5],
+                                pBottom = [x + 0.5, y + 1],
+                                pLeft = [x, y + 0.5];
+                            const add = (a, b) => segs.push([a, b]);
+                            switch (code) {
+                                case 0:
+                                case 15:
+                                    break;
+                                case 1:
+                                    add(pLeft, pBottom);
+                                    break;
+                                case 2:
+                                    add(pRight, pBottom);
+                                    break;
+                                case 3:
+                                    add(pRight, pLeft);
+                                    break;
+                                case 4:
+                                    add(pTop, pRight);
+                                    break;
+                                case 5:
+                                    if (v0) {
+                                        add(pTop, pLeft);
+                                        add(pRight, pBottom);
+                                    } else {
+                                        add(pTop, pRight);
+                                        add(pBottom, pLeft);
+                                    }
+                                    break;
+                                case 6:
+                                    add(pTop, pBottom);
+                                    break;
+                                case 7:
+                                    add(pTop, pLeft);
+                                    break;
+                                case 8:
+                                    add(pTop, pLeft);
+                                    break;
+                                case 9:
+                                    add(pTop, pBottom);
+                                    break;
+                                case 10:
+                                    if (v0) {
+                                        add(pTop, pRight);
+                                        add(pBottom, pLeft);
+                                    } else {
+                                        add(pRight, pBottom);
+                                        add(pLeft, pTop);
+                                    }
+                                    break;
+                                case 11:
+                                    add(pRight, pTop);
+                                    break;
+                                case 12:
+                                    add(pRight, pLeft);
+                                    break;
+                                case 13:
+                                    add(pBottom, pRight);
+                                    break;
+                                case 14:
+                                    add(pBottom, pLeft);
+                                    break;
+                            }
+                        }
+                    return segs;
+                }
+
+                function linkSegmentsToLoops(segments) {
+                    const adj = new Map(),
+                        key = (p) => p[0] + "," + p[1];
+                    const push = (a, b) => {
+                        const ka = key(a),
+                            kb = key(b);
+                        if (!adj.has(ka)) adj.set(ka, { p: a, next: [] });
+                        if (!adj.has(kb)) adj.set(kb, { p: b, next: [] });
+                        adj.get(ka).next.push(kb);
+                        adj.get(kb).next.push(ka);
+                    };
+                    for (const [a, b] of segments) push(a, b);
+
+                    const used = new Set(),
+                        ekey = (a, b) => (a < b ? a + "|" + b : b + "|" + a);
+                    const loops = [];
+                    for (const [ka, node] of adj.entries()) {
+                        for (const kb of node.next) {
+                            const e = ekey(ka, kb);
+                            if (used.has(e)) continue;
+                            const loop = [];
+                            let curr = ka,
+                                prev = kb;
+                            while (true) {
+                                loop.push(adj.get(curr).p);
+                                const neighbors = adj.get(curr).next;
+                                let nx = null;
+                                for (const kn of neighbors) {
+                                    const e2 = ekey(curr, kn);
+                                    if (used.has(e2)) continue;
+                                    if (kn === prev) continue;
+                                    nx = kn;
+                                    break;
+                                }
+                                if (!nx) nx = prev;
+                                used.add(ekey(curr, nx));
+                                prev = curr;
+                                curr = nx;
+                                if (curr === ka) break;
+                            }
+                            loops.push(cleanLoop(loop));
+                        }
+                    }
+                    return loops;
+                }
+
+                function cleanLoop(loop) {
+                    const out = [];
+                    let last = null;
+                    for (const p of loop) {
+                        if (!last || p[0] !== last[0] || p[1] !== last[1]) {
+                            out.push(p);
+                            last = p;
+                        }
+                    }
+                    return out;
+                }
+
+                function polygonArea(poly) {
+                    let a = 0;
+                    for (let i = 0, n = poly.length; i < n; i++) {
+                        const [x1, y1] = poly[i],
+                            [x2, y2] = poly[(i + 1) % n];
+                        a += x1 * y2 - x2 * y1;
+                    }
+                    return Math.abs(a) * 0.5;
+                }
+
+                function pickLargestLoop(loops) {
+                    let best = loops[0],
+                        bestA = polygonArea(loops[0]);
+                    for (let i = 1; i < loops.length; i++) {
+                        const A = polygonArea(loops[i]);
+                        if (A > bestA) {
+                            bestA = A;
+                            best = loops[i];
+                        }
+                    }
+                    return best;
+                }
+
+                // Ramer–Douglas–Peucker
+                function rdp(points, eps) {
+                    if (points.length <= 3) return points.slice();
+                    const first = points[0],
+                        last = points[points.length - 1];
+                    let idx = -1,
+                        dmax = 0;
+                    for (let i = 1; i < points.length - 1; i++) {
+                        const d = distToSeg(points[i], first, last);
+                        if (d > dmax) {
+                            dmax = d;
+                            idx = i;
+                        }
+                    }
+                    if (dmax > eps) {
+                        const L = rdp(points.slice(0, idx + 1), eps);
+                        const R = rdp(points.slice(idx), eps);
+                        return L.slice(0, -1).concat(R);
+                    } else {
+                        return [first, last];
+                    }
+                }
+                function distToSeg(p, a, b) {
+                    const [x, y] = p,
+                        [x1, y1] = a,
+                        [x2, y2] = b;
+                    const A = x - x1,
+                        B = y - y1,
+                        C = x2 - x1,
+                        D = y2 - y1,
+                        dot = A * C + B * D,
+                        len = C * C + D * D || 1e-9;
+                    let t = dot / len;
+                    if (t < 0) t = 0;
+                    else if (t > 1) t = 1;
+                    const xx = x1 + t * C,
+                        yy = y1 + t * D;
+                    return Math.hypot(x - xx, y - yy);
+                }
+            })();
+
+            // 공통 유틸
+            async function fetchText(url) {
+                try {
+                    const r = await fetch(url, { cache: "no-cache" });
+                    if (!r.ok) return null;
+                    return await r.text();
+                } catch {
+                    return null;
+                }
+            }
+            function ensureViewBox(svgEl) {
+                if (svgEl.hasAttribute("viewBox")) return;
+                const w = parseFloat(svgEl.getAttribute("width") || "0");
+                const h = parseFloat(svgEl.getAttribute("height") || "0");
+                if (w > 0 && h > 0) {
+                    svgEl.setAttribute("viewBox", `0 0 ${w} ${h}`);
+                } else {
+                    svgEl.setAttribute("viewBox", "0 0 1024 1024");
+                }
+            }
+        </script>
+    </body>
+</html>
