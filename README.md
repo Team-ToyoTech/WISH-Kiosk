@@ -59,4 +59,5 @@ git clone https://github.com/Team-ToyoTech/WISH-Kiosk.git
 
 ## 로고
 
-<img width="128" height="128" alt="logo" src="https://github.com/user-attachments/assets/5763fa6b-c943-4710-8e5b-b0fc36910024" />
+<a href="https://wish.docs.toyotech.dev/logo/logo.html">
+<img width="128" height="128" alt="logo" src="https://github.com/user-attachments/assets/5763fa6b-c943-4710-8e5b-b0fc36910024" /></a>
