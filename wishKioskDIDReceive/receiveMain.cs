@@ -15,7 +15,7 @@ namespace wishKioskDIDReceive
         private record Order(List<OrderItem> order, int orderNumber, string paid);
         private record OrderItem(string Name, int Count);
 
-        List<Order>? prevOrder, prevCompletedOrder;
+        List<int>? prevOrderNum, prevCompletedOrderNum;
 
         private readonly string soundFilePath = "sound.wav";
 
@@ -42,8 +42,8 @@ namespace wishKioskDIDReceive
                 return;
             }
 
-            prevOrder = null;
-            prevCompletedOrder = null;
+            prevOrderNum = null;
+            prevCompletedOrderNum = null;
 
             var orderTimer = new System.Windows.Forms.Timer { Interval = 500 };
             orderTimer.Tick += async (s, ev) => await GetOrders();
@@ -56,7 +56,7 @@ namespace wishKioskDIDReceive
         /// <param name="ord1"></param>
         /// <param name="ord2"></param>
         /// <returns></returns>
-        private static bool OrderCmp(List<Order> ord1, List<Order> ord2)
+        private static bool OrderCmp(List<int>? ord1, List<int>? ord2)
         {
             if (ord1 == null || ord2 == null)
             {
@@ -68,23 +68,9 @@ namespace wishKioskDIDReceive
             }
             for (int i = 0; i < ord1.Count; i++)
             {
-                if (ord1[i].orderNumber != ord2[i].orderNumber ||
-                    ord1[i].order.Count != ord2[i].order.Count ||
-                    ord1[i].paid != ord2[i].paid)
+                if (ord1[i] != ord2[i])
                 {
                     return false;
-                }
-                if (ord1[i].order.Count != ord2[i].order.Count)
-                {
-                    return false;
-                }
-                for (int j = 0; j < ord1[i].order.Count; j++)
-                {
-                    if (ord1[i].order[j].Name != ord2[i].order[j].Name ||
-                        ord1[i].order[j].Count != ord2[i].order[j].Count)
-                    {
-                        return false;
-                    }
                 }
             }
             return true;
@@ -98,26 +84,42 @@ namespace wishKioskDIDReceive
         {
             try
             {
+                // 준비중 주문 목록
                 var resp = await httpClient.GetAsync(serverUrl + "/order/get");
                 resp.EnsureSuccessStatusCode();
 
                 var json = await resp.Content.ReadAsStringAsync();
                 var orders = JsonSerializer.Deserialize<List<Order>>(json);
 
+                // 준비중 번호 목록
+                var respNum = await httpClient.GetAsync(serverUrl + "/order/getid");
+                respNum.EnsureSuccessStatusCode();
+
+                var jsonNum = await respNum.Content.ReadAsStringAsync();
+                var orderNums = JsonSerializer.Deserialize<List<int>>(jsonNum);
+
+                // 준비 완료 주문 목록
                 var completeResp = await httpClient.GetAsync(serverUrl + "/order/complete/get");
-                resp.EnsureSuccessStatusCode();
+                completeResp.EnsureSuccessStatusCode();
 
                 var completeJson = await completeResp.Content.ReadAsStringAsync();
                 var completeOrders = JsonSerializer.Deserialize<List<Order>>(completeJson);
 
-                if (orders != null && !OrderCmp(orders, prevOrder))
+                // 준비 완료 주문 번호 목록
+                var completeRespNum = await httpClient.GetAsync(serverUrl + "/order/complete/getid");
+                completeRespNum.EnsureSuccessStatusCode();
+
+                var completeJsonNum = await completeRespNum.Content.ReadAsStringAsync();
+                var completeOrderNums = JsonSerializer.Deserialize<List<int>>(completeJsonNum);
+
+                if (orders != null && !OrderCmp(orderNums, prevOrderNum))
                 {
                     DisplayOrders(orders);
-                    if (prevOrder != null)
+                    if (prevOrderNum != null)
                     {
-                        foreach (var order in orders)
+                        foreach (var order in orderNums)
                         {
-                            if (!prevOrder.Contains(order))
+                            if (!prevOrderNum.Contains(order))
                             {
                                 SoundPlayer player = new SoundPlayer(soundFilePath);
                                 player.Load();
@@ -125,12 +127,12 @@ namespace wishKioskDIDReceive
                             }
                         }
                     }
-                    prevOrder = orders;
+                    prevOrderNum = orderNums;
                 }
-                if (completeOrders != null && !OrderCmp(completeOrders, prevCompletedOrder))
+                if (completeOrders != null && !OrderCmp(completeOrderNums, prevCompletedOrderNum))
                 {
                     DisplayCompletedOrders(completeOrders);
-                    prevCompletedOrder = completeOrders;
+                    prevCompletedOrderNum = completeOrderNums;
                 }
             }
             catch (HttpRequestException ex)
@@ -503,6 +505,7 @@ namespace wishKioskDIDReceive
             {
                 var json = await httpClient.GetFromJsonAsync<JsonElement>(serverUrl + "/order/complete/set/" + inputText);
                 var status = json.GetProperty("status").ToString();
+
                 if (status != "success")
                 {
                     MessageBox.Show("잘못된 주문 번호입니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Warning);
