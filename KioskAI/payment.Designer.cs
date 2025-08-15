@@ -32,8 +32,8 @@
             FormBorderStyle = FormBorderStyle.None;
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "payment";
+            ShowIcon = false;
             ShowInTaskbar = false;
-            Text = "결제";
             WindowState = FormWindowState.Maximized;
             Load += payment_Load;
             ((System.ComponentModel.ISupportInitialize)paymentView).EndInit();

@@ -421,51 +421,76 @@ namespace wishKioskDIDReceive
                     order.order.Select(i => $"{i.Name}: {i.Count}")
                 );
 
+                var working = Screen.FromControl(this).WorkingArea;
+                var maxSize = new Size(working.Width - 80, working.Height - 80);
+
                 var detailForm = new Form
                 {
                     Text = $"주문 상세 정보 – {order.orderNumber}",
-                    Size = new Size(450, 350),
+                    AutoSize = true,
+                    AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                    AutoScroll = true,
                     FormBorderStyle = FormBorderStyle.FixedDialog,
-                    StartPosition = FormStartPosition.CenterParent
+                    StartPosition = FormStartPosition.CenterParent,
+                    MaximumSize = maxSize
+                };
+
+                var layout = new TableLayoutPanel
+                {
+                    AutoSize = true,
+                    AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                    Dock = DockStyle.Fill,
+                    ColumnCount = 1,
+                    Padding = new Padding(15)
                 };
 
                 var detailLabel = new Label
                 {
                     Text = details,
                     Font = new Font("Segoe UI", 16),
-                    AutoSize = false,
-                    Size = new Size(410, 200),
-                    Location = new Point(15, 15)
+                    AutoSize = true,
+                    MaximumSize = new Size(maxSize.Width - 60, 0)
                 };
-                detailForm.Controls.Add(detailLabel);
 
                 var btnComplete = new Button
                 {
                     Text = "주문 완료",
                     Font = new Font("Segoe UI", 14),
                     Size = new Size(160, 50),
-                    Location = new Point(70, 240)
+                    Margin = new Padding(0, 15, 10, 0)
                 };
                 btnComplete.Click += async (s, ev) =>
                 {
                     await CallComplete(order.orderNumber.ToString());
                     detailForm.Close();
                 };
-                detailForm.Controls.Add(btnComplete);
 
                 var btnClose = new Button
                 {
                     Text = "닫기",
                     Font = new Font("Segoe UI", 14),
                     Size = new Size(120, 50),
-                    Location = new Point(250, 240)
+                    Margin = new Padding(0, 15, 0, 0)
                 };
                 btnClose.Click += (s, ev) => detailForm.Close();
-                detailForm.Controls.Add(btnClose);
 
+                var btnPanel = new FlowLayoutPanel
+                {
+                    AutoSize = true,
+                    FlowDirection = FlowDirection.LeftToRight,
+                    Dock = DockStyle.Top
+                };
+                btnPanel.Controls.Add(btnComplete);
+                btnPanel.Controls.Add(btnClose);
+
+                layout.Controls.Add(detailLabel);
+                layout.Controls.Add(btnPanel);
+
+                detailForm.Controls.Add(layout);
                 detailForm.ShowDialog();
             }
         }
+
 
         /// <summary>
         /// 주문 완료 처리
