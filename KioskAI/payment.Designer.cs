@@ -29,11 +29,10 @@
             AutoScaleMode = AutoScaleMode.None;
             ClientSize = new Size(1608, 1138);
             Controls.Add(paymentView);
-            FormBorderStyle = FormBorderStyle.None;
             Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "payment";
-            ShowIcon = false;
             ShowInTaskbar = false;
+            Text = "WI:SH Payments";
             WindowState = FormWindowState.Maximized;
             Load += payment_Load;
             ((System.ComponentModel.ISupportInitialize)paymentView).EndInit();

@@ -289,7 +289,7 @@ namespace wishKiosk
                 DrawLabelValue(g, font, left, width, y, "부가세:", (tax.ToString("#,0")));
                 y += lineHeight;
                 DrawLabelValue(g, font, left, width, y, "결제 예정 금액:", (total.ToString("#,0")));
-                y += lineHeight;
+                y += lineHeight * 3;
 
                 // 주문번호
                 using (var orderFont = new Font("Arial", FontSize + 4, FontStyle.Bold))
