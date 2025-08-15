@@ -121,20 +121,6 @@ namespace wishKioskDIDDisplay
                             if (!prevCompletedOrder.Contains(order))
                             {
                                 SpeakOrderAsync(order);
-                                /*using (SpeechSynthesizer synthesizer = new SpeechSynthesizer())
-                                {
-                                    synthesizer.SetOutputToDefaultAudioDevice();
-                                    synthesizer.Volume = 100;  // 0 - 100
-                                    synthesizer.Rate = 1;      // -10 - 10
-
-                                    string ssml = $@"<speak version='1.0'
-											xmlns='http://www.w3.org/2001/10/synthesis'
-											xml:lang='ko-KR'>
-											<say-as interpret-as='cardinal'>{order}</say-as>번 손님, 주문이 준비되었습니다.
-											</speak>";
-
-                                    synthesizer.SpeakSsmlAsync(ssml);
-                                }*/
                             }
                         }
                     }
