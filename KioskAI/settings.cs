@@ -99,7 +99,7 @@ namespace wishKiosk
                 "www.toyotech.dev\n\n" +
                 "WI:SH KIOSK\n" +
                 "Write It: Scan && Handle\n" +
-                "www.github.com/Team-ToyoTech/WISH-Kiosk\n", "WISH INFO");
+                "https://wish.docs.toyotech.dev\n", "WISH INFO");
         }
 
         /// <summary>
