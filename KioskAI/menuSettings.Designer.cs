@@ -74,6 +74,7 @@
             // 
             digitCntNumericUpDown.Font = new Font("맑은 고딕", 12F);
             digitCntNumericUpDown.Location = new Point(210, 25);
+            digitCntNumericUpDown.Maximum = new decimal(new int[] { 9, 0, 0, 0 });
             digitCntNumericUpDown.Name = "digitCntNumericUpDown";
             digitCntNumericUpDown.Size = new Size(166, 39);
             digitCntNumericUpDown.TabIndex = 3;
