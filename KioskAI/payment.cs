@@ -33,7 +33,10 @@ namespace wishKiosk
 
             foreach (var item in totalOrderResult)
             {
-                orderItems.Add(new orderResult.OrderItem(item.Key, item.Value));
+                if (item.Value > 0)
+                {
+                    orderItems.Add(new orderResult.OrderItem(item.Key, item.Value));
+                }
             }
         }
 

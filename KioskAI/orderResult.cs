@@ -125,6 +125,7 @@ namespace wishKiosk
 
 		private void OrderButton_Click(object sender, EventArgs e)
 		{
+
             payment Payment = new(total, totalOrderResult, menuPrice)
             {
                 printDoc = printDoc,
@@ -186,7 +187,10 @@ namespace wishKiosk
                 orderItems.Clear();
                 foreach (var item in totalOrderResult)
                 {
-                    orderItems.Add(new orderResult.OrderItem(item.Key, item.Value));
+                    if (item.Value > 0)
+                    {
+                        orderItems.Add(new orderResult.OrderItem(item.Key, item.Value));
+                    }
                 }
 
                 var body = new { amount = total, orders = orderItems };
