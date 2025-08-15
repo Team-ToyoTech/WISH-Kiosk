@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualBasic;
+using System.Globalization;
 using System.Speech.Synthesis;
 using System.Text;
 using System.Text.Json;
@@ -7,6 +8,7 @@ namespace wishKioskDIDDisplay
 {
     public partial class displayMain : Form
     {
+        private SpeechSynthesizer? synthesizer;
         private readonly HttpClient httpClient = new();
         private string serverUrl = "https://wish.toyotech.dev"; // 실제 서버 주소로 변경
         private readonly string serverUrlPath = "serverURL.dat";
@@ -28,6 +30,27 @@ namespace wishKioskDIDDisplay
                 }
             }
             serverUrl = File.ReadAllText(serverUrlPath).Trim();
+
+            // SSML tts 초기화
+            synthesizer = new SpeechSynthesizer();
+            synthesizer.SetOutputToDefaultAudioDevice();
+            synthesizer.Volume = 100; // 0 - 100
+            synthesizer.Rate = 1;     // -10 - 10
+
+            try
+            {
+                synthesizer.SelectVoiceByHints(
+                    VoiceGender.NotSet,
+                    VoiceAge.NotSet,
+                    0,
+                    new CultureInfo("ko-KR")
+                );
+            }
+            catch
+            {
+                MessageBox.Show("TTS가 한국어를 제공하지 않습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.Close();
+            }
 
             prevOrder = null;
             prevCompletedOrder = null;
@@ -97,7 +120,8 @@ namespace wishKioskDIDDisplay
                         {
                             if (!prevCompletedOrder.Contains(order))
                             {
-                                using (SpeechSynthesizer synthesizer = new SpeechSynthesizer())
+                                SpeakOrderAsync(order);
+                                /*using (SpeechSynthesizer synthesizer = new SpeechSynthesizer())
                                 {
                                     synthesizer.SetOutputToDefaultAudioDevice();
                                     synthesizer.Volume = 100;  // 0 - 100
@@ -109,8 +133,8 @@ namespace wishKioskDIDDisplay
 											<say-as interpret-as='cardinal'>{order}</say-as>번 손님, 주문이 준비되었습니다.
 											</speak>";
 
-                                    synthesizer.SpeakSsml(ssml);
-                                }
+                                    synthesizer.SpeakSsmlAsync(ssml);
+                                }*/
                             }
                         }
                     }
@@ -136,6 +160,40 @@ namespace wishKioskDIDDisplay
                 flowLayoutPanelOrders.Controls.Clear();
                 flowLayoutPanelCompletedOrders.Controls.Clear();
             }
+        }
+
+        private void SpeakOrderAsync(int order)
+        {
+            if (synthesizer == null)
+            {
+                synthesizer = new SpeechSynthesizer();
+                synthesizer.SetOutputToDefaultAudioDevice();
+                synthesizer.Volume = 100; // 0 - 100
+                synthesizer.Rate = 1;     // -10 - 10
+
+                try
+                {
+                    synthesizer.SelectVoiceByHints(
+                        VoiceGender.NotSet,
+                        VoiceAge.NotSet,
+                        0,
+                        new CultureInfo("ko-KR")
+                    );
+                }
+                catch
+                {
+                    MessageBox.Show("TTS가 한국어를 제공하지 않습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
+
+            string ssml = $@"<speak version='1.0'
+							xmlns='http://www.w3.org/2001/10/synthesis'
+							xml:lang='ko-KR'>
+							<say-as interpret-as='cardinal'>{order}</say-as>번 손님, 주문이 준비되었습니다.
+							</speak>";
+
+            synthesizer.SpeakSsmlAsync(ssml);
         }
 
         /// <summary>
