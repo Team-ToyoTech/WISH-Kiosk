@@ -295,7 +295,7 @@ namespace wishKioskDIDReceive
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private async void cancelLabel_Click(object sender, EventArgs e)
+        private void cancelLabel_Click(object sender, EventArgs e)
         {
             if (sender is Label lbl && lbl.Tag is Order order)
             {
