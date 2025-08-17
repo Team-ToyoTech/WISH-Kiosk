@@ -7,11 +7,14 @@
         private System.Windows.Forms.Label totalLabel;
         private System.Windows.Forms.Button OrderButton;
         private System.Windows.Forms.Button CancelButton_;
+        private System.Windows.Forms.Button CounterOrderButton;
+        private System.Windows.Forms.Button RescanButton;
 
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(orderResult));
             panelMain = new Panel();
+            RescanButton = new Button();
             CounterOrderButton = new Button();
             orderResultDataGridView = new DataGridView();
             totalLabel = new Label();
@@ -24,6 +27,7 @@
             // panelMain
             // 
             panelMain.AutoScroll = true;
+            panelMain.Controls.Add(RescanButton);
             panelMain.Controls.Add(CounterOrderButton);
             panelMain.Controls.Add(orderResultDataGridView);
             panelMain.Controls.Add(totalLabel);
@@ -35,13 +39,24 @@
             panelMain.Size = new Size(625, 707);
             panelMain.TabIndex = 0;
             // 
+            // RescanButton
+            // 
+            RescanButton.Location = new Point(99, 656);
+            RescanButton.Margin = new Padding(2);
+            RescanButton.Name = "RescanButton";
+            RescanButton.Size = new Size(105, 36);
+            RescanButton.TabIndex = 4;
+            RescanButton.Text = "다시 스캔";
+            RescanButton.UseVisualStyleBackColor = true;
+            RescanButton.Click += RescanButton_Click;
+            // 
             // CounterOrderButton
             // 
             CounterOrderButton.Location = new Point(220, 656);
             CounterOrderButton.Margin = new Padding(2);
             CounterOrderButton.Name = "CounterOrderButton";
             CounterOrderButton.Size = new Size(192, 36);
-            CounterOrderButton.TabIndex = 4;
+            CounterOrderButton.TabIndex = 5;
             CounterOrderButton.Text = "카운터에서 결제하기";
             CounterOrderButton.UseVisualStyleBackColor = true;
             CounterOrderButton.Click += CounterOrderButton_Click;
@@ -106,6 +121,5 @@
             ((System.ComponentModel.ISupportInitialize)orderResultDataGridView).EndInit();
             ResumeLayout(false);
         }
-        private Button CounterOrderButton;
     }
 }

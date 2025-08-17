@@ -687,7 +687,12 @@ namespace wishKiosk
 			}
 		}
 
-		private void scanButton_Click(object sender, EventArgs e)
+        public void StartScan()
+        {
+            scanButton.PerformClick();
+        }
+
+        private void scanButton_Click(object sender, EventArgs e)
 		{
 			Bitmap? bitmap = ScanWithWia(); // WIA 스캐너로 이미지 가져오기, nullable
 			if (bitmap == null)
@@ -883,7 +888,7 @@ namespace wishKiosk
 			}
 
 			int[] menuNums = yTable.Keys.ToArray();
-			orderResult orderRes = new(menuMap, menuNums, price, orderCnts, menuPrice)
+			orderResult orderRes = new(menuMap, menuNums, price, orderCnts, menuPrice, this)
 			{
 				printDoc = printDoc,
 				serverUrl = serverURL
