@@ -264,11 +264,14 @@ namespace wishKiosk
                     foreach (var item in orderItems)
                     {
                         g.DrawString(item.Name, font, Brushes.Black, left, y);
-                        g.DrawString(menuPrice[item.Name].ToString("#,0"), font, Brushes.Black, left + width * 0.5f, y);
-                        g.DrawString(item.Count.ToString(), font, Brushes.Black, left + width * 0.7f, y);
-                        int totalPrice = menuPrice[item.Name] * item.Count;
-                        g.DrawString(totalPrice.ToString("#,0"), font, Brushes.Black, left + width * 0.85f, y);
-                        y += lineHeight;
+                        if (menuPrice.TryGetValue(item.Name, out int unitPrice))
+                        {
+                            g.DrawString(unitPrice.ToString("#,0"), font, Brushes.Black, left + width * 0.5f, y);
+                            g.DrawString(item.Count.ToString(), font, Brushes.Black, left + width * 0.7f, y);
+                            int totalPrice = unitPrice * item.Count;
+                            g.DrawString(totalPrice.ToString("#,0"), font, Brushes.Black, left + width * 0.85f, y);
+                            y += lineHeight;
+                        }
                     }
                 }
                 else
@@ -317,6 +320,16 @@ namespace wishKiosk
             g.DrawString(label, font, Brushes.Black, left, y);
             var valueSize = g.MeasureString(value, font);
             g.DrawString(value, font, Brushes.Black, left + width - valueSize.Width, y);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                http.Dispose();
+                components?.Dispose();
+            }
+            base.Dispose(disposing);
         }
     }
 }

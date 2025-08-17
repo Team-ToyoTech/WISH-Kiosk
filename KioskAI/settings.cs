@@ -60,7 +60,9 @@ namespace wishKiosk
         {
             if (WishKiosk == null)
             {
-                throw new Exception("WishKiosk 인스턴스가 설정되지 않았습니다."); // MessageBox로 표시 고려, 사용자에게 노출?
+                MessageBox.Show("WishKiosk 인스턴스가 설정되지 않았습니다.");
+                e.Cancel = true;
+                return;
             }
             WishKiosk.getData(this);
         }
@@ -218,7 +220,7 @@ namespace wishKiosk
         /// <returns></returns>
         private async Task ServerReset()
         {
-            var httpClient = new HttpClient();
+            using var httpClient = new HttpClient();
             try
             {
                 var json = await httpClient.GetFromJsonAsync<JsonElement>(serverUrl + "/reset");
