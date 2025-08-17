@@ -3,12 +3,13 @@ using Microsoft.ML.OnnxRuntime.Tensors;
 using Microsoft.VisualBasic;
 using Newtonsoft.Json;
 using QRCoder;
+using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.Drawing.Printing;
 using System.IO;
-using System.Text;
 using System.Security.Cryptography;
+using System.Text;
 using WIA;
 using ZXing;
 
@@ -86,6 +87,11 @@ namespace wishKiosk
 			for (int i = 1; i < lines.Length; i++)
 			{
 				string[]? splt = lines[i].Trim().Split(',');
+				if (splt.Length < 2)
+				{
+					MessageBox.Show("메뉴 목록을 다시 확인해주세요.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+					return;
+				}
 				string menuName = splt[0];
 				try
 				{
@@ -247,22 +253,50 @@ namespace wishKiosk
 		}
 
         /// <summary>
-        /// 문자열을 SHA256 해싱하여 16진수 문자열 반환
+        /// 문자열을 SHA256 해싱하고 랜덤 솔트 포함한 문자열 반환
         /// </summary>
         /// <param name="input">original str</param>
         /// <returns>hash str</returns>
-        public static string Sha256Hash(string input)
+        public static string Sha256Hash(string input, byte[]? saltBytes = null)
         {
+            if (saltBytes == null)
+            {
+                saltBytes = new byte[16];
+                using (var rng = RandomNumberGenerator.Create())
+                {
+                    rng.GetBytes(saltBytes);
+                }
+            }
+
             using (SHA256 sha256 = SHA256.Create())
             {
-                byte[] data = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));
+                byte[] inputBytes = Encoding.UTF8.GetBytes(input);
+                byte[] toHash = new byte[saltBytes.Length + inputBytes.Length];
+                Buffer.BlockCopy(saltBytes, 0, toHash, 0, saltBytes.Length);
+                Buffer.BlockCopy(inputBytes, 0, toHash, saltBytes.Length, inputBytes.Length);
+                byte[] hashBytes = sha256.ComputeHash(toHash);
 
-                var sb = new StringBuilder();
-                foreach (byte b in data)
-                    sb.Append(b.ToString("x2"));
-
-                return sb.ToString();
+                return $"{Convert.ToBase64String(saltBytes)}:{Convert.ToBase64String(hashBytes)}";
             }
+        }
+
+        /// <summary>
+        /// 저장된 솔트와 해시 문자열을 이용해 입력 값 검증
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="stored"></param>
+        /// <returns></returns>
+        public static bool VerifySha256Hash(string input, string stored)
+        {
+            string[] parts = stored.Split(':');
+			if (parts.Length != 2)
+			{
+				return false;
+			}
+
+            byte[] salt = Convert.FromBase64String(parts[0]);
+            string computed = Sha256Hash(input, salt);
+            return stored == computed;
         }
 
         private void settingsButton_Click(object sender, EventArgs e)
@@ -277,19 +311,23 @@ namespace wishKiosk
             }
 
 			string? passwordHash = File.ReadAllText(passwordFilePath).Trim();
-            string input = Interaction.InputBox("비밀번호를 입력하세요: ", "비밀번호");
-			if (string.IsNullOrEmpty(input))
+			string? input = null;
+			do
 			{
-				return;
-			}
-            if (passwordHash != Sha256Hash(input))
-			{
-				MessageBox.Show("비밀번호가 일치하지 않습니다.");
-				settingsButton.PerformClick();
-				return;
-            }
+				input = Interaction.InputBox("비밀번호를 입력하세요: ", "비밀번호");
+                if (string.IsNullOrEmpty(input))
+                {
+                    return;
+                }
+                if (!VerifySha256Hash(input, passwordHash))
+                {
+                    MessageBox.Show("비밀번호가 일치하지 않습니다.");
+                    settingsButton.PerformClick();
+                    return;
+                }
+            } while (!VerifySha256Hash(input, passwordHash));
 
-            settings Settings = new(passwordFilePath)
+			settings Settings = new(passwordFilePath)
 			{
 				printDoc = printDoc,
 				digitCount = digitCount,

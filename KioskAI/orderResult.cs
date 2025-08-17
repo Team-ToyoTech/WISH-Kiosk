@@ -18,7 +18,6 @@ namespace wishKiosk
         private readonly Dictionary<string, int> menuPrice = [];
 		public PrintDocument printDoc = new();
 
-		private HttpClient http = new();
 		public string serverUrl = "https://wish.toyotech.dev"; // 실제 서버 주소로 변경 필요
 
 		private List<OrderItem> orderItems = [];
@@ -194,6 +193,7 @@ namespace wishKiosk
                 }
 
                 var body = new { amount = total, orders = orderItems };
+                using var http = new HttpClient();
                 var res = await http.PostAsJsonAsync(serverUrl + "/pay/counter", body);
                 res.EnsureSuccessStatusCode();
 
@@ -264,9 +264,14 @@ namespace wishKiosk
                     foreach (var item in orderItems)
                     {
                         g.DrawString(item.Name, font, Brushes.Black, left, y);
-                        g.DrawString(menuPrice[item.Name].ToString("#,0"), font, Brushes.Black, left + width * 0.5f, y);
+                        if (!menuPrice.TryGetValue(item.Name, out var unitPrice))
+                        {
+                            unitPrice = 0;
+                            MessageBox.Show($"'{item.Name}'의 가격 정보를 찾을 수 없습니다.");
+                        }
+                        g.DrawString(unitPrice.ToString("#,0"), font, Brushes.Black, left + width * 0.5f, y);
                         g.DrawString(item.Count.ToString(), font, Brushes.Black, left + width * 0.7f, y);
-                        int totalPrice = menuPrice[item.Name] * item.Count;
+                        int totalPrice = unitPrice * item.Count;
                         g.DrawString(totalPrice.ToString("#,0"), font, Brushes.Black, left + width * 0.85f, y);
                         y += lineHeight;
                     }

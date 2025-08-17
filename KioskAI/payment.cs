@@ -14,6 +14,7 @@ namespace wishKiosk
         public uint? orderNum;
         public List<orderResult.OrderItem> orderItems = [];
         private readonly HttpClient http = new();
+        private CancellationTokenSource? paymentCts;
 
         public string serverUrl = "https://wish.toyotech.dev"; // 실제 서버 주소로 변경 필요
 
@@ -120,16 +121,21 @@ namespace wishKiosk
         /// <param name="s"></param>
         /// <param name="e"></param>
         private async void OnNavigationStarting(object? s, CoreWebView2NavigationStartingEventArgs e)
-		{
-			if (!isRunning)
-				return;
+        {
+            if (!isRunning)
+            {
+                return;
+            }
 			isRunning = false;
 
-			while (true)
-			{
-                try
+            paymentCts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
+            var token = paymentCts.Token;
+
+            try
+            {
+                while (!token.IsCancellationRequested)
                 {
-                    var res = await http.GetFromJsonAsync<PaymentResponse>(serverUrl + "/ispaying/" + orderId);
+                    var res = await http.GetFromJsonAsync<PaymentResponse>(serverUrl + "/ispaying/" + orderId, token);
                     if (res?.status == "paid")
                     {
                         // MessageBox.Show("결제 완료"); // 디버깅용
@@ -151,6 +157,7 @@ namespace wishKiosk
                             printDoc.PrintPage -= printDocument_PrintOrderNumPage;
                         }
                         DialogResult = DialogResult.OK;
+                        paymentCts.Cancel();
                         this.Close();
                         e.Cancel = false;
                         return;
@@ -159,6 +166,7 @@ namespace wishKiosk
                     {
                         MessageBox.Show("결제 실패");
                         DialogResult = DialogResult.Abort;
+                        paymentCts.Cancel();
                         this.Close();
                         e.Cancel = true;
                         return;
@@ -167,26 +175,34 @@ namespace wishKiosk
                     {
                         // 결제 진행 중
                     }
+                    await Task.Delay(500, token); // 0.5초 대기
                 }
-                catch (HttpRequestException ex)
+            }
+            catch (HttpRequestException ex)
+            {
+                MessageBox.Show("서버 연결 실패: " + ex.Message);
+                DialogResult = DialogResult.Abort;
+                this.Close();
+                e.Cancel = true;
+            }
+            catch (JsonException ex)
+            {
+                MessageBox.Show("응답 처리 오류: " + ex.Message);
+                DialogResult = DialogResult.Abort;
+                this.Close();
+                e.Cancel = true;
+            }
+            catch (OperationCanceledException)
+            {
+                if (DialogResult == DialogResult.None)
                 {
-                    MessageBox.Show("서버 연결 실패: " + ex.Message);
+                    MessageBox.Show("결제 확인이 시간 초과되었습니다.");
                     DialogResult = DialogResult.Abort;
                     this.Close();
                     e.Cancel = true;
-                    return;
                 }
-                catch (JsonException ex)
-                {
-                    MessageBox.Show("응답 처리 오류: " + ex.Message);
-                    DialogResult = DialogResult.Abort;
-                    this.Close();
-                    e.Cancel = true;
-                    return;
-                }
-                await Task.Delay(500); // 0.5초 대기
-			}
-		}
+            }
+        }
 
         /// <summary>
         /// 주문번호만 출력
@@ -333,6 +349,14 @@ namespace wishKiosk
             g.DrawString(label, font, Brushes.Black, left, y);
             var valueSize = g.MeasureString(value, font);
             g.DrawString(value, font, Brushes.Black, left + width - valueSize.Width, y);
+        }
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            paymentCts?.Cancel();
+            paymentCts?.Dispose();
+            http.Dispose();
+            base.OnFormClosed(e);
         }
     }
 }
