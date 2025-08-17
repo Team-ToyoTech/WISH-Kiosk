@@ -83,23 +83,26 @@ namespace wishKiosk
 			List<string> menuList = new List<string>();
 			List<int> priceList = new List<int>();
 
-			for (int i = 1; i < lines.Length; i++)
-			{
-				string[]? splt = lines[i].Trim().Split(',');
-				string menuName = splt[0];
-				try
-				{
-					int priceValue = int.Parse(splt[1]);
-					menuList.Add(menuName);
-					priceList.Add(priceValue);
-					menuPrice[menuName] = priceValue;
-				}
-				catch
-				{
-					MessageBox.Show($"{i}행의 가격이 잘못된 형식입니다.");
-					return;
-				}
-			}
+                        for (int i = 1; i < lines.Length; i++)
+                        {
+                                string[]? splt = lines[i].Trim().Split(',');
+                                if (splt.Length < 2)
+                                {
+                                        MessageBox.Show($"{i}행의 형식이 올바르지 않습니다.");
+                                        continue;
+                                }
+                                string menuName = splt[0];
+                                if (int.TryParse(splt[1], out int priceValue))
+                                {
+                                        menuList.Add(menuName);
+                                        priceList.Add(priceValue);
+                                        menuPrice[menuName] = priceValue;
+                                }
+                                else
+                                {
+                                        MessageBox.Show($"{i}행의 가격이 잘못된 형식입니다.");
+                                }
+                        }
 
 			menu = menuList.ToArray();
 			price = priceList.ToArray();
@@ -178,23 +181,23 @@ namespace wishKiosk
 				float digitQRScale = 1.3f;
 				int digitQRSize = (int)(boxSize * digitQRScale);
 
-				for (int j = 0; j < digitCount; j++)
-				{
-					string digitData = (currentMenuIndex + 1).ToString() + "-" + digitLabels[j];
-					Bitmap digitQR = GenerateQRCode(digitData);
+                                for (int j = 0; j < digitCount; j++)
+                                {
+                                        string digitData = (currentMenuIndex + 1).ToString() + "-" + digitLabels[j];
+                                        using Bitmap digitQR = GenerateQRCode(digitData);
 
-					int boxCenterX = boxXs[j] + boxSize / 2;
-					int qrX1 = boxCenterX - digitQRSize / 2;
+                                        int boxCenterX = boxXs[j] + boxSize / 2;
+                                        int qrX1 = boxCenterX - digitQRSize / 2;
 
-					int qrYOffset1 = (digitQRSize - boxSize) / 2;
-					int qrY1 = lineY - boxSize - 10 - qrYOffset1;
+                                        int qrYOffset1 = (digitQRSize - boxSize) / 2;
+                                        int qrY1 = lineY - boxSize - 10 - qrYOffset1;
 
-					e.Graphics?.DrawImage(digitQR, new Rectangle(qrX1, qrY1, digitQRSize, digitQRSize));
-				}
+                                        e.Graphics?.DrawImage(digitQR, new Rectangle(qrX1, qrY1, digitQRSize, digitQRSize));
+                                }
 
 				// QR 코드
 				string qrData = $"{"m" + (currentMenuIndex + 1).ToString()}";
-				Bitmap qrImage = GenerateQRCode(qrData);
+                                using Bitmap qrImage = GenerateQRCode(qrData);
 				float scaleFactor = 1.3f;
 				int qrRenderSize = (int)(boxSize * scaleFactor);
 				int qrX = boxXs[digitCount - 1] + boxSize + spacing * 2;
@@ -238,31 +241,38 @@ namespace wishKiosk
 		/// </summary>
 		/// <param name="data">QR code contents</param>
 		/// <returns>QR code img</returns>
-		private Bitmap GenerateQRCode(string data)
-		{
-			QRCodeGenerator qrGen = new QRCodeGenerator();
-			QRCodeData qrCodeData = qrGen.CreateQrCode(data, QRCodeGenerator.ECCLevel.Q);
-			QRCode qrCode = new QRCode(qrCodeData);
-			return qrCode.GetGraphic(20);
-		}
+                private Bitmap GenerateQRCode(string data)
+                {
+                        using var qrGen = new QRCodeGenerator();
+                        using QRCodeData qrCodeData = qrGen.CreateQrCode(data, QRCodeGenerator.ECCLevel.Q);
+                        using QRCode qrCode = new QRCode(qrCodeData);
+                        return qrCode.GetGraphic(20);
+                }
 
         /// <summary>
         /// 문자열을 SHA256 해싱하여 16진수 문자열 반환
         /// </summary>
         /// <param name="input">original str</param>
         /// <returns>hash str</returns>
-        public static string Sha256Hash(string input)
+        public static string Sha256Hash(string input, string? salt = null)
         {
+            salt ??= Convert.ToBase64String(RandomNumberGenerator.GetBytes(16));
             using (SHA256 sha256 = SHA256.Create())
             {
-                byte[] data = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));
-
+                byte[] data = sha256.ComputeHash(Encoding.UTF8.GetBytes(salt + input));
                 var sb = new StringBuilder();
                 foreach (byte b in data)
                     sb.Append(b.ToString("x2"));
-
-                return sb.ToString();
+                return $"{salt}:{sb}";
             }
+        }
+
+        public static bool VerifyPassword(string input, string stored)
+        {
+            var parts = stored.Split(':');
+            if (parts.Length != 2) return false;
+            string salt = parts[0];
+            return Sha256Hash(input, salt) == stored;
         }
 
         private void settingsButton_Click(object sender, EventArgs e)
@@ -276,38 +286,39 @@ namespace wishKiosk
                 }
             }
 
-			string? passwordHash = File.ReadAllText(passwordFilePath).Trim();
-            string input = Interaction.InputBox("비밀번호를 입력하세요: ", "비밀번호");
-			if (string.IsNullOrEmpty(input))
-			{
-				return;
-			}
-            if (passwordHash != Sha256Hash(input))
-			{
-				MessageBox.Show("비밀번호가 일치하지 않습니다.");
-				settingsButton.PerformClick();
-				return;
+                        string? passwordHash = File.ReadAllText(passwordFilePath).Trim();
+            for (int attempt = 0; attempt < 3; attempt++)
+            {
+                string input = Interaction.InputBox("비밀번호를 입력하세요: ", "비밀번호");
+                if (string.IsNullOrEmpty(input))
+                {
+                    return;
+                }
+                if (VerifyPassword(input, passwordHash))
+                {
+                    settings Settings = new(passwordFilePath)
+                    {
+                        printDoc = printDoc,
+                        digitCount = digitCount,
+                        WishKiosk = this,
+                        serverUrl = serverURL,
+                        serverUrlPath = serverURLPath
+                    };
+
+                    if (!File.Exists(menuFilePath))
+                    {
+                        MessageBox.Show($"{menuFilePath} 파일이 존재하지 않습니다.");
+                    }
+                    else
+                    {
+                        Settings.menuPath = menuFilePath;
+                    }
+                    Settings.Show();
+                    return;
+                }
+                MessageBox.Show("비밀번호가 일치하지 않습니다.");
             }
-
-            settings Settings = new(passwordFilePath)
-			{
-				printDoc = printDoc,
-				digitCount = digitCount,
-				WishKiosk = this,
-				serverUrl = serverURL,
-				serverUrlPath = serverURLPath
-            };
-
-			if (!File.Exists(menuFilePath))
-			{
-				MessageBox.Show($"{menuFilePath} 파일이 존재하지 않습니다.");
-			}
-			else
-			{
-				Settings.menuPath = menuFilePath;
-			}
-			Settings.Show();
-		}
+                }
 
 		/// <summary>
 		/// settings에서 digitCount 받아와서 digit.dat 에 기록
@@ -340,23 +351,26 @@ namespace wishKiosk
 			List<string> menuList = new List<string>();
 			List<int> priceList = new List<int>();
 
-			for (int i = 1; i < lines.Length; i++)
-			{
-				string[]? splt = lines[i].Trim().Split(',');
-				string menuName = splt[0];
-				try
-				{
-					int priceValue = int.Parse(splt[1]);
-					menuList.Add(menuName);
-					priceList.Add(priceValue);
-					menuPrice[menuName] = priceValue;
-				}
-				catch
-				{
-					MessageBox.Show($"{i}행의 가격이 잘못된 형식입니다.");
-					return;
-				}
-			}
+                        for (int i = 1; i < lines.Length; i++)
+                        {
+                                string[]? splt = lines[i].Trim().Split(',');
+                                if (splt.Length < 2)
+                                {
+                                        MessageBox.Show($"{i}행의 형식이 올바르지 않습니다.");
+                                        continue;
+                                }
+                                string menuName = splt[0];
+                                if (int.TryParse(splt[1], out int priceValue))
+                                {
+                                        menuList.Add(menuName);
+                                        priceList.Add(priceValue);
+                                        menuPrice[menuName] = priceValue;
+                                }
+                                else
+                                {
+                                        MessageBox.Show($"{i}행의 가격이 잘못된 형식입니다.");
+                                }
+                        }
 
 			menu = menuList.ToArray();
 			price = priceList.ToArray();
@@ -939,103 +953,122 @@ namespace wishKiosk
         /// <param name="roi"></param>
         /// <returns>label</returns>
         public static string OCRDigit(Bitmap bitmap, Rectangle roi)
-		{
-			using (var memoryStream = new MemoryStream())
-			{
-				try
-				{
-					// ROI 안전 클램프
-					Rectangle safeROI = ClampROI(roi, bitmap.Size);
-					Bitmap cropped = new Bitmap(safeROI.Width, safeROI.Height, PixelFormat.Format24bppRgb);
-					using (Graphics g = Graphics.FromImage(cropped))
-					{
-						g.DrawImage(bitmap, new Rectangle(0, 0, cropped.Width, cropped.Height), safeROI, GraphicsUnit.Pixel);
-					}
+                {
+                        try
+                        {
+                                // ROI 안전 클램프
+                                Rectangle safeROI = ClampROI(roi, bitmap.Size);
+                                using Bitmap cropped = new Bitmap(safeROI.Width, safeROI.Height, PixelFormat.Format24bppRgb);
+                                using (Graphics g = Graphics.FromImage(cropped))
+                                {
+                                        g.DrawImage(bitmap, new Rectangle(0, 0, cropped.Width, cropped.Height), safeROI, GraphicsUnit.Pixel);
+                                }
 
-					// 전처리 + 64x64 변환
-					Bitmap resized = new Bitmap(64, 64, PixelFormat.Format24bppRgb);
-					using (Graphics g = Graphics.FromImage(resized))
-					{
-						g.DrawImage(cropped, new Rectangle(0, 0, 64, 64));
-					}
+                                // 전처리 + 64x64 변환
+                                using Bitmap resized = new Bitmap(64, 64, PixelFormat.Format24bppRgb);
+                                using (Graphics g = Graphics.FromImage(resized))
+                                {
+                                        g.DrawImage(cropped, new Rectangle(0, 0, 64, 64));
+                                }
 
-					Bitmap preprocessed = PreprocessImage(resized); // 필요 시 흑백, 이진화 등
-					// preprocessed.Save($"ocr_debug_{t++}.png", ImageFormat.Png);
+                                using Bitmap preprocessed = PreprocessImage(resized); // 필요 시 흑백, 이진화 등
 
-					// Tensor 변환
-					var inputTensor = ImageToTensor(preprocessed);
+                                // Tensor 변환
+                                var inputTensor = ImageToTensor(preprocessed);
 
-					// ONNX 입력 생성
-					var inputs = new List<NamedOnnxValue>
-					{
-						NamedOnnxValue.CreateFromTensor("input", inputTensor)
-					};
+                                // ONNX 입력 생성
+                                var inputs = new List<NamedOnnxValue>
+                                {
+                                        NamedOnnxValue.CreateFromTensor("input", inputTensor)
+                                };
 
-					// 추론
-					using (var results = _session?.Run(inputs))
-					{
-						var output = results?.First().AsEnumerable<float>().ToArray();
-						int predictedIndex = Array.IndexOf(output, output?.Max());
-						string label = _labels[predictedIndex];
+                                // 추론
+                                using (var results = _session?.Run(inputs))
+                                {
+                                        var output = results?.First().AsEnumerable<float>().ToArray();
+                                        int predictedIndex = Array.IndexOf(output, output?.Max());
+                                        string label = _labels[predictedIndex];
 
-						return label == "NaN" ? "" : label;
-					}
-				}
-				catch (Exception ex)
-				{
-					if (!OCRError)
-					{
-						OCRError = true;
-						MessageBox.Show($"OCR Error: {ex.Message}");
-					}
-					return "";
-				}
-			}
-		}
+                                        return label == "NaN" ? "" : label;
+                                }
+                        }
+                        catch (Exception ex)
+                        {
+                                if (!OCRError)
+                                {
+                                        OCRError = true;
+                                        MessageBox.Show($"OCR Error: {ex.Message}");
+                                }
+                                return "";
+                        }
+                }
 
 		/// <summary>
 		/// 이미지를 ONNX 모델 입력 텐서로 변환
 		/// </summary>
 		/// <param name="image">img</param>
 		/// <returns>Tensor</returns>
-		private static DenseTensor<float> ImageToTensor(Bitmap image)
-		{
-			// ONNX 모델, 그레이스케일
-			var tensor = new DenseTensor<float>(new[] { 1, 1, 64, 64 });
-			for (int y = 0; y < 64; y++)
-			{
-				for (int x = 0; x < 64; x++)
-				{
-					Color c = image.GetPixel(x, y);
-					// 흑백 변환 후 -1~1 정규화
-					float gray = (c.R + c.G + c.B) / 3f / 255f;
-					gray = (gray - 0.5f) / 0.5f; // [-1,1]
-					tensor[0, 0, y, x] = gray;
-				}
-			}
-			return tensor;
-		}
+                private static DenseTensor<float> ImageToTensor(Bitmap image)
+                {
+                        var tensor = new DenseTensor<float>(new[] { 1, 1, 64, 64 });
+                        Rectangle rect = new Rectangle(0, 0, image.Width, image.Height);
+                        BitmapData data = image.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+                        unsafe
+                        {
+                                byte* ptr = (byte*)data.Scan0;
+                                int stride = data.Stride;
+                                for (int y = 0; y < 64; y++)
+                                {
+                                        byte* row = ptr + y * stride;
+                                        for (int x = 0; x < 64; x++)
+                                        {
+                                                byte b = row[x * 3];
+                                                byte g = row[x * 3 + 1];
+                                                byte r = row[x * 3 + 2];
+                                                float gray = (r + g + b) / 3f / 255f;
+                                                gray = (gray - 0.5f) / 0.5f;
+                                                tensor[0, 0, y, x] = gray;
+                                        }
+                                }
+                        }
+                        image.UnlockBits(data);
+                        return tensor;
+                }
 
 		/// <summary>
 		/// 이미지 흑백 변환
 		/// </summary>
 		/// <param name="input">img</param>
 		/// <returns>preprocessed img</returns>
-		static Bitmap PreprocessImage(Bitmap input)
-		{
-			Bitmap result = new Bitmap(input.Width, input.Height);
-			for (int y = 0; y < input.Height; y++)
-			{
-				for (int x = 0; x < input.Width; x++)
-				{
-					Color c = input.GetPixel(x, y);
-					int gray = (c.R + c.G + c.B) / 3;
-					Color newColor = gray > 150 ? Color.White : Color.Black;
-					result.SetPixel(x, y, newColor);
-				}
-			}
-			return result;
-		}
+                static Bitmap PreprocessImage(Bitmap input)
+                {
+                        Bitmap result = new Bitmap(input.Width, input.Height, PixelFormat.Format24bppRgb);
+                        Rectangle rect = new Rectangle(0, 0, input.Width, input.Height);
+                        BitmapData srcData = input.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+                        BitmapData dstData = result.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format24bppRgb);
+                        unsafe
+                        {
+                                byte* srcPtr = (byte*)srcData.Scan0;
+                                byte* dstPtr = (byte*)dstData.Scan0;
+                                int stride = srcData.Stride;
+                                for (int y = 0; y < input.Height; y++)
+                                {
+                                        byte* sRow = srcPtr + y * stride;
+                                        byte* dRow = dstPtr + y * stride;
+                                        for (int x = 0; x < input.Width; x++)
+                                        {
+                                                int gray = (sRow[2] + sRow[1] + sRow[0]) / 3;
+                                                byte val = (byte)(gray > 150 ? 255 : 0);
+                                                dRow[0] = dRow[1] = dRow[2] = val;
+                                                sRow += 3;
+                                                dRow += 3;
+                                        }
+                                }
+                        }
+                        input.UnlockBits(srcData);
+                        result.UnlockBits(dstData);
+                        return result;
+                }
 
 		public static Bitmap? ScanWithWia()
 		{
