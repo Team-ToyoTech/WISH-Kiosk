@@ -3,7 +3,6 @@ using System.Drawing.Printing;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
-using System.Threading;
 
 namespace wishKiosk
 {
@@ -24,7 +23,7 @@ namespace wishKiosk
 
         private readonly Dictionary<string, int> menuPrice = [];
 
-        private CancellationTokenSource? pollCts;
+        private bool isRunning = true;
 
 		public payment(int totalPrice, Dictionary<string, int> totalOrderResult, Dictionary<string, int> menuPrice)
 		{
@@ -121,17 +120,16 @@ namespace wishKiosk
         /// <param name="s"></param>
         /// <param name="e"></param>
         private async void OnNavigationStarting(object? s, CoreWebView2NavigationStartingEventArgs e)
-                {
-                        if (pollCts != null)
-                                return;
-                        pollCts = new CancellationTokenSource(TimeSpan.FromMinutes(2));
-                        var token = pollCts.Token;
+		{
+			if (!isRunning)
+				return;
+			isRunning = false;
 
-                        while (!token.IsCancellationRequested)
-                        {
+			while (true)
+			{
                 try
                 {
-                    var res = await http.GetFromJsonAsync<PaymentResponse>(serverUrl + "/ispaying/" + orderId, token);
+                    var res = await http.GetFromJsonAsync<PaymentResponse>(serverUrl + "/ispaying/" + orderId);
                     if (res?.status == "paid")
                     {
                         // MessageBox.Show("결제 완료"); // 디버깅용
@@ -170,10 +168,6 @@ namespace wishKiosk
                         // 결제 진행 중
                     }
                 }
-                catch (OperationCanceledException)
-                {
-                    break;
-                }
                 catch (HttpRequestException ex)
                 {
                     MessageBox.Show("서버 연결 실패: " + ex.Message);
@@ -190,13 +184,9 @@ namespace wishKiosk
                     e.Cancel = true;
                     return;
                 }
-                await Task.Delay(500, token); // 0.5초 대기
-                        }
-                        MessageBox.Show("결제 시간이 초과되었습니다.");
-                        DialogResult = DialogResult.Abort;
-                        this.Close();
-                        e.Cancel = true;
-                }
+                await Task.Delay(500); // 0.5초 대기
+			}
+		}
 
         /// <summary>
         /// 주문번호만 출력
@@ -289,14 +279,10 @@ namespace wishKiosk
                 {
                     foreach (var item in orderItems)
                     {
-                        if (!menuPrice.TryGetValue(item.Name, out int unitPrice))
-                        {
-                            continue;
-                        }
                         g.DrawString(item.Name, font, Brushes.Black, left, y);
-                        g.DrawString(unitPrice.ToString("#,0"), font, Brushes.Black, left + width * 0.5f, y);
+                        g.DrawString(menuPrice[item.Name].ToString("#,0"), font, Brushes.Black, left + width * 0.5f, y);
                         g.DrawString(item.Count.ToString(), font, Brushes.Black, left + width * 0.7f, y);
-                        int totalPrice = unitPrice * item.Count;
+                        int totalPrice = menuPrice[item.Name] * item.Count;
                         g.DrawString(totalPrice.ToString("#,0"), font, Brushes.Black, left + width * 0.85f, y);
                         y += lineHeight;
                     }
@@ -347,17 +333,6 @@ namespace wishKiosk
             g.DrawString(label, font, Brushes.Black, left, y);
             var valueSize = g.MeasureString(value, font);
             g.DrawString(value, font, Brushes.Black, left + width - valueSize.Width, y);
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                http.Dispose();
-                pollCts?.Dispose();
-                components?.Dispose();
-            }
-            base.Dispose(disposing);
         }
     }
 }

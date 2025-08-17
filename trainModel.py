@@ -5,10 +5,9 @@ from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 import json
 from collections import Counter
-from pathlib import Path
 
 # 데이터 경로
-data_dir = Path("tmnist_data")
+data_dir = "C:/Users/ASUS/Desktop/tmnist_data/tmnist_data"
 
 # 데이터 변환 + 증강
 transform_train = transforms.Compose([
@@ -29,8 +28,8 @@ transform_test = transforms.Compose([
 ])
 
 # 데이터셋 로드
-train_dataset = datasets.ImageFolder(root=data_dir / "train", transform=transform_train)
-test_dataset = datasets.ImageFolder(root=data_dir / "test", transform=transform_test)
+train_dataset = datasets.ImageFolder(root=data_dir, transform=transform_train)
+test_dataset = datasets.ImageFolder(root=data_dir, transform=transform_test)
 
 # 클래스 목록 저장
 class_names = train_dataset.classes

@@ -11,7 +11,6 @@ namespace wishKioskDIDReceive
         private readonly HttpClient httpClient = new HttpClient();
         private string serverUrl = "https://wish.toyotech.dev"; // 실제 서버 주소로 변경
         private readonly string serverUrlPath = "serverURL.dat";
-        private SoundPlayer? player;
 
         private record Order(List<OrderItem> order, int orderNumber, string paid);
         private record OrderItem(string Name, int Count);
@@ -42,9 +41,6 @@ namespace wishKioskDIDReceive
                 this.Close();
                 return;
             }
-
-            player = new SoundPlayer(soundFilePath);
-            player.Load();
 
             prevOrderNum = null;
             prevCompletedOrderNum = null;
@@ -125,7 +121,9 @@ namespace wishKioskDIDReceive
                         {
                             if (!prevOrderNum.Contains(order))
                             {
-                                player?.Play();
+                                SoundPlayer player = new SoundPlayer(soundFilePath);
+                                player.Load();
+                                player.Play(); // async
                             }
                         }
                     }
@@ -568,19 +566,17 @@ namespace wishKioskDIDReceive
         {
             if (e.KeyCode == Keys.T)
             {
-                while (true)
+                string input = Interaction.InputBox("서버 주소를 입력하세요:", "서버 주소 설정", serverUrl);
+                if (!string.IsNullOrWhiteSpace(input))
                 {
-                    string input = Interaction.InputBox("서버 주소를 입력하세요:", "서버 주소 설정", serverUrl);
-                    if (string.IsNullOrWhiteSpace(input))
-                        break;
                     if (!input.StartsWith("http"))
                     {
                         MessageBox.Show("유효하지 않은 서버 주소입니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        continue;
+                        receiveMain_KeyDown(sender, e);
+                        return;
                     }
                     serverUrl = input.Trim().TrimEnd('/');
                     File.WriteAllText(serverUrlPath, serverUrl);
-                    break;
                 }
             }
         }
@@ -588,17 +584,6 @@ namespace wishKioskDIDReceive
         private void completeButton_KeyDown(object sender, KeyEventArgs e)
         {
             receiveMain_KeyDown(sender, e);
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                player?.Dispose();
-                httpClient.Dispose();
-                components?.Dispose();
-            }
-            base.Dispose(disposing);
         }
     }
 }

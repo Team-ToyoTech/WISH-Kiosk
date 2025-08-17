@@ -259,32 +259,19 @@ namespace wishKioskDIDDisplay
         {
             if (e.KeyCode == Keys.T)
             {
-                while (true)
+                string input = Interaction.InputBox("서버 주소를 입력하세요:", "서버 주소 설정", serverUrl);
+                if (!string.IsNullOrWhiteSpace(input))
                 {
-                    string input = Interaction.InputBox("서버 주소를 입력하세요:", "서버 주소 설정", serverUrl);
-                    if (string.IsNullOrWhiteSpace(input))
-                        break;
                     if (!input.StartsWith("http"))
                     {
                         MessageBox.Show("유효하지 않은 서버 주소입니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        continue;
+                        displayMain_KeyDown(sender, e);
+                        return;
                     }
                     serverUrl = input.Trim().TrimEnd('/');
                     File.WriteAllText(serverUrlPath, serverUrl);
-                    break;
                 }
             }
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                synthesizer?.Dispose();
-                httpClient.Dispose();
-                components?.Dispose();
-            }
-            base.Dispose(disposing);
         }
     }
 }
