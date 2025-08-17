@@ -1081,24 +1081,39 @@ namespace wishKiosk
 
 			var manager = new DeviceManager();
 
-			DeviceInfo? scannerInfo = null;
-			foreach (DeviceInfo info in manager.DeviceInfos)
-			{
-				if (info.Type == WiaDeviceType.ScannerDeviceType &&
-					info.Properties["Name"].get_Value().ToString().Contains("ES-50"))
-				{
-					scannerInfo = info;
-					break;
-				}
-			}
+            DeviceInfo? scannerInfo = null;
 
-			if (scannerInfo == null)
-			{
-				MessageBox.Show("ES-50 스캐너를 찾을 수 없습니다.");
-				return null;
-			}
+            // 먼저 ES-50 스캐너를 탐색
+            foreach (DeviceInfo info in manager.DeviceInfos)
+            {
+                if (info.Type == WiaDeviceType.ScannerDeviceType &&
+                        info.Properties["Name"].get_Value().ToString().Contains("ES-50"))
+                {
+                    scannerInfo = info;
+                    break;
+                }
+            }
 
-			var device = scannerInfo.Connect();
+            // ES-50이 없다면 첫 번째 사용 가능한 스캐너 사용
+            if (scannerInfo == null)
+            {
+                foreach (DeviceInfo info in manager.DeviceInfos)
+                {
+                    if (info.Type == WiaDeviceType.ScannerDeviceType)
+                    {
+                        scannerInfo = info;
+                        break;
+                    }
+                }
+            }
+
+            if (scannerInfo == null)
+            {
+                MessageBox.Show("스캐너를 찾을 수 없습니다.");
+                return null;
+            }
+
+            var device = scannerInfo.Connect();
 			var item = device.Items[1];
 
 			// 컬러, 해상도 설정
@@ -1130,15 +1145,30 @@ namespace wishKiosk
         /// <param name="value"></param>
         private static void SetWiaProperty(Item item, int id, object value)
 		{
-			foreach (Property prop in item.Properties)
-			{
-				if (prop.PropertyID == id)
-				{
-					prop.set_Value(ref value);
-					return;
-				}
-			}
-		}
+            foreach (Property prop in item.Properties)
+            {
+                if (prop.PropertyID == id)
+                {
+                    try
+                    {
+                        prop.set_Value(ref value);
+                    }
+                    catch (ArgumentException)
+                    {
+                        if (value is int intVal && intVal > 300)
+                        {
+                            object fallback = 300;
+                            try
+                            {
+                                prop.set_Value(ref fallback);
+                            }
+                            catch {}
+                        }
+                    }
+                    return;
+                }
+            }
+        }
 
 		private bool IsNumber(string s)
 		{
