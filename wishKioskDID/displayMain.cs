@@ -101,7 +101,7 @@ namespace wishKioskDIDDisplay
                 var orders = JsonSerializer.Deserialize<int[]>(json);
 
                 var completeResp = await httpClient.GetAsync(serverUrl + "/order/complete/getid");
-                resp.EnsureSuccessStatusCode();
+                completeResp.EnsureSuccessStatusCode();
 
                 var completeJson = await completeResp.Content.ReadAsStringAsync();
                 var completeOrders = JsonSerializer.Deserialize<int[]>(completeJson);
@@ -188,7 +188,9 @@ namespace wishKioskDIDDisplay
         /// <param name="orders"></param>
         private void DisplayOrders(int[] orders)
         {
+            flowLayoutPanelOrders.SuspendLayout();
             flowLayoutPanelOrders.Controls.Clear();
+
             foreach (var order in orders)
             {
                 var panel = new Panel
@@ -197,24 +199,25 @@ namespace wishKioskDIDDisplay
                     AutoSizeMode = AutoSizeMode.GrowAndShrink,
                     Padding = new Padding(12),
                     Margin = new Padding(8),
-                    BorderStyle = BorderStyle.FixedSingle,
-                    MaximumSize = new Size(flowLayoutPanelOrders.ClientSize.Width - 20, 0)
+                    BorderStyle = BorderStyle.FixedSingle
                 };
 
-                // 주문 번호
                 var numberLabel = new Label
                 {
                     Text = order.ToString(),
                     Font = new Font("Segoe UI", 80, FontStyle.Bold),
                     AutoSize = true,
                     Cursor = Cursors.Hand,
-                    Tag = order
+                    Tag = order,
+                    Location = new Point(0, 0)
                 };
                 numberLabel.BackColor = Color.Yellow;
-                panel.Controls.Add(numberLabel);
 
+                panel.Controls.Add(numberLabel);
                 flowLayoutPanelOrders.Controls.Add(panel);
             }
+
+            flowLayoutPanelOrders.ResumeLayout();
         }
 
         /// <summary>

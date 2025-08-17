@@ -162,7 +162,9 @@ namespace wishKioskDIDReceive
         /// <param name="orders"></param>
         private void DisplayOrders(List<Order> orders)
         {
+            flowLayoutPanelOrders.SuspendLayout();
             flowLayoutPanelOrders.Controls.Clear();
+
             foreach (var order in orders)
             {
                 var panel = new Panel
@@ -171,8 +173,7 @@ namespace wishKioskDIDReceive
                     AutoSizeMode = AutoSizeMode.GrowAndShrink,
                     Padding = new Padding(12),
                     Margin = new Padding(8),
-                    BorderStyle = BorderStyle.FixedSingle,
-                    MaximumSize = new Size(flowLayoutPanelOrders.ClientSize.Width - 20, 0)
+                    BorderStyle = BorderStyle.FixedSingle
                 };
 
                 // 주문 번호
@@ -182,9 +183,10 @@ namespace wishKioskDIDReceive
                     Font = new Font("Segoe UI", 40, FontStyle.Bold),
                     AutoSize = true,
                     Cursor = Cursors.Hand,
-                    Tag = order
+                    Tag = order,
+                    BackColor = Color.Yellow,
+                    Location = new Point(0, 0)
                 };
-                numberLabel.BackColor = Color.Yellow;
                 numberLabel.Click += numberLabel_Click;
                 panel.Controls.Add(numberLabel);
 
@@ -220,8 +222,20 @@ namespace wishKioskDIDReceive
                     offsetY += lblItem.Height + 4;
                 }
 
+                int contentWidth = 0;
+                foreach (Control c in panel.Controls)
+                {
+                    if (c.Right > contentWidth)
+                    {
+                        contentWidth = c.Right;
+                    }
+                }
+                numberLabel.Left = Math.Max(0, (contentWidth - numberLabel.Width) / 2);
+
                 flowLayoutPanelOrders.Controls.Add(panel);
             }
+
+            flowLayoutPanelOrders.ResumeLayout();
         }
 
         /// <summary>

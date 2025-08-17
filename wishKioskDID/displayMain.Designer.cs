@@ -85,7 +85,7 @@ namespace wishKioskDIDDisplay
             flowLayoutPanelOrders.Name = "flowLayoutPanelOrders";
             flowLayoutPanelOrders.Size = new Size(726, 610);
             flowLayoutPanelOrders.TabIndex = 0;
-            flowLayoutPanelOrders.WrapContents = false;
+            flowLayoutPanelOrders.WrapContents = true;
             // 
             // displayMain
             // 

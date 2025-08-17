@@ -58,7 +58,7 @@
             groupBoxCompleted.Font = new Font("맑은 고딕", 35F);
             groupBoxCompleted.Location = new Point(0, 106);
             groupBoxCompleted.Name = "groupBoxCompleted";
-            groupBoxCompleted.Size = new Size(360, 617);
+            groupBoxCompleted.Size = new Size(332, 617);
             groupBoxCompleted.TabIndex = 1;
             groupBoxCompleted.TabStop = false;
             groupBoxCompleted.Text = "완료";
@@ -70,7 +70,7 @@
             flowLayoutPanelCompletedOrders.FlowDirection = FlowDirection.TopDown;
             flowLayoutPanelCompletedOrders.Location = new Point(3, 97);
             flowLayoutPanelCompletedOrders.Name = "flowLayoutPanelCompletedOrders";
-            flowLayoutPanelCompletedOrders.Size = new Size(354, 517);
+            flowLayoutPanelCompletedOrders.Size = new Size(326, 517);
             flowLayoutPanelCompletedOrders.TabIndex = 0;
             flowLayoutPanelCompletedOrders.WrapContents = false;
             // 
@@ -79,9 +79,9 @@
             groupBoxPreparing.Controls.Add(flowLayoutPanelOrders);
             groupBoxPreparing.Dock = DockStyle.Fill;
             groupBoxPreparing.Font = new Font("맑은 고딕", 35F);
-            groupBoxPreparing.Location = new Point(360, 106);
+            groupBoxPreparing.Location = new Point(332, 106);
             groupBoxPreparing.Name = "groupBoxPreparing";
-            groupBoxPreparing.Size = new Size(769, 617);
+            groupBoxPreparing.Size = new Size(797, 617);
             groupBoxPreparing.TabIndex = 2;
             groupBoxPreparing.TabStop = false;
             groupBoxPreparing.Text = "주문 준비중";
@@ -93,9 +93,8 @@
             flowLayoutPanelOrders.FlowDirection = FlowDirection.TopDown;
             flowLayoutPanelOrders.Location = new Point(3, 97);
             flowLayoutPanelOrders.Name = "flowLayoutPanelOrders";
-            flowLayoutPanelOrders.Size = new Size(763, 517);
+            flowLayoutPanelOrders.Size = new Size(791, 517);
             flowLayoutPanelOrders.TabIndex = 0;
-            flowLayoutPanelOrders.WrapContents = false;
             // 
             // receiveMain
             // 
