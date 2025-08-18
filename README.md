@@ -16,6 +16,8 @@
 - **wishKiosk**의 설정 버튼은 스캔 버튼 오른쪽에 얇게 마련되어 있습니다.
 - **wishKiosk**의 설정창 초기 비밀번호는 `0000` 입니다.
 - **wishKioskDIDDisplay**와 **wishKioskDIDReceive**의 설정창 진입 키는 `T`입니다.
+- 각 앱의 설정창에서 서버 주소를 변경할 수 있습니다. 초기값은 `https://wish.toyotech.dev` 입니다. 로컬에서 사용하기 위해서는 `http://localhost:4000`으로 설정하세요.
+- **wishKiosk**를 처음 사용할 때는 설정창에서 초기 비밀번호 변경 및 인쇄 설정을 해야합니다.
 
 ---
 
