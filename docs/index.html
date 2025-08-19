@@ -607,22 +607,6 @@ resp : { "orderNumber": 101, "orderId": "XXXXX" }</code></pre>
                             </summary>
                         </div>
                     </div>
-
-                    <div class="card" style="margin-top: 18px">
-                        <h3 class="h3">cURL 예시</h3>
-                        <pre><code class="mono"># 세션 생성 → redirectId 확인
-curl -X POST http://localhost:4000/pay \
-  -H "Content-Type: application/json" \
-  -d '{ "amount": 12000 }'
-
-# 결제 상태 폴링
-curl http://localhost:4000/ispaying/&lt;redirectId&gt;
-
-# 결제완료 후 주문 등록
-curl -X POST http://localhost:4000/order/add/&lt;redirectId&gt; \
-  -H "Content-Type: application/json" \
-  -d '[{ "Name": "라면", "Count": 2 }]'</code></pre>
-                    </div>
                 </div>
             </section>
 
