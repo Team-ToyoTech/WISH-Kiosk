@@ -60,7 +60,9 @@ namespace wishKiosk
         {
             if (WishKiosk == null)
             {
-                throw new Exception("WishKiosk 인스턴스가 설정되지 않았습니다."); // MessageBox로 표시 고려, 사용자에게 노출?
+                MessageBox.Show("WishKiosk 인스턴스가 설정되지 않았습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                e.Cancel = true;
+                return;
             }
             WishKiosk.getData(this);
         }
@@ -218,19 +220,21 @@ namespace wishKiosk
         /// <returns></returns>
         private async Task ServerReset()
         {
-            var httpClient = new HttpClient();
-            try
+            using (var httpClient = new HttpClient())
             {
-                var json = await httpClient.GetFromJsonAsync<JsonElement>(serverUrl + "/reset");
-                var status = json.GetProperty("status").GetString();
-                if (status != "Success")
+                try
                 {
-                    MessageBox.Show("초기화에 실패했습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    var json = await httpClient.GetFromJsonAsync<JsonElement>(serverUrl + "/reset");
+                    var status = json.GetProperty("status").GetString();
+                    if (status != "Success")
+                    {
+                        MessageBox.Show("초기화에 실패했습니다.", "오류", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"오류: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"오류: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 

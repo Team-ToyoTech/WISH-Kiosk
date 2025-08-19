@@ -121,10 +121,18 @@
                         <div class="card">
                             <h3 class="h3">저장소 구조 하이라이트</h3>
                             <ul class="mono">
-                                <li>KioskAI — 프린트 · 스캔 · 인식</li>
-                                <li>wishKioskDID/DIDReceive — DID System</li>
-                                <li>trainModel.py — 모델 학습 스크립트</li>
-                                <li>copy_these_files — 실행 전 복사 파일</li>
+                                <li>
+                                    KioskAI — 키오스크 본체 (주문지 출력 · 스캔
+                                    · 인식 · 결제)
+                                </li>
+                                <li>
+                                    wishKioskDIDDisplay — 주문 번호 DID 표시
+                                </li>
+                                <li>wishKioskDIDReceive — 주문 관리 및 알림</li>
+                                <li>trainModel.py — AI 모델 학습 스크립트</li>
+                                <li>
+                                    copy_these_files — 실행 전 복사할 파일들
+                                </li>
                             </ul>
                         </div>
                         <div class="card">
@@ -150,7 +158,11 @@
                             <li>
                                 ONNX 런타임 기반 손글씨 분류/인식 (PyTorch 학습)
                             </li>
-                            <li>DID 시스템 보조 모듈 연동</li>
+                            <li>
+                                DID
+                                시스템(wishKioskDIDDisplay/wishKioskDIDReceive)
+                                연동
+                            </li>
                         </ul>
                     </div>
                     <div>
@@ -247,6 +259,7 @@ cd WISH-Kiosk
                         <ol>
                             <li>
                                 <span class="mono">KioskAI</span>,
+                                <span class="mono">wishKioskDIDDisplay</span>,
                                 <span class="mono">wishKioskDIDReceive</span>
                                 실행
                             </li>
@@ -488,7 +501,7 @@ cd WISH-Kiosk
                             <h3 class="h3">다운로드</h3>
                             <pre><code class="mono">git clone https://github.com/Team-ToyoTech/WISH-Server.git
 cd WISH-Server
-npm install express body-parser
+npm install
 node Server.js
 </code></pre>
                             <p class="small">

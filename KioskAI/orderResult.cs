@@ -6,125 +6,127 @@ using System.Text.Json;
 
 namespace wishKiosk
 {
-	public partial class orderResult : Form
-	{
-		private readonly Dictionary<int, string> menuMap;
-		private readonly int[] menuNum;
-		private readonly int[] price;
-		private readonly List<int> menuOrderCount;
-		private Dictionary<string, int> totalOrderResult = [];
-		private uint? orderNum = 0;
-		private string? orderId;
+    public partial class orderResult : Form
+    {
+        private readonly Dictionary<int, string> menuMap;
+        private readonly int[] menuNum;
+        private readonly int[] price;
+        private readonly List<int> menuOrderCount;
+        private Dictionary<string, int> totalOrderResult = [];
+        private uint? orderNum = 0;
+        private string? orderId;
         private readonly Dictionary<string, int> menuPrice = [];
-		public PrintDocument printDoc = new();
+        private readonly wishKiosk parentForm;
+        public PrintDocument printDoc = new();
 
-		private HttpClient http = new();
-		public string serverUrl = "https://wish.toyotech.dev"; // 실제 서버 주소로 변경 필요
+        public string serverUrl = "https://wish.toyotech.dev"; // 실제 서버 주소로 변경 필요
 
-		private List<OrderItem> orderItems = [];
+        private List<OrderItem> orderItems = [];
         public record OrderItem(string Name, int Count);
 
         private int total = 0;
 
-		public orderResult(
-			Dictionary<int, string> menuMap,
-			int[] menuNum,
-			int[] price,
-			List<int> menuOrderCount,
-			Dictionary<string, int> menuPrice)
-		{
-			InitializeComponent();
+        public orderResult(
+            Dictionary<int, string> menuMap,
+            int[] menuNum,
+            int[] price,
+            List<int> menuOrderCount,
+            Dictionary<string, int> menuPrice,
+            wishKiosk parentForm)
+        {
+            InitializeComponent();
 
-			this.menuMap = menuMap;
-			this.menuNum = menuNum;
-			this.price = price;
-			this.menuOrderCount = menuOrderCount;
-			this.menuPrice = menuPrice;
+            this.menuMap = menuMap;
+            this.menuNum = menuNum;
+            this.price = price;
+            this.menuOrderCount = menuOrderCount;
+            this.menuPrice = menuPrice;
+            this.parentForm = parentForm;
 
             Load += orderResult_Load;
-		}
+        }
 
-		private void orderResult_Load(object sender, EventArgs e)
-		{
-			orderResultDataGridView.Columns.Add("MenuName", "메뉴명");
-			orderResultDataGridView.Columns.Add("Quantity", "수량");
-			orderResultDataGridView.Columns.Add("Price", "가격");
+        private void orderResult_Load(object sender, EventArgs e)
+        {
+            orderResultDataGridView.Columns.Add("MenuName", "메뉴명");
+            orderResultDataGridView.Columns.Add("Quantity", "수량");
+            orderResultDataGridView.Columns.Add("Price", "가격");
 
-			var btnCol = new DataGridViewButtonColumn
-			{
-				HeaderText = "수정",
-				Text = "수정",
-				UseColumnTextForButtonValue = true
-			};
-			orderResultDataGridView.Columns.Add(btnCol);
+            var btnCol = new DataGridViewButtonColumn
+            {
+                HeaderText = "수정",
+                Text = "수정",
+                UseColumnTextForButtonValue = true
+            };
+            orderResultDataGridView.Columns.Add(btnCol);
 
-			orderResultDataGridView.AllowUserToAddRows = false;
-			orderResultDataGridView.SelectionMode = DataGridViewSelectionMode.CellSelect;
-			orderResultDataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
-			orderResultDataGridView.CurrentCell = null;
-			orderResultDataGridView.Columns["MenuName"].ReadOnly = true;
-			orderResultDataGridView.Columns["Quantity"].ReadOnly = true;
-			orderResultDataGridView.Columns["Price"].ReadOnly = true;
+            orderResultDataGridView.AllowUserToAddRows = false;
+            orderResultDataGridView.SelectionMode = DataGridViewSelectionMode.CellSelect;
+            orderResultDataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
+            orderResultDataGridView.CurrentCell = null;
+            orderResultDataGridView.Columns["MenuName"].ReadOnly = true;
+            orderResultDataGridView.Columns["Quantity"].ReadOnly = true;
+            orderResultDataGridView.Columns["Price"].ReadOnly = true;
 
-			for (int i = 0; i < menuNum.Length; i++)
-			{
-				int qty = menuOrderCount[i];
-				if (qty <= 0)
-				{
-					continue;
-				}
+            for (int i = 0; i < menuNum.Length; i++)
+            {
+                int qty = menuOrderCount[i];
+                if (qty <= 0)
+                {
+                    continue;
+                }
                 int key = menuNum[i];
-				string name = menuMap[key];
-				int linePrice = price[i] * qty;
-				totalOrderResult[name] = qty;
+                string name = menuMap[key];
+                int linePrice = price[i] * qty;
+                totalOrderResult[name] = qty;
                 orderResultDataGridView.Rows.Add(name, qty, linePrice);
-			}
+            }
 
-			orderResultDataGridView.CellClick += orderResultDataGridView_CellClick;
+            orderResultDataGridView.CellClick += orderResultDataGridView_CellClick;
 
-			int originalWidth = orderResultDataGridView.Columns[3].Width;
-			orderResultDataGridView.Columns[3].Width = originalWidth / 2;
+            int originalWidth = orderResultDataGridView.Columns[3].Width;
+            orderResultDataGridView.Columns[3].Width = originalWidth / 2;
 
-			UpdateTotalLabel();
-		}
+            UpdateTotalLabel();
+        }
 
-		private void orderResultDataGridView_CellClick(object sender, DataGridViewCellEventArgs e)
-		{
-			if (e.RowIndex >= 0 && e.ColumnIndex == 3)
-			{
-				string oldQty = orderResultDataGridView.Rows[e.RowIndex].Cells["Quantity"].Value.ToString();
-				string input = Interaction.InputBox(
-					"새 개수를 입력하세요:",
-					"개수 수정",
-					oldQty);
+        private void orderResultDataGridView_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && e.ColumnIndex == 3)
+            {
+                string oldQty = orderResultDataGridView.Rows[e.RowIndex].Cells["Quantity"].Value.ToString();
+                string input = Interaction.InputBox(
+                    "새 개수를 입력하세요:",
+                    "개수 수정",
+                    oldQty);
 
-				if (int.TryParse(input, out int newQty) && newQty >= 0)
-				{
-					menuOrderCount[e.RowIndex] = newQty;
-					orderResultDataGridView.Rows[e.RowIndex].Cells["Quantity"].Value = newQty;
-					decimal unitPrice = price[e.RowIndex];
-					orderResultDataGridView.Rows[e.RowIndex].Cells["Price"].Value = unitPrice * newQty;
-					totalOrderResult[orderResultDataGridView.Rows[e.RowIndex].Cells["MenuName"].Value.ToString()] = newQty;
+                if (int.TryParse(input, out int newQty) && newQty >= 0)
+                {
+                    menuOrderCount[e.RowIndex] = newQty;
+                    orderResultDataGridView.Rows[e.RowIndex].Cells["Quantity"].Value = newQty;
+                    decimal unitPrice = price[e.RowIndex];
+                    orderResultDataGridView.Rows[e.RowIndex].Cells["Price"].Value = unitPrice * newQty;
+                    totalOrderResult[orderResultDataGridView.Rows[e.RowIndex].Cells["MenuName"].Value.ToString()] = newQty;
                     UpdateTotalLabel();
-				}
-			}
-		}
+                }
+            }
+        }
 
-		/// <summary>
-		/// 총액 Label 업데이트
-		/// </summary>
-		private void UpdateTotalLabel()
-		{
+        /// <summary>
+        /// 총액 Label 업데이트
+        /// </summary>
+        private void UpdateTotalLabel()
+        {
             total = 0;
-			for (int i = 0; i < menuNum.Length; i++)
-			{
-				total += price[i] * menuOrderCount[i];
-			}
-			totalLabel.Text = $"총액: {total}원";
-		}
+            for (int i = 0; i < menuNum.Length; i++)
+            {
+                total += price[i] * menuOrderCount[i];
+            }
+            totalLabel.Text = $"총액: {total}원";
+        }
 
-		private void OrderButton_Click(object sender, EventArgs e)
-		{
+        private void OrderButton_Click(object sender, EventArgs e)
+        {
 
             payment Payment = new(total, totalOrderResult, menuPrice)
             {
@@ -132,29 +134,35 @@ namespace wishKiosk
                 serverUrl = serverUrl
             };
             var res = Payment.ShowDialog();
-			if (res == DialogResult.OK)
-			{
-				MessageBox.Show("주문이 완료되었습니다.");
-				if (uint.TryParse(Payment.orderNum?.ToString(), out uint orderNumber))
-				{
-					orderNum = orderNumber;
+            if (res == DialogResult.OK)
+            {
+                MessageBox.Show("주문이 완료되었습니다.");
+                if (uint.TryParse(Payment.orderNum?.ToString(), out uint orderNumber))
+                {
+                    orderNum = orderNumber;
                 }
-				orderItems = Payment.orderItems;
+                orderItems = Payment.orderItems;
                 this.Close();
             }
-			else
-			{
-				MessageBox.Show("결제를 실패하였습니다. 다시 진행해주세요");
-			}
-		}
+            else
+            {
+                MessageBox.Show("결제를 실패하였습니다. 다시 진행해주세요");
+            }
+        }
 
-		private void CancelButton_Click(object sender, EventArgs e)
-		{
-			this.Close();
-		}
+        private void CancelButton_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
 
-		private void CounterOrderButton_Click(object sender, EventArgs e)
-		{
+        private void RescanButton_Click(object sender, EventArgs e)
+        {
+            this.Close();
+            parentForm.StartScan();
+        }
+
+        private void CounterOrderButton_Click(object sender, EventArgs e)
+        {
             SendSelectedMenu().ContinueWith(t =>
             {
                 if (t.IsFaulted)
@@ -194,12 +202,13 @@ namespace wishKiosk
                 }
 
                 var body = new { amount = total, orders = orderItems };
+                using var http = new HttpClient();
                 var res = await http.PostAsJsonAsync(serverUrl + "/pay/counter", body);
                 res.EnsureSuccessStatusCode();
 
                 var json = await res.Content.ReadFromJsonAsync<JsonElement>();
                 orderNum = json.GetProperty("orderNumber").GetUInt32()!; // 주문 번호 받아오기
-				orderId = json.GetProperty("orderId").GetString()!; // 주문 ID 받아오기
+                orderId = json.GetProperty("orderId").GetString()!; // 주문 ID 받아오기
             }
             catch (HttpRequestException ex)
             {
@@ -264,9 +273,14 @@ namespace wishKiosk
                     foreach (var item in orderItems)
                     {
                         g.DrawString(item.Name, font, Brushes.Black, left, y);
-                        g.DrawString(menuPrice[item.Name].ToString("#,0"), font, Brushes.Black, left + width * 0.5f, y);
+                        if (!menuPrice.TryGetValue(item.Name, out var unitPrice))
+                        {
+                            unitPrice = 0;
+                            MessageBox.Show($"'{item.Name}'의 가격 정보를 찾을 수 없습니다.");
+                        }
+                        g.DrawString(unitPrice.ToString("#,0"), font, Brushes.Black, left + width * 0.5f, y);
                         g.DrawString(item.Count.ToString(), font, Brushes.Black, left + width * 0.7f, y);
-                        int totalPrice = menuPrice[item.Name] * item.Count;
+                        int totalPrice = unitPrice * item.Count;
                         g.DrawString(totalPrice.ToString("#,0"), font, Brushes.Black, left + width * 0.85f, y);
                         y += lineHeight;
                     }
