@@ -5,7 +5,7 @@
 > 
 > 키오스크 접근성 개선 프로젝트
 
-자세한 내용은 [`wish.docs.toyotech.dev`](https://wish.docs.toyotech.dev/)를 참고해 주세요.
+자세한 내용은 [`Docs`](https://wish.docs.toyotech.dev/)를 참고해 주세요.
 
 - Using **[QRCoder](https://github.com/codebude/QRCoder)**, **[ZXing](https://github.com/zxing/zxing)** and **WIA**
 - Trained AI model using **[PyTorch](https://github.com/pytorch/pytorch)**, [DataSet Preprocess](https://github.com/Team-ToyoTech/WISH-ImagePreprocess)
