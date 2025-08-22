@@ -21,6 +21,10 @@
 
 ---
 
+## 🎬 영상
+
+[YOUTUBE](https://www.youtube.com/watch?v=9WdMhsqMS8w)
+
 ## 📦 구성 개요
 
 ### 모듈
@@ -59,7 +63,7 @@ git clone https://github.com/Team-ToyoTech/WISH-Kiosk.git
 # Visual Studio 2022에서 솔루션 열기 → 빌드
 ```
 
-## 로고
+## 🖼️ 로고
 
 <a href="https://wish.docs.toyotech.dev/logo/logo.html">
 <img width="128" height="128" alt="logo" src="https://github.com/user-attachments/assets/5763fa6b-c943-4710-8e5b-b0fc36910024" /></a>
