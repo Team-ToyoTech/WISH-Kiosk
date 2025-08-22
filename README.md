@@ -23,7 +23,7 @@
 
 ## 🎬 영상
 
-[YOUTUBE](https://www.youtube.com/watch?v=9WdMhsqMS8w)
+실제 작동 영상 및 사용 방법은 [YOUTUBE](https://www.youtube.com/watch?v=9WdMhsqMS8w)를 참고해주세요.
 
 ## 📦 구성 개요
 
