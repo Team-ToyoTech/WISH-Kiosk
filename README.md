@@ -13,11 +13,11 @@
 - 실행 전 `copy_these_files` 폴더의 파일을 **실행 폴더**로 복사해야 합니다:
   - `onnx_model 폴더` → `KioskAI/bin/Debug/net8.0-windows/`
   - `sound.wav`   → `wishKioskDIDReceive/bin/Debug/net8.0-windows/`
-- **wishKiosk**의 설정 버튼은 스캔 버튼 오른쪽에 얇게 마련되어 있습니다.
-- **wishKiosk**의 설정창 초기 비밀번호는 `0000` 입니다.
-- **wishKioskDIDDisplay**와 **wishKioskDIDReceive**의 설정창 진입 키는 `T`입니다.
+- **`wishKiosk`**의 설정 버튼은 스캔 버튼 오른쪽에 얇게 마련되어 있습니다.
+- **`wishKiosk`**의 설정창 초기 비밀번호는 `0000` 입니다.
+- **`wishKioskDIDDisplay`**와 **`wishKioskDIDReceive`**의 설정창 진입 키는 `T`입니다.
 - 각 앱의 설정창에서 서버 주소를 변경할 수 있습니다. 초기값은 `https://wish.toyotech.dev` 입니다. 로컬에서 사용하기 위해서는 `http://localhost:4000`으로 설정하세요.
-- **wishKiosk**를 처음 사용할 때는 설정창에서 초기 비밀번호 변경 및 인쇄 설정을 해야합니다.
+- **`wishKiosk`**를 처음 사용할 때는 설정창에서 초기 비밀번호 변경 및 인쇄 설정을 해야합니다.
 
 ---
 
@@ -28,10 +28,10 @@
 ## 📦 구성 개요
 
 ### 모듈
-- **wishKiosk**: 주문지 *출력 → 스캔(WIA) → QR 위치 복원(ZXing) → 숫자 OCR(ONNXRuntime) → 주문 요약/수정 → 결제(TossPayments) → 영수증/주문번호 출력*
-- **wishKioskDIDDisplay**: 대기/완료 **주문번호 DID 표시** (완료 시 음성 안내)
-- **wishKioskDIDReceive**: 신규 주문 **효과음 알림**, **완료/수령/취소** 처리
-- **KioskAI**: ONNX 런타임 추론(숫자 모델)
+- **`wishKiosk`**: 주문지 *출력 → 스캔(WIA) → QR 위치 복원(ZXing) → 숫자 OCR(ONNXRuntime) → 주문 요약/수정 → 결제(TossPayments) → 영수증/주문번호 출력*
+- **`wishKioskDIDDisplay`**: 대기/완료 **주문번호 DID 표시** (완료 시 음성 안내)
+- **`wishKioskDIDReceive`**: 신규 주문 **효과음 알림**, **완료/수령/취소** 처리
+- **`KioskAI`**: ONNX 런타임 추론(숫자 모델)
 
 ### 서버
 - **[WISH-Server](https://github.com/Team-ToyoTech/WISH-Server)**
